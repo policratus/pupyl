@@ -8,7 +8,7 @@ from urllib.request import urlopen
 from enum import Enum, auto
 
 import numpy
-from cv2 import imread, IMREAD_COLOR, resize, imdecode
+import cv2
 
 
 class Protocols(Enum):
@@ -87,13 +87,13 @@ class ImageIO:
             With image tensor
         """
         try:
-            image = imdecode(
+            image = cv2.imdecode(
                 numpy.asarray(
                     bytearray(
                         urlopen(url).read()
                     )
                 ),
-                IMREAD_COLOR
+                cv2.IMREAD_COLOR
             )
         except IOError:
             raise IOError(f'Impossible to read image {url}')
@@ -115,7 +115,7 @@ class ImageIO:
         numpy.ndarray
             With image tensor
         """
-        image = imread(path, IMREAD_COLOR)
+        image = cv2.imread(path, cv2.IMREAD_COLOR)
 
         if image is None:
             raise IOError(f'Impossible to read image {path}')
@@ -145,6 +145,49 @@ class ImageIO:
             A resized image
         """
         if new_size:
-            return resize(cls.get(uri), new_size)
+            return cv2.resize(cls.get(uri), new_size)
 
         return cls.get(uri).shape[:2]
+
+    @staticmethod
+    def compress(tensor):
+        """
+        Compress the tensor before saving it
+
+        Parameters
+        ----------
+        tensor: numpy.ndarray
+            A tensor representing an image
+
+        Returns
+        -------
+        numpy.ndarray
+            An encoded image
+        """
+        _, encoded = cv2.imencode(
+            '.webp',
+            tensor,
+            (
+                cv2.IMWRITE_WEBP_QUALITY,
+                80
+            )
+        )
+
+        return encoded
+
+    @staticmethod
+    def decompress(tensor):
+        """
+        Decompress a tensor before loading it
+
+        Parameters
+        ----------
+        tensor: numpy.ndarray
+            A tensor representing an encoded image
+
+        Returns
+        -------
+        numpy.ndarray
+            A decoded image
+        """
+        return cv2.imdecode(tensor, cv2.IMREAD_UNCHANGED)

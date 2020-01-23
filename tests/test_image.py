@@ -5,6 +5,7 @@ from os.path import abspath
 from unittest import TestCase
 
 import numpy
+import cv2
 
 from duplex.image import ImageIO, Protocols
 
@@ -16,6 +17,18 @@ TEST_SIZE = (280, 260)
 TEST_RESIZE = (100, 100)
 
 IMAGE_IO = ImageIO()
+
+
+class TestCases(TestCase):
+    """
+    Unit tests over special cases
+    """
+    def test__get_local_unsuccesful(self):
+        """
+        Unit test for _get_local method, local unsuccesful case
+        """
+        with self.assertRaises(IOError):
+            IMAGE_IO._get_local(TEST_UNKNOWN)
 
 
 def test__infer_protocol_http():
@@ -77,18 +90,6 @@ def test__get_local_succesful():
     assert isinstance(IMAGE_IO._get_local(TEST_LOCAL), numpy.ndarray)
 
 
-class TestCases(TestCase):
-    """
-    Unit tests over special cases
-    """
-    def test__get_local_unsuccesful(self):
-        """
-        Unit test for _get_local method, local unsuccesful case
-        """
-        with self.assertRaises(IOError):
-            IMAGE_IO._get_local(TEST_UNKNOWN)
-
-
 def test_get_unknown():
     """
     Unit test for get method, unknown case
@@ -108,3 +109,40 @@ def test_size_resize():
     Unit test for size method, return size case
     """
     assert IMAGE_IO.size(TEST_LOCAL, TEST_RESIZE).shape[:2] == TEST_RESIZE
+
+
+def test_compress():
+    """
+    Unit test for compress method
+    """
+    def behaviour_compress(tensor):
+        """
+        Closure with expected behaviour for compress
+        method
+        """
+        configs = (cv2.IMWRITE_WEBP_QUALITY, 80)
+        _, encoded = cv2.imencode('.webp', tensor, configs)
+
+        return encoded
+
+    assert numpy.array_equal(
+        IMAGE_IO.compress(IMAGE_IO.get(TEST_LOCAL)),
+        behaviour_compress(IMAGE_IO.get(TEST_LOCAL))
+    )
+
+
+def test_decompress():
+    """
+    Unit test for decompress method
+    """
+    def behaviour_decompress(tensor):
+        """
+        Closure with expected behaviour for decompress
+        method
+        """
+        return cv2.imdecode(tensor, cv2.IMREAD_UNCHANGED)
+
+    assert numpy.array_equal(
+        IMAGE_IO.decompress(IMAGE_IO.compress(IMAGE_IO.get(TEST_LOCAL))),
+        behaviour_decompress(IMAGE_IO.compress(IMAGE_IO.get(TEST_LOCAL)))
+    )
