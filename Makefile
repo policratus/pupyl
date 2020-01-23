@@ -1,3 +1,13 @@
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S), Linux)
+    OPEN_EXECUTABLE ?= xdg-open
+endif
+ifeq ($(UNAME_S), Darwin)
+    OPEN_EXECUTABLE ?= open
+endif
+OPEN_EXECUTABLE ?= :
+
 clean:
 	@find . -name "*.pyc" | xargs rm -rf
 	@find . -name "*.pyo" | xargs rm -rf
@@ -18,3 +28,7 @@ test: clean
 
 coverage: clean
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -xs --cov-report=term --cov=.
+
+coverage-html: clean
+	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -xs --cov-report=html --cov=.
+	$(OPEN_EXECUTABLE) htmlcov/index.html
