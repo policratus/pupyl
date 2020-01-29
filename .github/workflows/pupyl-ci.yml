@@ -1,4 +1,4 @@
-name: pupil-ci
+name: pupyl-ci
 
 on: [push]
 
