@@ -71,8 +71,8 @@ class ImageIO:
 
         return Protocols.UNKNOWN
 
-    @staticmethod
-    def _get_url(url):
+    @classmethod
+    def _get_url(cls, url):
         """
         Load an image from a remote (http(s)) location
 
@@ -87,13 +87,12 @@ class ImageIO:
             With image tensor
         """
         try:
-            image = cv2.imdecode(
+            image = cls.decompress(
                 numpy.asarray(
                     bytearray(
                         urlopen(url).read()
                     )
-                ),
-                cv2.IMREAD_COLOR
+                )
             )
         except IOError:
             raise IOError(f'Impossible to read image {url}')
