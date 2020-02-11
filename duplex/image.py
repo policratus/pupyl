@@ -8,7 +8,8 @@ from urllib.request import urlopen
 from enum import Enum, auto
 
 import numpy
-import cv2
+from tensorflow import io as io_ops
+from tensorflow import image as image_ops
 
 
 class Protocols(Enum):
@@ -59,8 +60,8 @@ class ImageIO:
 
         Returns
         -------
-        numpy.ndarray or Enum:
-            If succesful, returns the image tensor,
+        bytes or Enum:
+            If succesful, returns the image bytes,
             or an Enum describing format not recognized
         """
         if cls._infer_protocol(uri) is Protocols.FILE:
@@ -83,21 +84,13 @@ class ImageIO:
 
         Returns
         -------
-        numpy.ndarray
+        bytes:
             With image tensor
         """
         try:
-            image = cls.decompress(
-                numpy.asarray(
-                    bytearray(
-                        urlopen(url).read()
-                    )
-                )
-            )
+            return urlopen(url).read()
         except IOError:
             raise IOError(f'Impossible to read image {url}')
-
-        return image
 
     @staticmethod
     def _get_local(path):
@@ -111,15 +104,44 @@ class ImageIO:
 
         Returns
         -------
-        numpy.ndarray
+        bytes:
             With image tensor
         """
-        image = cv2.imread(path, cv2.IMREAD_COLOR)
+        with open(path, 'rb') as image:
+            return image.read()
 
-        if image is None:
-            raise IOError(f'Impossible to read image {path}')
+    @staticmethod
+    def encoded_to_compressed_tensor(encoded):
+        """
+        Transform a binary encoded string image
+        to its compressed tensor
 
-        return image
+        Parameters
+        ----------
+        encoded: bytes
+            The binary representation of the image
+
+        Returns
+        -------
+        numpy.ndarray
+        """
+        return numpy.array(memoryview(io_ops.decode_raw(encoded, 'uint8')))
+
+    @staticmethod
+    def encoded_to_tensor(encoded):
+        """
+        Transform a binary encoded string image to tensor
+
+        Parameters
+        ----------
+        encoded: bytes
+            The binary representation of the image
+
+        Returns
+        -------
+        numpy.ndarray
+        """
+        return numpy.array(memoryview(io_ops.decode_image(encoded)))
 
     @classmethod
     def size(cls, uri, new_size=None):
@@ -144,9 +166,13 @@ class ImageIO:
             A resized image
         """
         if new_size:
-            return cv2.resize(cls.get(uri), new_size)
+            return image_ops.resize(
+                cls.encoded_to_tensor(cls.get(uri)),
+                new_size,
+                method=image_ops.ResizeMethod.NEAREST_NEIGHBOR
+            )
 
-        return cls.get(uri).shape[:2]
+        return cls.encoded_to_tensor(cls.get(uri)).shape[:2]
 
     @staticmethod
     def compress(tensor):
@@ -163,30 +189,10 @@ class ImageIO:
         numpy.ndarray
             An encoded image
         """
-        _, encoded = cv2.imencode(
-            '.webp',
+        return image_ops.encode_jpeg(
             tensor,
-            (
-                cv2.IMWRITE_WEBP_QUALITY,
-                80
-            )
+            quality=90,
+            progressive=True,
+            optimize_size=True,
+            chroma_downsampling=True
         )
-
-        return encoded
-
-    @staticmethod
-    def decompress(tensor):
-        """
-        Decompress a tensor before loading it
-
-        Parameters
-        ----------
-        tensor: numpy.ndarray
-            A tensor representing an encoded image
-
-        Returns
-        -------
-        numpy.ndarray
-            A decoded image
-        """
-        return cv2.imdecode(tensor, cv2.IMREAD_UNCHANGED)

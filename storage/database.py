@@ -8,8 +8,6 @@ import warnings
 
 import h5py
 
-from duplex.image import ImageIO
-
 
 class FileMode(Enum):
     """
@@ -116,9 +114,7 @@ class ImageDatabase:
         """
         with ImageDatabase(self._path, FileMode.READ_ONLY) as image_database:
             try:
-                return ImageIO.decompress(
-                    image_database[f'/{group}/{name}'][()]
-                )
+                return image_database[f'/{group}/{name}'][()]
             except KeyError:
                 raise KeyError(f"Key {group}/{name} wasn't found.")
 
@@ -140,8 +136,6 @@ class ImageDatabase:
         """
         with ImageDatabase(self._path, FileMode.READ_WRITE) as image_database:
             groups = image_database.require_group(group)
-
-            tensor = ImageIO.compress(tensor)
 
             groups.create_dataset(
                 name,
