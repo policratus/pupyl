@@ -15,8 +15,7 @@ PATH = f'{tempfile.gettempdir()}/test_database.db'
 TEST_DB = 'tests/test.db'
 TEST_GROUP = 'images'
 TEST_LOCAL = os.path.abspath('tests/test_image.jpg')
-TEST_TENSOR = ImageIO.get(TEST_LOCAL)
-TEST_COMPRESSED_TENSOR = ImageIO.decompress(ImageIO.compress(TEST_TENSOR))
+TEST_TENSOR = ImageIO.encoded_to_compressed_tensor(ImageIO.get(TEST_LOCAL))
 TEST_NAME = 'test1'
 
 
@@ -93,7 +92,7 @@ def test_get_successful():
 
     assert numpy.array_equal(
         image_database.get(TEST_GROUP, TEST_NAME),
-        TEST_COMPRESSED_TENSOR
+        TEST_TENSOR
     )
 
 
@@ -109,7 +108,7 @@ def test_add():
 
     assert numpy.array_equal(
         image_database.get(TEST_GROUP, TEST_NAME),
-        TEST_COMPRESSED_TENSOR
+        TEST_TENSOR
     )
 
     os.remove(test_db)

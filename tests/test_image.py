@@ -5,7 +5,7 @@ from os.path import abspath
 from unittest import TestCase
 
 import numpy
-import cv2
+from tensorflow import io as io_ops
 
 from duplex.image import ImageIO, Protocols
 
@@ -16,55 +16,53 @@ TEST_UNKNOWN = 'unk://path'
 TEST_SIZE = (280, 260)
 TEST_RESIZE = (100, 100)
 
-IMAGE_IO = ImageIO()
-
 
 class TestCases(TestCase):
     """
     Unit tests over special cases
     """
-    def test__get_local_unsuccesful(self):
+    def test__get_local_unsuccessful(self):
         """
-        Unit test for _get_local method, local unsuccesful case
+        Unit test for _get_local method, local unsuccessful case
         """
         with self.assertRaises(IOError):
-            IMAGE_IO._get_local(TEST_UNKNOWN)
+            ImageIO._get_local(TEST_UNKNOWN)
 
 
 def test__infer_protocol_http():
     """
     Unit tests for _infer_protocol method, http case
     """
-    assert IMAGE_IO._infer_protocol(TEST_URL) is Protocols.HTTP
+    assert ImageIO._infer_protocol(TEST_URL) is Protocols.HTTP
 
 
 def test__infer_protocol_local():
     """
     Unit tests for _infer_protocol method, local case
     """
-    assert IMAGE_IO._infer_protocol(TEST_LOCAL) is Protocols.FILE
+    assert ImageIO._infer_protocol(TEST_LOCAL) is Protocols.FILE
 
 
 def test__infer_protocol_unknown():
     """
     Unit tests for _infer_protocol method, unknown case
     """
-    assert IMAGE_IO._infer_protocol(TEST_UNKNOWN) is Protocols.UNKNOWN
+    assert ImageIO._infer_protocol(TEST_UNKNOWN) is Protocols.UNKNOWN
 
 
-def test__get_url_succesful():
+def test__get_url_successful():
     """
     Unit tests for _get_url method, successful case
     """
-    assert isinstance(IMAGE_IO._get_url(TEST_URL), numpy.ndarray)
+    assert isinstance(ImageIO._get_url(TEST_URL), bytes)
 
 
-def test__get_url_unsuccesful():
+def test__get_url_unsuccessful():
     """
     Unit tests for _get_url method, unsuccessful case
     """
     try:
-        IMAGE_IO._get_url(TEST_UNKNOWN)
+        ImageIO._get_url(TEST_UNKNOWN)
     except IOError:
         assert True
 
@@ -73,42 +71,42 @@ def test_get_http():
     """
     Unit test for get method, http case
     """
-    assert isinstance(IMAGE_IO.get(TEST_URL), numpy.ndarray)
+    assert isinstance(ImageIO.get(TEST_URL), bytes)
 
 
 def test_get_local():
     """
     Unit test for get method, http case
     """
-    assert isinstance(IMAGE_IO.get(TEST_LOCAL), numpy.ndarray)
+    assert isinstance(ImageIO.get(TEST_LOCAL), bytes)
 
 
-def test__get_local_succesful():
+def test__get_local_successful():
     """
-    Unit test for _get_local method, local succesful case
+    Unit test for _get_local method, local successful case
     """
-    assert isinstance(IMAGE_IO._get_local(TEST_LOCAL), numpy.ndarray)
+    assert isinstance(ImageIO._get_local(TEST_LOCAL), bytes)
 
 
 def test_get_unknown():
     """
     Unit test for get method, unknown case
     """
-    assert IMAGE_IO.get(TEST_UNKNOWN) is Protocols.UNKNOWN
+    assert ImageIO.get(TEST_UNKNOWN) is Protocols.UNKNOWN
 
 
 def test_size_size():
     """
     Unit test for size method, return size case
     """
-    assert IMAGE_IO.size(TEST_LOCAL) == TEST_SIZE
+    assert ImageIO.size(TEST_LOCAL) == TEST_SIZE
 
 
 def test_size_resize():
     """
     Unit test for size method, return size case
     """
-    assert IMAGE_IO.size(TEST_LOCAL, TEST_RESIZE).shape[:2] == TEST_RESIZE
+    assert ImageIO.size(TEST_LOCAL, TEST_RESIZE).shape[:2] == TEST_RESIZE
 
 
 def test_compress():
@@ -120,29 +118,17 @@ def test_compress():
         Closure with expected behaviour for compress
         method
         """
-        configs = (cv2.IMWRITE_WEBP_QUALITY, 80)
-        _, encoded = cv2.imencode('.webp', tensor, configs)
+        return io_ops.encode_jpeg(
+            tensor,
+            quality=90,
+            progressive=True,
+            optimize_size=True,
+            chroma_downsampling=True
+        )
 
-        return encoded
+    test_tensor = ImageIO.encoded_to_tensor(ImageIO.get(TEST_LOCAL))
 
-    assert numpy.array_equal(
-        IMAGE_IO.compress(IMAGE_IO.get(TEST_LOCAL)),
-        behaviour_compress(IMAGE_IO.get(TEST_LOCAL))
-    )
-
-
-def test_decompress():
-    """
-    Unit test for decompress method
-    """
-    def behaviour_decompress(tensor):
-        """
-        Closure with expected behaviour for decompress
-        method
-        """
-        return cv2.imdecode(tensor, cv2.IMREAD_UNCHANGED)
-
-    assert numpy.array_equal(
-        IMAGE_IO.decompress(IMAGE_IO.compress(IMAGE_IO.get(TEST_LOCAL))),
-        behaviour_decompress(IMAGE_IO.compress(IMAGE_IO.get(TEST_LOCAL)))
+    assert numpy.equal(
+        ImageIO.compress(test_tensor),
+        behaviour_compress(test_tensor)
     )
