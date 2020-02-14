@@ -61,7 +61,7 @@ class ImageIO:
         Returns
         -------
         bytes or Enum:
-            If succesful, returns the image bytes,
+            If successful, returns the image bytes,
             or an Enum describing format not recognized
         """
         if cls._infer_protocol(uri) is Protocols.FILE:
@@ -85,12 +85,9 @@ class ImageIO:
         Returns
         -------
         bytes:
-            With image tensor
+            With image binary information
         """
-        try:
-            return urlopen(url).read()
-        except IOError:
-            raise IOError(f'Impossible to read image {url}')
+        return urlopen(url).read()
 
     @staticmethod
     def _get_local(path):
@@ -105,7 +102,7 @@ class ImageIO:
         Returns
         -------
         bytes:
-            With image tensor
+            With image binary information
         """
         with open(path, 'rb') as image:
             return image.read()
@@ -140,6 +137,7 @@ class ImageIO:
         Returns
         -------
         numpy.ndarray
+            Describing the compressed image tensor
         """
         return numpy.array(memoryview(io_ops.decode_image(encoded)))
 
@@ -155,7 +153,7 @@ class ImageIO:
             Description of where the image are located
 
         new_size: tuple
-            The new intended dimension
+            The new intended dimension of the image
 
         Returns
         -------
@@ -163,7 +161,8 @@ class ImageIO:
             Current image dimensions
 
         numpy.ndarray:
-            A resized image
+            A resized image, if new_size parameter
+            is passed through
         """
         if new_size:
             return image_ops.resize(
@@ -177,7 +176,8 @@ class ImageIO:
     @staticmethod
     def compress(tensor):
         """
-        Compress the tensor before saving it
+        Compress the tensor before saving it,
+        as a JPEG
 
         Parameters
         ----------
@@ -187,12 +187,16 @@ class ImageIO:
         Returns
         -------
         numpy.ndarray
-            An encoded image
+            An encoded image, in bytes
         """
-        return image_ops.encode_jpeg(
-            tensor,
-            quality=90,
-            progressive=True,
-            optimize_size=True,
-            chroma_downsampling=True
+        return numpy.array(
+            memoryview(
+                image_ops.encode_jpeg(
+                    tensor,
+                    quality=80,
+                    progressive=True,
+                    optimize_size=True,
+                    chroma_downsampling=True
+                )
+            )
         )
