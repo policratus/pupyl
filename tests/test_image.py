@@ -120,7 +120,7 @@ def test_compress():
         """
         return io_ops.encode_jpeg(
             tensor,
-            quality=90,
+            quality=80,
             progressive=True,
             optimize_size=True,
             chroma_downsampling=True
