@@ -49,7 +49,7 @@ class ImageIO:
         return Protocols.UNKNOWN
 
     @classmethod
-    def get(cls, uri):
+    def get(cls, uri, as_tensor=False):
         """
         Load an image file from specified location
 
@@ -58,6 +58,10 @@ class ImageIO:
         uri: str
             Location where the image are stored
 
+        as_tensor (optional): bool
+            If the image should be converted to its tensor representation.
+            Default to False, which returns images to byte representation
+
         Returns
         -------
         bytes or Enum:
@@ -65,12 +69,16 @@ class ImageIO:
             or an Enum describing format not recognized
         """
         if cls._infer_protocol(uri) is Protocols.FILE:
-            return cls._get_local(uri)
+            image_bytes = cls._get_local(uri)
+        elif cls._infer_protocol(uri) is Protocols.HTTP:
+            image_bytes = cls._get_url(uri)
+        else:
+            return Protocols.UNKNOWN
 
-        if cls._infer_protocol(uri) is Protocols.HTTP:
-            return cls._get_url(uri)
+        if as_tensor:
+            return cls.encoded_to_tensor(image_bytes)
 
-        return Protocols.UNKNOWN
+        return image_bytes
 
     @classmethod
     def _get_url(cls, url):
@@ -160,18 +168,23 @@ class ImageIO:
         tuple:
             Current image dimensions
 
-        numpy.ndarray:
-            A resized image, if new_size parameter
-            is passed through
+        If new_size as True:
+            numpy.ndarray:
+                A resized image, if new_size parameter
+                is passed through
         """
         if new_size:
-            return image_ops.resize(
-                cls.encoded_to_tensor(cls.get(uri)),
-                new_size,
-                method=image_ops.ResizeMethod.NEAREST_NEIGHBOR
+            return numpy.array(
+                memoryview(
+                    image_ops.resize(
+                        cls.get(uri, as_tensor=True),
+                        new_size,
+                        method=image_ops.ResizeMethod.NEAREST_NEIGHBOR
+                    )
+                )
             )
 
-        return cls.encoded_to_tensor(cls.get(uri)).shape[:2]
+        return cls.get(uri, as_tensor=True).shape[:2]
 
     @staticmethod
     def compress(tensor):
