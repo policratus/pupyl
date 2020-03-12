@@ -88,6 +88,13 @@ def test__get_local_successful():
     assert isinstance(ImageIO._get_local(TEST_LOCAL), bytes)
 
 
+def test_get_as_tensor():
+    """
+    Unit test for get method, as_tensor optional parameter set
+    """
+    assert isinstance(ImageIO.get(TEST_LOCAL, as_tensor=True), numpy.ndarray)
+
+
 def test_get_unknown():
     """
     Unit test for get method, unknown case

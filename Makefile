@@ -24,11 +24,11 @@ flake8: clean
 	@flake8 . --show-source
 
 test: clean
-	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -xs
+	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs
 
 coverage: clean
-	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -xs --cov-report=term --cov=.
+	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=term --cov=.
 
 coverage-html: clean
-	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -xs --cov-report=html --cov=.
+	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=html --cov=.
 	$(OPEN_EXECUTABLE) htmlcov/index.html
