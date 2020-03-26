@@ -33,6 +33,13 @@ class TestCases(TestCase):
         with self.assertRaises(UnknownCharacteristics):
             Extractors('UNKNOWN')
 
+    def test_extractors_context_manager(self):
+        """
+        Unit test for context manager Extractors
+        """
+        with Extractors() as extractors:
+            assert isinstance(extractors, Extractors)
+
 
 def test_characteristics():
     """
@@ -72,3 +79,23 @@ def test_extract():
 
         assert extractor.extract(abspath(TEST_LOCAL)).shape == \
             (1, extractor.network.output_shape[1])
+
+
+def test_acceleration_discovery(monkeypatch):
+    """
+    Unit test for acceleration_discovery staticmethod
+    """
+    @staticmethod
+    def mocked_acceleration_discovery():
+        """
+        Closure to mock acceleration_discovery behaviour
+        """
+        return True
+
+    monkeypatch.setattr(
+        Extractors,
+        'acceleration_discovery',
+        mocked_acceleration_discovery
+    )
+
+    assert Extractors.acceleration_discovery()

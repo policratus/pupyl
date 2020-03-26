@@ -27,7 +27,7 @@ test: clean
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs
 
 coverage: clean
-	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=term --cov=.
+	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test --cov-report=term-missing:skip-covered --cov=.
 
 coverage-html: clean
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=html --cov=.
