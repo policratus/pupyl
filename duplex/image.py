@@ -4,117 +4,19 @@ Image module
 Performs multiple operations over images, like resizing,
 loading and so on.
 """
-from urllib.request import urlopen
-from enum import Enum, auto
-
 import numpy
 from tensorflow import io as io_ops
 from tensorflow import image as image_ops
 
-
-class Protocols(Enum):
-    """
-    Defines several possible protocols to be discovered
-    """
-    UNKNOWN = auto()
-    HTTP = auto()
-    FILE = auto()
+from duplex.file_io import FileIO
+from duplex.file_types import FileType
+from duplex import exceptions
 
 
-class ImageIO:
+class ImageIO(FileIO, FileType):
     """
     Operations of read and write over images
     """
-    @staticmethod
-    def _infer_protocol(uri):
-        """
-        Discover the protocol which the passed uri may pertain
-
-        Parameters
-        ----------
-        uri: str
-            URI that describes the image location
-
-        Returns
-        -------
-        Enum:
-            Referencing the discovered protocol
-        """
-        if uri.startswith('http'):
-            return Protocols.HTTP
-
-        if uri.startswith('file') or uri[0] == '/':
-            return Protocols.FILE
-
-        return Protocols.UNKNOWN
-
-    @classmethod
-    def get(cls, uri, as_tensor=False):
-        """
-        Load an image file from specified location
-
-        Parameters
-        ----------
-        uri: str
-            Location where the image are stored
-
-        as_tensor (optional): bool
-            If the image should be converted to its tensor representation.
-            Default to False, which returns images to byte representation
-
-        Returns
-        -------
-        bytes or Enum:
-            If successful, returns the image bytes,
-            or an Enum describing format not recognized
-        """
-        if cls._infer_protocol(uri) is Protocols.FILE:
-            image_bytes = cls._get_local(uri)
-        elif cls._infer_protocol(uri) is Protocols.HTTP:
-            image_bytes = cls._get_url(uri)
-        else:
-            return Protocols.UNKNOWN
-
-        if as_tensor:
-            return cls.encoded_to_tensor(image_bytes)
-
-        return image_bytes
-
-    @classmethod
-    def _get_url(cls, url):
-        """
-        Load an image from a remote (http(s)) location
-
-        Parameters
-        ----------
-        url: str
-            The URL where the image are stored
-
-        Returns
-        -------
-        bytes:
-            With image binary information
-        """
-        return urlopen(url).read()
-
-    @staticmethod
-    def _get_local(path):
-        """
-        Load an image from a local file
-
-        Parameters
-        ----------
-        path: str
-            Local which the image file is saved
-
-        Returns
-        -------
-        bytes:
-            With image binary information
-        """
-        with open(path, 'rb') as image:
-            return image.read()
-
     @staticmethod
     def encoded_to_compressed_tensor(encoded):
         """
@@ -150,6 +52,33 @@ class ImageIO:
         return numpy.array(memoryview(io_ops.decode_image(encoded)))
 
     @classmethod
+    def get_image(cls, uri, as_tensor=False):
+        """
+        Load a image from specified location
+
+        Parameters
+        ----------
+        uri: str
+            Location where the image are stored
+
+        as_tensor (optional): bool
+            Default: False
+
+            If the image should be converted to its tensor representation.
+            Default to False, which returns images to byte representation
+        """
+        bytess = cls.get(uri)
+
+        try:
+            if cls.is_image(bytess):
+                if as_tensor:
+                    return cls.encoded_to_tensor(bytess)
+        except exceptions.FileTypeNotSupportedYet:
+            raise exceptions.FileIsNotImage
+
+        return bytess
+
+    @classmethod
     def size(cls, uri, new_size=None):
         """
         Returns the current image dimensions or
@@ -177,14 +106,14 @@ class ImageIO:
             return numpy.array(
                 memoryview(
                     image_ops.resize(
-                        cls.get(uri, as_tensor=True),
+                        cls.get_image(uri, as_tensor=True),
                         new_size,
                         method=image_ops.ResizeMethod.NEAREST_NEIGHBOR
                     )
                 )
             )
 
-        return cls.get(uri, as_tensor=True).shape[:2]
+        return cls.get_image(uri, as_tensor=True).shape[:2]
 
     @staticmethod
     def compress(tensor):

@@ -7,6 +7,7 @@ from enum import Enum, auto
 import numpy
 import tensorflow
 import tensorflow.keras.applications as networks
+import tensorflow.keras.backend as backend
 import termcolor
 
 from embeddings import exceptions
@@ -30,13 +31,18 @@ class Extractors(ImageIO):
     """
     Pretrained CNNs for embeddings generation
     """
-    def __init__(self, characteristics):
+    def __init__(
+        self,
+        characteristics=Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
+    ):
         """
         Creates embeddings generators
 
         Parameters
         ----------
-        characteristics: Enum
+        characteristics (optional): Enum
+            Default: Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
+
             Describing the intended characteristics to transform images
             into embeddings
         """
@@ -49,6 +55,20 @@ class Extractors(ImageIO):
         self.converter, self.network = self._infer_network()
         self.image_input_shape = self.network.input_shape[1:3]
 
+    def __enter__(self):
+        """
+        Opening Extractors context
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Closing Extractors context
+        """
+        del exc_type, exc_val, exc_tb
+
+        backend.clear_session()
+
     @staticmethod
     def acceleration_discovery():
         """
@@ -56,7 +76,7 @@ class Extractors(ImageIO):
         for faster embeddings extraction
         """
         # If GPU(s) device(s) are found, avoid excessive VRAM consumption
-        for gpu in tensorflow.config.get_visible_devices('GPU'):
+        for gpu in tensorflow.config.experimental.list_physical_devices('GPU'):
             print(
                 termcolor.colored(
                     'GPU found! Using it for embeddings '

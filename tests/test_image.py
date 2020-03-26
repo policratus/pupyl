@@ -7,12 +7,14 @@ from unittest import TestCase
 import numpy
 from tensorflow import io as io_ops
 
-from duplex.image import ImageIO, Protocols
+from duplex.image import ImageIO
+from duplex.exceptions import FileIsNotImage
 
 
-TEST_URL = 'https://avatars1.githubusercontent.com/u/827563'
+TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/' + \
+    'Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
 TEST_LOCAL = abspath('tests/test_image.jpg')
-TEST_UNKNOWN = 'unk://path'
+TEST_NOT_IMAGE = abspath('tests/not_image.txt')
 TEST_SIZE = (280, 260)
 TEST_RESIZE = (100, 100)
 
@@ -21,85 +23,20 @@ class TestCases(TestCase):
     """
     Unit tests over special cases
     """
-    def test__get_local_unsuccessful(self):
+    def test_get_image_no_image(self):
         """
-        Unit test for _get_local method, local unsuccessful case
+        Unit test for get_image method, not image case
         """
-        with self.assertRaises(IOError):
-            ImageIO._get_local(TEST_UNKNOWN)
+        with self.assertRaises(FileIsNotImage):
+            ImageIO.get_image(TEST_NOT_IMAGE)
 
 
-def test__infer_protocol_http():
+def test_get_image_as_tensor():
     """
-    Unit tests for _infer_protocol method, http case
+    Unit test for get_image method, as_tensor optional parameter set
     """
-    assert ImageIO._infer_protocol(TEST_URL) is Protocols.HTTP
-
-
-def test__infer_protocol_local():
-    """
-    Unit tests for _infer_protocol method, local case
-    """
-    assert ImageIO._infer_protocol(TEST_LOCAL) is Protocols.FILE
-
-
-def test__infer_protocol_unknown():
-    """
-    Unit tests for _infer_protocol method, unknown case
-    """
-    assert ImageIO._infer_protocol(TEST_UNKNOWN) is Protocols.UNKNOWN
-
-
-def test__get_url_successful():
-    """
-    Unit tests for _get_url method, successful case
-    """
-    assert isinstance(ImageIO._get_url(TEST_URL), bytes)
-
-
-def test__get_url_unsuccessful():
-    """
-    Unit tests for _get_url method, unsuccessful case
-    """
-    try:
-        ImageIO._get_url(TEST_UNKNOWN)
-    except IOError:
-        assert True
-
-
-def test_get_http():
-    """
-    Unit test for get method, http case
-    """
-    assert isinstance(ImageIO.get(TEST_URL), bytes)
-
-
-def test_get_local():
-    """
-    Unit test for get method, http case
-    """
-    assert isinstance(ImageIO.get(TEST_LOCAL), bytes)
-
-
-def test__get_local_successful():
-    """
-    Unit test for _get_local method, local successful case
-    """
-    assert isinstance(ImageIO._get_local(TEST_LOCAL), bytes)
-
-
-def test_get_as_tensor():
-    """
-    Unit test for get method, as_tensor optional parameter set
-    """
-    assert isinstance(ImageIO.get(TEST_LOCAL, as_tensor=True), numpy.ndarray)
-
-
-def test_get_unknown():
-    """
-    Unit test for get method, unknown case
-    """
-    assert ImageIO.get(TEST_UNKNOWN) is Protocols.UNKNOWN
+    assert isinstance(
+        ImageIO.get_image(TEST_LOCAL, as_tensor=True), numpy.ndarray)
 
 
 def test_size_size():
@@ -133,7 +70,7 @@ def test_compress():
             chroma_downsampling=True
         )
 
-    test_tensor = ImageIO.encoded_to_tensor(ImageIO.get(TEST_LOCAL))
+    test_tensor = ImageIO.encoded_to_tensor(ImageIO.get_image(TEST_LOCAL))
 
     assert numpy.equal(
         ImageIO.compress(test_tensor),
