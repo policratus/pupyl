@@ -74,7 +74,7 @@ class FileIO(file_types.FileType):
         -------
         bytes or Enum:
             If successful, returns the image bytes,
-            or an Enum describing format not recognized
+            or an Enum describing format was not recognized
         """
         if cls._infer_protocol(uri) is Protocols.FILE:
             return cls._get_local(uri)
