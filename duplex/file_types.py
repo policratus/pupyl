@@ -1,7 +1,7 @@
 """
 file_types Module
 
-Operations of file type and mime type discovery,
+Operations of file and mime type discovery,
 based on file content, not extensions
 """
 from enum import Enum
