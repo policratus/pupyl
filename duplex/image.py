@@ -66,7 +66,7 @@ class ImageIO(FileIO, FileType):
 
             If the image should be converted to its tensor representation.
             Default to False, which returns images to byte representation
-            
+
         Returns
         -------
         bytes or numpy.ndarray
