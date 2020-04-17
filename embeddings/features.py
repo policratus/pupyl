@@ -36,7 +36,7 @@ class Extractors(ImageIO):
         characteristics=Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
     ):
         """
-        Creates embeddings generators
+        Creates embedding extractors
 
         Parameters
         ----------
