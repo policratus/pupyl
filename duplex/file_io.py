@@ -158,9 +158,9 @@ class FileIO(file_types.FileType):
         """
         if os.path.isfile(path):
             yield os.path.abspath(path)
-            
+
         else:
             for root, _, files in os.walk(path):
                 for ffile in files:
-                    
+
                     yield os.path.abspath(f'{root}/{ffile}')
