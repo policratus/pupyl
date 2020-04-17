@@ -25,8 +25,8 @@ class FileIO(file_types.FileType):
     """
     Operations over files
     """
-    @classmethod
-    def _get_url(cls, url):
+    @staticmethod
+    def _get_url(url):
         """
         Load a file from a remote (http(s)) location
 
