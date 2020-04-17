@@ -143,13 +143,13 @@ class FileIO(file_types.FileType):
     @staticmethod
     def scan(path):
         """
-        Return a validated file if a file path is passed,
+        Returns a validated file if a path is passed,
         or iterates over a directory
 
         Parameters
         ----------
         path: str
-            A file or directory to scan for files
+            A file or directory to scan
 
         Returns
         -------
@@ -158,7 +158,9 @@ class FileIO(file_types.FileType):
         """
         if os.path.isfile(path):
             yield os.path.abspath(path)
+            
         else:
             for root, _, files in os.walk(path):
                 for ffile in files:
+                    
                     yield os.path.abspath(f'{root}/{ffile}')
