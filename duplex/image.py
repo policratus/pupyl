@@ -66,6 +66,12 @@ class ImageIO(FileIO, FileType):
 
             If the image should be converted to its tensor representation.
             Default to False, which returns images to byte representation
+            
+        Returns
+        -------
+        bytes or numpy.ndarray
+            Respectively returns the image as bytes or as tensor
+            representation
         """
         bytess = cls.get(uri)
 
@@ -73,10 +79,13 @@ class ImageIO(FileIO, FileType):
             if cls.is_image(bytess):
                 if as_tensor:
                     return cls.encoded_to_tensor(bytess)
+                
+                return bytess
+            else:
+                raise exceptions.FileIsNotImage
+                
         except exceptions.FileTypeNotSupportedYet:
             raise exceptions.FileIsNotImage
-
-        return bytess
 
     @classmethod
     def size(cls, uri, new_size=None):
@@ -89,7 +98,7 @@ class ImageIO(FileIO, FileType):
         uri: str
             Description of where the image are located
 
-        new_size: tuple
+        new_size (optional): tuple
             The new intended dimension of the image
 
         Returns
@@ -97,10 +106,10 @@ class ImageIO(FileIO, FileType):
         tuple:
             Current image dimensions
 
-        If new_size as True:
+        If new_size is True:
             numpy.ndarray:
                 A resized image, if new_size parameter
-                is passed through
+                was passed through
         """
         if new_size:
             return numpy.array(
@@ -119,7 +128,7 @@ class ImageIO(FileIO, FileType):
     def compress(tensor):
         """
         Compress the tensor before saving it,
-        as a JPEG
+        as JPEG
 
         Parameters
         ----------
