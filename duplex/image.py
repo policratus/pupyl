@@ -79,11 +79,11 @@ class ImageIO(FileIO, FileType):
             if cls.is_image(bytess):
                 if as_tensor:
                     return cls.encoded_to_tensor(bytess)
-                
+
                 return bytess
             else:
                 raise exceptions.FileIsNotImage
-                
+
         except exceptions.FileTypeNotSupportedYet:
             raise exceptions.FileIsNotImage
 
