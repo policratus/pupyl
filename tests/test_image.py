@@ -23,6 +23,7 @@ class TestCases(TestCase):
     """
     Unit tests over special cases
     """
+
     def test_get_image_no_image(self):
         """
         Unit test for get_image method, not image case
@@ -68,11 +69,11 @@ def test_compress():
             progressive=True,
             optimize_size=True,
             chroma_downsampling=True
-        )
+            )
 
     test_tensor = ImageIO.encoded_to_tensor(ImageIO.get_image(TEST_LOCAL))
 
     assert numpy.equal(
         ImageIO.compress(test_tensor),
         behaviour_compress(test_tensor)
-    )
+        )
