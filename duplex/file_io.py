@@ -1,34 +1,37 @@
 """
-file_io Module
+file_io Module.
 
-Operations over files, introspection and more
+Operations over files, introspection and more.
 """
 import os
 from urllib.request import urlopen
 from enum import Enum, auto
 import mimetypes
+import csv
+import gzip
+import zipfile
+import bz2
+import lzma
 
 from duplex import file_types
-from duplex.exceptions import FileTypeNotSupportedYet
+from duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
 
 
 class Protocols(Enum):
-    """
-    Defines several possible protocols to be discovered
-    """
+    """Defines several possible protocols to be discovered."""
+
     UNKNOWN = auto()
     HTTP = auto()
     FILE = auto()
 
 
 class FileIO(file_types.FileType):
-    """
-    Operations over files
-    """
+    """Operations over files."""
+
     @staticmethod
     def _get_url(url):
         """
-        Load a file from a remote (http(s)) location
+        Load a file from a remote (http(s)) location.
 
         Parameters
         ----------
@@ -45,7 +48,7 @@ class FileIO(file_types.FileType):
     @staticmethod
     def _get_local(path):
         """
-        Load a local file
+        Load a local file.
 
         Parameters
         ----------
@@ -63,7 +66,7 @@ class FileIO(file_types.FileType):
     @classmethod
     def get(cls, uri):
         """
-        Load a file from specified location
+        Load a file from specified location.
 
         Parameters
         ----------
@@ -87,7 +90,7 @@ class FileIO(file_types.FileType):
     @staticmethod
     def _infer_protocol(uri):
         """
-        Discover the protocol which the passed uri may pertain
+        Discover the protocol which the passed uri may pertain.
 
         Parameters
         ----------
@@ -102,14 +105,14 @@ class FileIO(file_types.FileType):
         if uri.startswith('http'):
             return Protocols.HTTP
 
-        if uri.startswith('file') or uri[0] == '/':
+        if uri.startswith('file') or os.path.exists(uri):
             return Protocols.FILE
 
         return Protocols.UNKNOWN
 
     def infer_file_type_from_uri(self, uri, mimetype=False):
         """
-        Infer the file type from an uri
+        Infer the file type from an uri.
 
         Parameters
         ----------
@@ -140,15 +143,119 @@ class FileIO(file_types.FileType):
 
             raise FileTypeNotSupportedYet
 
-    @staticmethod
-    def scan(path):
+    @classmethod
+    def scan_csv(cls, uri):
         """
-        Returns a validated file if a path is passed,
-        or iterates over a directory
+        Scanner for CSV formatted text files.
 
         Parameters
         ----------
-        path: str
+        uri: str
+            Where csv file resides
+
+        Returns
+        -------
+        generator of str:
+            With the discovery file paths
+        """
+        csv_string = cls.get(uri)
+
+        if csv_string is Protocols.UNKNOWN:
+            raise FileTypeNotSupportedYet
+
+        csv_string = csv_string.decode('utf-8').splitlines()
+
+        reader = csv.reader(csv_string)
+
+        for row in reader:
+            yield row
+
+    @classmethod
+    def scan_csv_gzip(cls, uri):
+        """
+        Scanner for CSV formatted text files, compressed with Gzip algorithm.
+
+        Parameters
+        ----------
+        uri: str
+            Where csv file resides
+
+        Returns
+        -------
+        generator of str:
+            With the discovery file paths
+        """
+        with gzip.open(uri, 'rt') as gzip_file:
+            for row in gzip_file:
+                yield row.replace('\n', '')
+
+    @classmethod
+    def scan_csv_bzip2(cls, uri):
+        """
+        Scanner for CSV formatted text files, compressed with Bzip2 algorithm.
+
+        Parameters
+        ----------
+        uri: str
+            Where csv file resides
+
+        Returns
+        -------
+        generator of str:
+            With the discovery file paths
+        """
+        with bz2.open(uri, 'rt') as bz2_file:
+            for row in bz2_file:
+                yield row.replace('\n', '')
+
+    @classmethod
+    def scan_csv_zip(cls, uri):
+        """
+        Scanner for CSV formatted text files, compressed with Zip algorithm.
+
+        Parameters
+        ----------
+        uri: str
+            Where csv file resides
+
+        Returns
+        -------
+        generator of str:
+            With the discovery file paths
+        """
+        for ffile in zipfile.ZipFile(uri).namelist():
+            with zipfile.ZipFile(uri).open(ffile) as ufile:
+                for row in ufile:
+                    yield row.decode('utf-8').replace('\n', '')
+
+    @classmethod
+    def scan_csv_xz(cls, uri):
+        """
+        Scanner for CSV formatted text files, compressed with Lzma algorithm.
+
+        Parameters
+        ----------
+        uri: str
+            Where csv file resides
+
+        Returns
+        -------
+        generator of str:
+            With the discovery file paths
+        """
+        with lzma.open(uri, 'rt') as xz_file:
+            for row in xz_file:
+                yield row.replace('\n', '')
+
+    def scan(self, uri):
+        """
+        Return a validated uri, resolving several cases.
+
+        It also choose the best discovery method.
+
+        Parameters
+        ----------
+        uri: str
             A file or directory to scan
 
         Returns
@@ -156,11 +263,32 @@ class FileIO(file_types.FileType):
         generator of str:
             With the discovery file paths
         """
-        if os.path.isfile(path):
-            yield os.path.abspath(path)
+        try:
+            inferred_type = self.infer_file_type_from_uri(uri)
 
-        else:
-            for root, _, files in os.walk(path):
+            if inferred_type in ('CSV', 'PLAIN'):
+                for line in self.scan_csv(uri):
+                    yield line
+
+            elif inferred_type in ('GZP', 'GZT'):
+                for line in self.scan_csv_gzip(uri):
+                    yield line
+
+            elif inferred_type == 'ZIP':
+                for line in self.scan_csv_zip(uri):
+                    yield line
+
+            elif inferred_type == 'BZ2':
+                for line in self.scan_csv_bzip2(uri):
+                    yield line
+
+            elif inferred_type == 'LXZ':
+                for line in self.scan_csv_xz(uri):
+                    yield line
+
+            else:
+                raise FileScanNotPossible
+        except IsADirectoryError:
+            for root, _, files in os.walk(uri):
                 for ffile in files:
-
                     yield os.path.abspath(f'{root}/{ffile}')

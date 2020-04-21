@@ -1,5 +1,5 @@
 """
-Image module
+Image module.
 
 Performs multiple operations over images, like resizing,
 loading and so on.
@@ -10,18 +10,16 @@ from tensorflow import image as image_ops
 
 from duplex.file_io import FileIO
 from duplex.file_types import FileType
-from duplex import exceptions
+from duplex.exceptions import FileIsNotImage
 
 
 class ImageIO(FileIO, FileType):
-    """
-    Operations of read and write over images
-    """
+    """Operations of read and write over images."""
+
     @staticmethod
     def encoded_to_compressed_tensor(encoded):
         """
-        Transform a binary encoded string image
-        to its compressed tensor
+        Transform a binary encoded string image to its compressed tensor.
 
         Parameters
         ----------
@@ -37,7 +35,7 @@ class ImageIO(FileIO, FileType):
     @staticmethod
     def encoded_to_tensor(encoded):
         """
-        Transform a binary encoded string image to tensor
+        Transform a binary encoded string image to tensor.
 
         Parameters
         ----------
@@ -54,7 +52,7 @@ class ImageIO(FileIO, FileType):
     @classmethod
     def get_image(cls, uri, as_tensor=False):
         """
-        Load a image from specified location
+        Load a image from specified location.
 
         Parameters
         ----------
@@ -75,23 +73,18 @@ class ImageIO(FileIO, FileType):
         """
         bytess = cls.get(uri)
 
-        try:
-            if cls.is_image(bytess):
-                if as_tensor:
-                    return cls.encoded_to_tensor(bytess)
+        if cls.is_image(bytess):
+            if as_tensor:
+                return cls.encoded_to_tensor(bytess)
 
-                return bytess
-            else:
-                raise exceptions.FileIsNotImage
+            return bytess
 
-        except exceptions.FileTypeNotSupportedYet:
-            raise exceptions.FileIsNotImage
+        raise FileIsNotImage
 
     @classmethod
     def size(cls, uri, new_size=None):
         """
-        Returns the current image dimensions or
-        resize it.
+        Return the current image dimensions or resize it.
 
         Parameters
         ----------
@@ -118,17 +111,16 @@ class ImageIO(FileIO, FileType):
                         cls.get_image(uri, as_tensor=True),
                         new_size,
                         method=image_ops.ResizeMethod.NEAREST_NEIGHBOR
+                        )
                     )
                 )
-            )
 
         return cls.get_image(uri, as_tensor=True).shape[:2]
 
     @staticmethod
     def compress(tensor):
         """
-        Compress the tensor before saving it,
-        as JPEG
+        Compress the tensor before saving it, as JPEG.
 
         Parameters
         ----------
@@ -148,6 +140,6 @@ class ImageIO(FileIO, FileType):
                     progressive=True,
                     optimize_size=True,
                     chroma_downsampling=True
+                    )
                 )
             )
-        )

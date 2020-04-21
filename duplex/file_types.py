@@ -1,8 +1,7 @@
 """
-file_types Module
+file_types Module.
 
-Operations of file and mime type discovery,
-based on file content, not extensions
+Operations of file and mime type discovery, based on file content.
 """
 from enum import Enum
 
@@ -10,47 +9,42 @@ from duplex import exceptions
 
 
 class FileHeaderHex(Enum):
-    """
-    Describes header hexadecimals for every
-    supported file types
-    """
+    """Describes header hexadecimals for every supported file types."""
+
     JFI = 'ffd8ffe0'
     JPG = 'ffd8ffdb'
     GIF = '47494638'
     PNG = '89504e47'
     TIF = '49492a00'
     GZP = '1f8b0808'
+    GZT = '1f8b0800'
     BZ2 = '425a6839'
     ZIP = '504b0304'
     LXZ = 'fd377a58'
 
 
 class FileMimeTypes(Enum):
-    """
-    Describes the mime types associated
-    with underlying files
-    """
+    """Describes the mime types associated with underlying files."""
+
     JFI = 'image/jpeg'
     JPG = 'image/jpeg'
     GIF = 'image/gif'
     PNG = 'image/png'
     TIF = 'image/tiff'
     GZP = 'application/gzip'
+    GZT = 'application/gzip'
     BZ2 = 'application/x-bzip2'
     ZIP = 'application/zip'
     LXZ = 'application/x-xz'
 
 
 class FileType:
-    """
-    Operations of file type discovery over
-    file content
-    """
+    """Operations of file type discovery over file content."""
+
     @staticmethod
     def to_hex(bytess):
         """
-        Converts a byte string to its hexadecimal
-        representation
+        Convert a byte string to its hexadecimal representation.
 
         Parameters
         ----------
@@ -67,7 +61,7 @@ class FileType:
     @classmethod
     def header(cls, bytess):
         """
-        Return only the file header or the first four bytes
+        Return only the file header or the first four bytes.
 
         Parameters
         ----------
@@ -84,8 +78,7 @@ class FileType:
     @classmethod
     def guess_file_type(cls, bytess, mimetype=False):
         """
-        Heuristically discover the file type
-        for the underlying path
+        Heuristically discover the file type for the underlying path.
 
         Parameters
         ----------
@@ -118,7 +111,7 @@ class FileType:
     @classmethod
     def is_image(cls, bytess):
         """
-        Returns if the read file is an image or not
+        Return if the read file is an image or not.
 
         Parameters
         ----------
@@ -130,7 +123,10 @@ class FileType:
         bool:
             Describing if the inferred type is image
         """
-        return cls.guess_file_type(
-            bytess,
-            mimetype=True
-        )[1].split('/')[0] == 'image'
+        try:
+            return cls.guess_file_type(
+                bytess,
+                mimetype=True
+                )[1].split('/')[0] == 'image'
+        except exceptions.FileTypeNotSupportedYet:
+            return False

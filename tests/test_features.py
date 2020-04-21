@@ -33,13 +33,6 @@ class TestCases(TestCase):
         with self.assertRaises(UnknownCharacteristics):
             Extractors('UNKNOWN')
 
-    def test_extractors_context_manager(self):
-        """
-        Unit test for context manager Extractors
-        """
-        with Extractors() as extractors:
-            assert isinstance(extractors, Extractors)
-
 
 def test_characteristics():
     """
@@ -59,15 +52,22 @@ def test_network_instance():
         assert extractor._infer_network()[1].name == extractor.network.name
 
 
+def test_extractors_context_manager():
+    """
+    Unit test for context manager Extractors
+    """
+    with Extractors() as extractors:
+        assert isinstance(extractors, Extractors)
+
+
 def test_preprocessor():
     """
     Unit test for preprocessor method
     """
     for characteristic in Characteristics:
-        extractor = Extractors(characteristic)
-
-        assert extractor.preprocessor(abspath(TEST_LOCAL)).shape == \
-            (1, *extractor.image_input_shape, 3)
+        with Extractors(characteristic) as extractor:
+            assert extractor.preprocessor(abspath(TEST_LOCAL)).shape == \
+                (1, *extractor.image_input_shape, 3)
 
 
 def test_extract():
@@ -75,10 +75,9 @@ def test_extract():
     Unit test for extract method
     """
     for characteristic in Characteristics:
-        extractor = Extractors(characteristic)
-
-        assert extractor.extract(abspath(TEST_LOCAL)).shape == \
-            (1, extractor.network.output_shape[1])
+        with Extractors(characteristic) as extractor:
+            assert extractor.extract(abspath(TEST_LOCAL)).shape == \
+                (1, extractor.network.output_shape[1])
 
 
 def test_acceleration_discovery(monkeypatch):
