@@ -21,6 +21,8 @@ class FileHeaderHex(Enum):
     BZ2 = '425a6839'
     ZIP = '504b0304'
     LXZ = 'fd377a58'
+    JTI = 'ffd8ffe1'
+    JP3 = 'ffd8ffed'
 
 
 class FileMimeTypes(Enum):
@@ -28,9 +30,11 @@ class FileMimeTypes(Enum):
 
     JFI = 'image/jpeg'
     JPG = 'image/jpeg'
+    JP3 = 'image/jpeg'
     GIF = 'image/gif'
     PNG = 'image/png'
     TIF = 'image/tiff'
+    JTI = 'image/jpeg'
     GZP = 'application/gzip'
     GZT = 'application/gzip'
     BZ2 = 'application/x-bzip2'

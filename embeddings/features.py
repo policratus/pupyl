@@ -1,24 +1,20 @@
-"""
-Factory for image feature extraction
-"""
+"""Factory for image feature extraction."""
 import warnings
 from enum import Enum, auto
+import termcolor
 
 import numpy
 import tensorflow
 import tensorflow.keras.applications as networks
 import tensorflow.keras.backend as backend
-import termcolor
 
 from embeddings import exceptions
 from duplex.image import ImageIO
 
 
 class Characteristics(Enum):
-    """
-    Describes high level characteristics
-    of complex feature extractors
-    """
+    """Describes high level characteristics of complex feature extractors."""
+
     # MobileNetV2
     LIGHTWEIGHT_REGULAR_PRECISION = auto()
     # DenseNet169
@@ -28,15 +24,14 @@ class Characteristics(Enum):
 
 
 class Extractors(ImageIO):
-    """
-    Pretrained CNNs for embeddings generation
-    """
+    """Pretrained CNNs for embeddings generation."""
+
     def __init__(
-        self,
-        characteristics=Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
-    ):
+            self,
+            characteristics=Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
+            ):
         """
-        Creates embedding extractors
+        Create embedding extractors.
 
         Parameters
         ----------
@@ -54,26 +49,34 @@ class Extractors(ImageIO):
 
         self.converter, self.network = self._infer_network()
         self.image_input_shape = self.network.input_shape[1:3]
+        self._features_output_shape = self.network.output_shape[1]
 
     def __enter__(self):
-        """
-        Opening Extractors context
-        """
+        """Open Extractors context."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """
-        Closing Extractors context
-        """
+        """Close Extractors context."""
         del exc_type, exc_val, exc_tb
 
         backend.clear_session()
 
+    @property
+    def output_shape(self):
+        """
+        Getter for property output_shape.
+
+        Describes the output shape of extracted features.
+        """
+        return self._features_output_shape
+
     @staticmethod
     def acceleration_discovery():
         """
-        Performs a hardware processing acceleration discovery
-        for faster embeddings extraction
+        Perform a hardware processing acceleration discovery.
+
+        Most GPUs supported (through CUDA), which results on
+        faster embeddings extraction.
         """
         # If GPU(s) device(s) are found, avoid excessive VRAM consumption
         for gpu in tensorflow.config.experimental.list_physical_devices('GPU'):
@@ -83,8 +86,8 @@ class Extractors(ImageIO):
                     'extraction acceleration.',
                     color='blue',
                     attrs=['bold']
+                    )
                 )
-            )
 
             try:
                 tensorflow.config.experimental.set_memory_growth(gpu, True)
@@ -95,15 +98,12 @@ class Extractors(ImageIO):
                         'already initialized GPU',
                         color='blue',
                         attrs=['bold']
-                    ),
+                        ),
                     ResourceWarning
-                )
+                    )
 
     def _infer_network(self):
-        """
-        Translates a characteristic to a network
-        architecture
-        """
+        """Translate a characteristic to a network architecture."""
         # Networks general configurations
         weights = 'imagenet'
         pooling = 'max'
@@ -119,7 +119,7 @@ class Extractors(ImageIO):
                     pooling=pooling,
                     include_top=include_top,
                     input_shape=input_shape
-                )
+                    )
 
         if self._characteristics is \
                 Characteristics.MEDIUMWEIGHT_GOOD_PRECISION:
@@ -129,7 +129,7 @@ class Extractors(ImageIO):
                     pooling=pooling,
                     include_top=include_top,
                     input_shape=input_shape
-                )
+                    )
 
         if self._characteristics is \
                 Characteristics.HEAVYWEIGHT_HUGE_PRECISION:
@@ -140,14 +140,13 @@ class Extractors(ImageIO):
                     include_top=include_top,
                     # Specific shape for NASNetLarge
                     input_shape=input_shape_nasnet_large
-                )
+                    )
 
         raise exceptions.UnknownCharacteristics
 
     def preprocessor(self, uri):
         """
-        Image preprocessing before network
-        ingestion
+        Image preprocessing methods, suitable for posterior network ingestion.
 
         Parameters
         ----------
@@ -162,11 +161,11 @@ class Extractors(ImageIO):
         return numpy.expand_dims(
             self.converter(self.size(uri, self.image_input_shape)),
             axis=0
-        )
+            )
 
     def extract(self, uri):
         """
-        Converts image uri to its embeddings
+        Convert image uri to its embeddings.
 
         Parameters
         ----------
@@ -180,4 +179,4 @@ class Extractors(ImageIO):
         """
         return self.network.predict(
             self.preprocessor(uri)
-        )
+            ).ravel()

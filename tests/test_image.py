@@ -73,7 +73,7 @@ def test_compress():
 
     test_tensor = ImageIO.encoded_to_tensor(ImageIO.get_image(TEST_LOCAL))
 
-    assert numpy.equal(
+    numpy.testing.assert_array_equal(
         ImageIO.compress(test_tensor),
         behaviour_compress(test_tensor)
         )
