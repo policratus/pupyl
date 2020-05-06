@@ -26,6 +26,7 @@ class TestCases(TestCase):
     """
     Unit tests over special cases
     """
+
     def test_unknown_network_instance(self):
         """
         Unit test for an unknown network characteristic
@@ -76,8 +77,8 @@ def test_extract():
     """
     for characteristic in Characteristics:
         with Extractors(characteristic) as extractor:
-            assert extractor.extract(abspath(TEST_LOCAL)).shape == \
-                (1, extractor.network.output_shape[1])
+            assert extractor.extract(abspath(TEST_LOCAL)).shape[0] == \
+                extractor.network.output_shape[1]
 
 
 def test_acceleration_discovery(monkeypatch):
@@ -95,6 +96,12 @@ def test_acceleration_discovery(monkeypatch):
         Extractors,
         'acceleration_discovery',
         mocked_acceleration_discovery
-    )
+        )
 
     assert Extractors.acceleration_discovery()
+
+
+def test_output_shape_property():
+    """Unit test for property output_shape."""
+    with Extractors() as extractor:
+        extractor.output_shape == extractor._features_output_shape

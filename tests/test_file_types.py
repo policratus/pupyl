@@ -17,6 +17,7 @@ class TestCases(TestCase):
     """
     Unit tests over special cases
     """
+
     def test_guess_file_type_unknown_case(self):
         """
         Unit test for guess_file_type method, file type
@@ -33,4 +34,4 @@ def test_guess_file_type_known_case():
     known case
     """
     with open(TEST_LOCAL, 'rb') as ffile:
-        assert FileType.guess_file_type(ffile.read()) == 'JFI'
+        assert FileType.guess_file_type(ffile.read()) == 'JPG'

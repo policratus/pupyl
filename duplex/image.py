@@ -81,8 +81,23 @@ class ImageIO(FileIO, FileType):
 
         raise FileIsNotImage
 
+    @staticmethod
+    def save_image(path, bytess):
+        """
+        Save an image to defined path.
+
+        Parameters
+        ----------
+        path: str
+            Local to save the image.
+
+        bytess: bytes
+            Bytes representing an image.
+        """
+        io_ops.write_file(path, bytess)
+
     @classmethod
-    def size(cls, uri, new_size=None):
+    def size(cls, uri, new_size=None, keep_aspect=False):
         """
         Return the current image dimensions or resize it.
 
@@ -93,6 +108,10 @@ class ImageIO(FileIO, FileType):
 
         new_size (optional): tuple
             The new intended dimension of the image
+
+        keep_aspect (optional) (default=False): bool
+            If the image proportions should be preserved
+            or not.
 
         Returns
         -------
@@ -110,36 +129,42 @@ class ImageIO(FileIO, FileType):
                     image_ops.resize(
                         cls.get_image(uri, as_tensor=True),
                         new_size,
-                        method=image_ops.ResizeMethod.NEAREST_NEIGHBOR
-                        )
+                        method=image_ops.ResizeMethod.NEAREST_NEIGHBOR,
+                        preserve_aspect_ratio=keep_aspect
                     )
                 )
+            )
 
         return cls.get_image(uri, as_tensor=True).shape[:2]
 
-    @staticmethod
-    def compress(tensor):
+    @classmethod
+    def compress(cls, tensor, as_tensor=False):
         """
-        Compress the tensor before saving it, as JPEG.
+        Compress the tensor using JPEG algorithm.
 
         Parameters
         ----------
         tensor: numpy.ndarray
             A tensor representing an image
 
+        as_tensor (optional) (default=False): bool
+            If the new compressed JPEG image should be
+            returned as a numpy.ndarray
+
         Returns
         -------
         numpy.ndarray
-            An encoded image, in bytes
+            An encoded image, in bytes or numpy.ndarray
         """
-        return numpy.array(
-            memoryview(
-                image_ops.encode_jpeg(
-                    tensor,
-                    quality=80,
-                    progressive=True,
-                    optimize_size=True,
-                    chroma_downsampling=True
-                    )
-                )
-            )
+        compressed = image_ops.encode_jpeg(
+            tensor,
+            quality=80,
+            progressive=True,
+            optimize_size=True,
+            chroma_downsampling=True
+        )
+
+        if as_tensor:
+            return cls.encoded_to_tensor(compressed)
+
+        return compressed

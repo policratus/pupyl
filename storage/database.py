@@ -1,150 +1,194 @@
 """
-database module
+database module.
 
-Operations and storage for images
+Operations and storage for images.
 """
-from enum import Enum, auto
-import warnings
+import os
+import json
 
-import h5py
-
-
-class FileMode(Enum):
-    """
-    Defines supported modes within file interaction
-    """
-    READ_ONLY = auto()
-    READ_WRITE = auto()
-    CREATE = auto()
-    UNKNOWN = auto()
+from duplex.image import ImageIO
 
 
-class ImageDatabase:
-    """
-    Handling of storage and IO operations
-    over images
-    """
-    def __init__(self, path, mode):
+class ImageDatabase(ImageIO):
+    """Handling of storage and IO operations over images."""
+
+    def __init__(self, import_images=True, directory=None, **kwargs):
         """
-        Image storage and operations
+        Image storage and operations.
 
         Parameters
         ----------
-        path: str
-            Location to save the image storage file
+        import_images (optional) (default=True): bool
+            If the images must be copied to internal database or not.
 
-        mode: Enum
-            Any suitable IO mode described on FileMode enum
+        directory (optional) (default=self.safe_temp_file()): str
+            Location to save the image storage files
+
+        **bucket_size (optional) (default=1000): int
+            Define the size of file buckets. In other words, how much
+            files to save on a directory.
+
+        **image_size (optional) (default=(800, 600)): tuple
+            Define the dimensions of saved image. Only has some effect
+            if import_images is True.
         """
-        self._path = path
-        self._mode = mode
+        self._import_images = import_images
+
+        if directory:
+            self._directory = os.path.normpath(directory)
+        else:
+            self._directory = self.safe_temp_file()
+
+        if kwargs.get('bucket_size'):
+            self._bucket_size = kwargs['bucket_size']
+        else:
+            self._bucket_size = 1000
+
+        if self._import_images:
+            if kwargs.get('image_size'):
+                self._image_size = kwargs['image_size']
+            else:
+                self._image_size = (800, 600)
+
+        os.makedirs(self._directory, exist_ok=True)
+
+    def __getitem__(self, position):
+        """Return the item at index."""
+        return self.load_image_metadata(position)
+
+    @property
+    def import_images(self):
+        """Getter for import_images property."""
+        return self._import_images
+
+    @import_images.setter
+    def import_images(self, import_it):
+        """Setter for import_images property."""
+        self._import_images = import_it
+
+    @property
+    def bucket_size(self):
+        """Getter for bucket_size property."""
+        return self._bucket_size
+
+    @bucket_size.setter
+    def bucket_size(self, size):
+        """Setter for bucket_size property."""
+        self._bucket_size = size
+
+    @property
+    def image_size(self):
+        """Getter for image_size property."""
+        if self._import_images:
+            return self._image_size
+
+        return (800, 600)
+
+    @image_size.setter
+    def image_size(self, dimensions):
+        if self._import_images:
+            self._image_size = dimensions
+
+    def what_bucket(self, index):
+        """
+        Discover in what bucket the file should be saved.
+
+        Parameters
+        ----------
+        index: int
+            The index number which file will be referenced.
+
+        Returns
+        -------
+        int:
+            With the chosen bucket
+        """
+        return index // self._bucket_size
+
+    def mount_file_name(self, index, extension):
+        """
+        Create the name of the posterior saved file.
+
+        Parameters
+        ----------
+        index: int
+            The indexer id associated with the file
+
+        extension: str
+            Describing the file extension
+        """
+        return os.path.join(
+            self._directory,
+            str(self.what_bucket(index)),
+            f'{index}.{extension}'
+        )
+
+    def load_image_metadata(self, index):
+        """
+        Return the metadata inside image file metadata.
+
+        Parameters
+        ----------
+        index: int
+            Related to metadata file stored.
+
+        Returns
+        -------
+        dict
+            Containing the parsed json file.
+        """
+        result_file_name = self.mount_file_name(index, 'json')
 
         try:
-            self._connection = h5py.File(
-                self._path,
-                self._resolve_mode(FileMode.CREATE),
-                driver=None
-            )
+            with open(result_file_name) as json_file:
+                return json.load(json_file)
 
-            if mode is FileMode.READ_ONLY:
-                warnings.warn(
-                    f'Opening {self._path} as r/w as it was created right now.'
+        except FileNotFoundError:
+            raise IndexError
+
+    def save_image_metadata(self, index, uri):
+        """
+        Store image metadata.
+
+        Parameters
+        ----------
+        index: int
+            The index related to the image.
+
+        uri: str
+            Local where image is stored.
+        """
+        bytess = self.get(uri)
+        result_file_name = self.mount_file_name(index, 'json')
+
+        os.makedirs(os.path.dirname(result_file_name), exist_ok=True)
+
+        if self.is_image(bytess):
+            with open(result_file_name, 'w') as json_file:
+                json.dump(self.get_metadata(uri), json_file)
+
+    def insert(self, index, uri):
+        """
+        Insert an image to database.
+
+        Parameters
+        ----------
+        index: int
+            The index number attributed to the image.
+
+        uri: str
+            Where the original file are located
+        """
+        if self._import_images:
+            self.save_image(
+                self.mount_file_name(index, 'jpg'),
+                self.compress(
+                    self.size(uri, new_size=self._image_size, keep_aspect=True)
                 )
-        except OSError:
-            self._connection = h5py.File(
-                self._path,
-                self._resolve_mode(self._mode),
-                driver=None
             )
 
-    @staticmethod
-    def _resolve_mode(mode):
-        """
-        Converts a enum mode to its string format
+        self.save_image_metadata(index, uri)
 
-        Parameters
-        ----------
-        mode: Enum
-            Defines which mode must be converted
-
-        Returns
-        -------
-        str
-        """
-        if mode is FileMode.CREATE:
-            return 'x'
-
-        if mode is FileMode.READ_ONLY:
-            return 'r'
-
-        if mode is FileMode.READ_WRITE:
-            return 'r+'
-
-        return FileMode.UNKNOWN
-
-    def __enter__(self):
-        """
-        Context manager creation
-        """
-        return self._connection
-
-    def __exit__(self, ptype, value, traceback):
-        """
-        Context manager destruction
-        """
-        self._connection.close()
-
-    def get(self, group, name):
-        """
-        Find and returns a tensor under
-        a group and name
-
-        Parameters
-        ----------
-        group: str
-            Name of the group where the tensor are
-
-        name: str
-            Description of the name chosen to the tensor
-
-        Returns
-        -------
-        numpy.ndarray
-            The tensor which describes the image
-        """
-        with ImageDatabase(self._path, FileMode.READ_ONLY) as image_database:
-            try:
-                return image_database[f'/{group}/{name}'][()]
-            except KeyError:
-                raise KeyError(f"Key {group}/{name} wasn't found.")
-
-    def add(self, group, name, tensor):
-        """
-        Adds a new tensor under the group and name specified,
-        only if the key doesn't exists
-
-        Parameters
-        ----------
-        group: str
-            Name of the group where the tensor are
-
-        name: str
-            Description of the name chosen to the tensor
-
-        tensor: numpy.ndarray
-            A tensor representing an image
-        """
-        with ImageDatabase(self._path, FileMode.READ_WRITE) as image_database:
-            groups = image_database.require_group(group)
-
-            groups.create_dataset(
-                name,
-                shape=tensor.shape,
-                data=tensor,
-                dtype=tensor.dtype,
-                compression='gzip',
-                compression_opts=9,
-                shuffle=True
-            )
-
-            image_database.flush()
+    def load_image(self, index):
+        """Return the image data at specified index."""
+        return self.get_image(self.mount_file_name(index, 'jpg'))

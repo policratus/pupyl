@@ -2,8 +2,10 @@
 Unit tests related to duplex.file_io module
 """
 import csv
+import tempfile
 from os import walk
-from os.path import abspath
+from os.path import abspath, exists, join
+from pathlib import Path
 from unittest import TestCase
 
 from duplex.file_io import FileIO, Protocols
@@ -73,6 +75,24 @@ class TestCases(TestCase):
 
         with self.assertRaises(FileTypeNotSupportedYet):
             next(file_io.scan_csv(TEST_UNKNOWN))
+
+
+def test_safe_temp_file():
+    """Unit test for method safe_temp_file."""
+    test_temp_file_name = FileIO.safe_temp_file()
+
+    assert not exists(test_temp_file_name)
+
+
+def test_safe_temp_file_exists():
+    """Unit test for method safe_temp_file, file exists case."""
+    test_temp_file_name = 'just_a_temp_file.txt'
+
+    Path(join(tempfile.gettempdir(), test_temp_file_name)).touch()
+
+    _ = FileIO.safe_temp_file(file_name=test_temp_file_name)
+
+    assert not exists(test_temp_file_name)
 
 
 def test__infer_protocol_http():
@@ -146,7 +166,7 @@ def test_scan_directory():
     test_against_tree = [
         abspath(f'{TEST_SCAN_DIR}{ffile}')
         for ffile in [*walk(TEST_SCAN_DIR)][0][-1]
-        ]
+    ]
 
     test_current_tree = [*file_io.scan(abspath(TEST_SCAN_DIR))]
 
@@ -227,6 +247,45 @@ def test_scan_csv_bzip2():
         assert method_row == util_row
 
 
+def test_get_metadata_http():
+    """Unit test for method get_metadata, http case."""
+    test_metadata = {
+        'original_file_name': '320px-Cheshm-Nazar.JPG',
+        'original_path': 'https://upload.wikimedia.org/' +
+                         'wikipedia/commons/thumb/e/e4/Cheshm-Nazar.JPG',
+        'original_file_size': '9K'
+    }
+
+    test_request_metadata = FileIO.get_metadata(TEST_URL)
+
+    del test_request_metadata['original_access_time']
+
+    assert test_metadata == test_request_metadata
+
+
+def test_get_metadata_local():
+    """Unit test for method get_metadata, local case."""
+    test_metadata = {
+        'original_file_name': 'test_image.jpg',
+        'original_path': abspath('tests'),
+        'original_file_size': '5K'
+    }
+
+    test_local_metadata = FileIO.get_metadata(TEST_LOCAL)
+
+    del test_local_metadata['original_access_time']
+
+    assert test_metadata == test_local_metadata
+
+
+def test_timestamp_to_iso8601():
+    """Unit test for method timestamp_to_iso8601"""
+    test_timestamp = 1591123280
+    expected_return = '2020-06-02T18:41:20'
+
+    assert FileIO.timestamp_to_iso8601(test_timestamp) == expected_return
+
+
 def test_infer_file_type_from_uri_with_mimetype():
     """
     Unit test for method infer_file_type_from_uri,
@@ -237,7 +296,7 @@ def test_infer_file_type_from_uri_with_mimetype():
     _, mime = file_io.infer_file_type_from_uri(
         TEST_LOCAL,
         mimetype=True
-        )
+    )
 
     assert mime == 'image/jpeg'
 
@@ -252,7 +311,7 @@ def test_infer_file_type_from_uri_no_mimetype():
     assert file_io.infer_file_type_from_uri(
         TEST_LOCAL,
         mimetype=False
-        ) == 'JFI'
+    ) == 'JPG'
 
 
 def test_infer_file_type_from_uri_unsupported():
@@ -265,7 +324,7 @@ def test_infer_file_type_from_uri_unsupported():
     assert file_io.infer_file_type_from_uri(
         TEST_UNSUPPORTED_FILE_TYPE,
         mimetype=True
-        ) == 'text/plain'
+    ) == 'text/plain'
 
 
 def test_infer_file_type_from_uri_remote():
