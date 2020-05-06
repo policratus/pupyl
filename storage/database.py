@@ -1,7 +1,7 @@
 """
-database module
+database module.
 
-Operations and storage for images
+Operations and storage for images.
 """
 from enum import Enum, auto
 import warnings
@@ -10,9 +10,8 @@ import h5py
 
 
 class FileMode(Enum):
-    """
-    Defines supported modes within file interaction
-    """
+    """Defines supported modes within file interaction."""
+
     READ_ONLY = auto()
     READ_WRITE = auto()
     CREATE = auto()
@@ -20,13 +19,11 @@ class FileMode(Enum):
 
 
 class ImageDatabase:
-    """
-    Handling of storage and IO operations
-    over images
-    """
+    """Handling of storage and IO operations over images."""
+
     def __init__(self, path, mode):
         """
-        Image storage and operations
+        Image storage and operations.
 
         Parameters
         ----------
@@ -44,23 +41,23 @@ class ImageDatabase:
                 self._path,
                 self._resolve_mode(FileMode.CREATE),
                 driver=None
-            )
+                )
 
             if mode is FileMode.READ_ONLY:
                 warnings.warn(
                     f'Opening {self._path} as r/w as it was created right now.'
-                )
+                    )
         except OSError:
             self._connection = h5py.File(
                 self._path,
                 self._resolve_mode(self._mode),
                 driver=None
-            )
+                )
 
     @staticmethod
     def _resolve_mode(mode):
         """
-        Converts a enum mode to its string format
+        Convert a enum mode to its string format.
 
         Parameters
         ----------
@@ -83,21 +80,18 @@ class ImageDatabase:
         return FileMode.UNKNOWN
 
     def __enter__(self):
-        """
-        Context manager creation
-        """
+        """Context manager creation."""
         return self._connection
 
-    def __exit__(self, ptype, value, traceback):
-        """
-        Context manager destruction
-        """
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager destruction."""
+        del exc_type, exc_val, exc_tb
+
         self._connection.close()
 
     def get(self, group, name):
         """
-        Find and returns a tensor under
-        a group and name
+        Find and returns a tensor under a group and name.
 
         Parameters
         ----------
@@ -120,8 +114,9 @@ class ImageDatabase:
 
     def add(self, group, name, tensor):
         """
-        Adds a new tensor under the group and name specified,
-        only if the key doesn't exists
+        Add a new tensor under the group and name specified.
+
+        Only if the key doesn't exists.
 
         Parameters
         ----------
@@ -145,6 +140,6 @@ class ImageDatabase:
                 compression='gzip',
                 compression_opts=9,
                 shuffle=True
-            )
+                )
 
             image_database.flush()

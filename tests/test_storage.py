@@ -1,6 +1,4 @@
-"""
-Unit tests related to storage.database module
-"""
+"""Unit tests related to storage.database module."""
 import os
 import tempfile
 from unittest import TestCase
@@ -20,13 +18,10 @@ TEST_NAME = 'test1'
 
 
 class TestCases(TestCase):
-    """
-    Unit tests over special cases
-    """
+    """Unit tests over special cases."""
+
     def test_get_unsuccessful(self):
-        """
-        Unit test for method get, unsuccessful case
-        """
+        """Unit test for method get, unsuccessful case."""
         test_unknown_group = 'unknown'
         test_unknown_name = 'unknown'
         image_database = ImageDatabase(TEST_DB, FileMode.READ_ONLY)
@@ -36,9 +31,7 @@ class TestCases(TestCase):
 
 
 def test__init__class_create():
-    """
-    Unit test for method __init__, create case
-    """
+    """Unit test for method __init__, create case."""
     with ImageDatabase(PATH, FileMode.CREATE):
         assert os.path.exists(PATH)
 
@@ -90,10 +83,10 @@ def test_get_successful():
     """
     image_database = ImageDatabase(TEST_DB, FileMode.READ_ONLY)
 
-    assert numpy.array_equal(
+    numpy.testing.assert_array_equal(
         image_database.get(TEST_GROUP, TEST_NAME),
         TEST_TENSOR
-    )
+        )
 
 
 def test_add():
@@ -106,9 +99,9 @@ def test_add():
 
     image_database.add(TEST_GROUP, TEST_NAME, TEST_TENSOR)
 
-    assert numpy.array_equal(
+    numpy.testing.assert_array_equal(
         image_database.get(TEST_GROUP, TEST_NAME),
         TEST_TENSOR
-    )
+        )
 
     os.remove(test_db)

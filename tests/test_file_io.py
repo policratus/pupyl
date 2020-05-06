@@ -2,8 +2,10 @@
 Unit tests related to duplex.file_io module
 """
 import csv
+import tempfile
 from os import walk
-from os.path import abspath
+from os.path import abspath, exists, join
+from pathlib import Path
 from unittest import TestCase
 
 from duplex.file_io import FileIO, Protocols
@@ -73,6 +75,24 @@ class TestCases(TestCase):
 
         with self.assertRaises(FileTypeNotSupportedYet):
             next(file_io.scan_csv(TEST_UNKNOWN))
+
+
+def test_safe_temp_file():
+    """Unit test for method safe_temp_file."""
+    test_temp_file_name = FileIO.safe_temp_file()
+
+    assert not exists(test_temp_file_name)
+
+
+def test_safe_temp_file_exists():
+    """Unit test for method safe_temp_file, file exists case."""
+    test_temp_file_name = 'just_a_temp_file.txt'
+
+    Path(join(tempfile.gettempdir(), test_temp_file_name)).touch()
+
+    _ = FileIO.safe_temp_file(file_name=test_temp_file_name)
+
+    assert not exists(test_temp_file_name)
 
 
 def test__infer_protocol_http():

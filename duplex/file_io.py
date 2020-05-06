@@ -7,6 +7,8 @@ import os
 from urllib.request import urlopen
 from enum import Enum, auto
 import mimetypes
+import tempfile
+import uuid
 import csv
 import gzip
 import zipfile
@@ -188,6 +190,32 @@ class FileIO(file_types.FileType):
         with gzip.open(uri, 'rt') as gzip_file:
             for row in gzip_file:
                 yield row.replace('\n', '')
+
+    @staticmethod
+    def safe_temp_file(**kwargs):
+        """
+        Create a secure temporary file name,
+        which means a file with an unique name.
+
+        If a file with the same name is found,
+        it's deleted a before generating a new unique name.
+
+        Parameters
+        ----------
+        file_name (optional) (keyword argument): str
+            Defining a temporary file to assert.
+        """
+        temp_dir = tempfile.gettempdir()
+
+        if kwargs.get('file_name'):
+            file_name = os.path.join(temp_dir, kwargs.get('file_name'))
+        else:
+            file_name = os.path.join(temp_dir, str(uuid.uuid4()))
+
+        if os.path.exists(file_name):
+            os.remove(file_name)
+
+        return file_name
 
     @classmethod
     def scan_csv_bzip2(cls, uri):
