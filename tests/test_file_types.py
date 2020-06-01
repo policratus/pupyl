@@ -34,4 +34,4 @@ def test_guess_file_type_known_case():
     known case
     """
     with open(TEST_LOCAL, 'rb') as ffile:
-        assert FileType.guess_file_type(ffile.read()) == 'JFI'
+        assert FileType.guess_file_type(ffile.read()) == 'JPG'

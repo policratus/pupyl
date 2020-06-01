@@ -272,7 +272,7 @@ def test_infer_file_type_from_uri_no_mimetype():
     assert file_io.infer_file_type_from_uri(
         TEST_LOCAL,
         mimetype=False
-        ) == 'JFI'
+        ) == 'JPG'
 
 
 def test_infer_file_type_from_uri_unsupported():
