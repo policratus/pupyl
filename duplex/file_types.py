@@ -11,32 +11,24 @@ from duplex import exceptions
 class FileHeaderHex(Enum):
     """Describes header hexadecimals for every supported file types."""
 
-    JFI = 'ffd8ffe0'
-    JPG = 'ffd8ffdb'
-    GIF = '47494638'
-    PNG = '89504e47'
-    TIF = '49492a00'
-    GZP = '1f8b0808'
-    GZT = '1f8b0800'
-    BZ2 = '425a6839'
-    ZIP = '504b0304'
-    LXZ = 'fd377a58'
-    JTI = 'ffd8ffe1'
-    JP3 = 'ffd8ffed'
+    JPG = 'ffd8ff'
+    GIF = '474946'
+    PNG = '89504e'
+    TIF = '49492a'
+    GZP = '1f8b08'
+    BZ2 = '425a68'
+    ZIP = '504b03'
+    LXZ = 'fd377a'
 
 
 class FileMimeTypes(Enum):
     """Describes the mime types associated with underlying files."""
 
-    JFI = 'image/jpeg'
     JPG = 'image/jpeg'
-    JP3 = 'image/jpeg'
     GIF = 'image/gif'
     PNG = 'image/png'
     TIF = 'image/tiff'
-    JTI = 'image/jpeg'
     GZP = 'application/gzip'
-    GZT = 'application/gzip'
     BZ2 = 'application/x-bzip2'
     ZIP = 'application/zip'
     LXZ = 'application/x-xz'
@@ -65,7 +57,7 @@ class FileType:
     @classmethod
     def header(cls, bytess):
         """
-        Return only the file header or the first four bytes.
+        Return only the file header or the first three bytes.
 
         Parameters
         ----------
@@ -77,7 +69,7 @@ class FileType:
         str:
             With the header hexadecimal representation
         """
-        return cls.to_hex(bytess[:4])
+        return cls.to_hex(bytess[:3])
 
     @classmethod
     def guess_file_type(cls, bytess, mimetype=False):
