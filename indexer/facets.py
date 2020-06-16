@@ -4,11 +4,14 @@ facets Module.
 Hyperspace indexing and operations.
 """
 import os
-from shutil import copy
+from shutil import move
 
 from annoy import AnnoyIndex
 
-from indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet
+from indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
+    NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
+    NullTensorError
+
 from addendum.operators import intmul
 from duplex.file_io import FileIO
 
@@ -16,38 +19,59 @@ from duplex.file_io import FileIO
 class Index:
     """Procedures over multidimensional spaces."""
 
-    def __init__(self, path, size, trees=.001):
+    def __init__(self, size, data_dir=None, trees=.001, volatile=False):
         """
         Indexing tensors operations and nearest neighbours search.
 
         Parameters
         ----------
-        path: str
-            Location where to load or save the index
-
         size: int
             Shape of unidimensional vectors which will be indexed
+
+        data_dir: str
+            Location where to load or save the index
 
         trees (optional): float
             Defines the number of trees to create based on the dataset
             size. Should be a number between 0 and 1.
+
+        volatile (optional): bool
+            If the index will be temporary or not.
         """
         self._position = -1
         self._size = size
-        self._path = path
+        self._data_dir = data_dir
         self._trees = trees
+        self._volatile = volatile
 
-        if os.path.exists(self._path):
+        if self._data_dir and not self._volatile:
+            if os.path.isfile(self._data_dir):
+                raise OSError('data_dir parameter is not a directory' +
+                              ', is a file.')
+
+            os.makedirs(self._data_dir, exist_ok=True)
+            self._path = os.path.join(self._data_dir, self.index_name)
+        elif not self._data_dir and not self._volatile:
+            raise NoDataDirForPermanentIndex
+        elif not self._data_dir and self._volatile:
+            _temp_file = FileIO.safe_temp_file()
+            self._data_dir = os.path.dirname(_temp_file)
+            self._path = _temp_file
+
+        else:
+            raise DataDirDefinedForVolatileIndex
+
+        if os.path.isfile(self._path):
             try:
-                self._index = AnnoyIndex(size, metric='angular')
+                self.tree = AnnoyIndex(size, metric='angular')
 
-                self._index.load(self._path)
+                self.tree.load(self._path)
 
                 self._is_new_index = False
             except OSError:
                 raise FileIsNotAnIndex
         else:
-            self._index = AnnoyIndex(size, metric='angular')
+            self.tree = AnnoyIndex(size, metric='angular')
             self._is_new_index = True
 
     @property
@@ -61,9 +85,19 @@ class Index:
         return self._path
 
     @property
+    def index_name(self):
+        """Getter for property index_name."""
+        return 'pupyl.index'
+
+    @property
     def trees(self):
         """Getter for property trees."""
         return self._trees
+
+    @property
+    def volatile(self):
+        """Getter for property volatile."""
+        return self._volatile
 
     @trees.setter
     def trees(self, trees):
@@ -78,27 +112,22 @@ class Index:
         """Context closing index."""
         del exc_type, exc_val, exc_tb
 
-        self.save()
-
-        self._index.unload()
-
-    def save(self):
-        """Save the new created index."""
         if self._is_new_index:
-            self._index.build(self.size << intmul >> self.trees)
+            self.tree.build(self.size << intmul >> self.trees)
 
-            self._index.save(self.path)
+            self.tree.save(self.path)
+
+        self.tree.unload()
 
     def items(self):
         """Return the indexed items."""
-        for item in range(self._index.get_n_items()):
-            if not sum(self._index.get_item_vector(item)) == 0.:
-                yield item
+        for item in range(self.tree.get_n_items()):
+            yield item
 
     def values(self):
         """Return the indexed values."""
         for item in self.items():
-            yield self._index.get_item_vector(item)
+            yield self.tree.get_item_vector(item)
 
     def items_values(self):
         """Return tuples with all items and values."""
@@ -108,16 +137,16 @@ class Index:
     def __getitem__(self, position):
         """Return item at index. Supports negative slicing."""
         if position >= 0:
-            return self._index.get_item_vector(position)
+            return self.tree.get_item_vector(position)
 
-        return self._index.get_item_vector(
-            self._index.get_n_items() - abs(position)
+        return self.tree.get_item_vector(
+            self.tree.get_n_items() - abs(position)
             )
 
     def refresh(self):
         """Update all information regarding index file."""
-        self._index.unload()
-        self._index.load(self.path)
+        self.tree.unload()
+        self.tree.load(self.path)
 
     def append(self, tensor):
         """
@@ -129,20 +158,21 @@ class Index:
         tensor: numpy.ndarray or list
             A vector to insert into index.
         """
+        if sum(tensor) == 0.:
+            raise NullTensorError
+
         if self._is_new_index:
-            self._index.add_item(len(self), tensor)
-
+            self.tree.add_item(len(self), tensor)
         else:
-            tmp_file = FileIO.safe_temp_file()
-
-            with Index(tmp_file, self.size, self.trees) as tmp_idx:
+            with Index(self.size, volatile=True, trees=self.trees) as tmp_idx:
                 for value in self.values():
                     tmp_idx.append(value)
 
                 tmp_idx.append(tensor)
 
-            copy(tmp_file, self.path)
-            os.remove(tmp_file)
+                _temp_file = tmp_idx.path
+
+            move(_temp_file, self.path)
 
             self.refresh()
 
@@ -159,15 +189,24 @@ class Index:
         if self._is_new_index:
             raise IndexNotBuildYet
 
-        tmp_file = FileIO.safe_temp_file()
+        if position > len(self):
+            raise IndexError
 
-        with Index(tmp_file, self.size, self.trees) as tmp_idx:
+        with Index(self.size, volatile=True, trees=self.trees) as tmp_idx:
+            shrink = False
+
             for item, value in self.items_values():
-                if not item == position:
-                    tmp_idx.append(value)
+                if item == position:
+                    shrink = True
+                else:
+                    if shrink:
+                        item -= 1
 
-        copy(tmp_file, self.path)
-        os.remove(tmp_file)
+                    tmp_idx.tree.add_item(item, value)
+
+            _temp_file = tmp_idx.path
+
+        move(_temp_file, self.path)
 
         self.refresh()
 
@@ -180,15 +219,18 @@ class Index:
         ----------
         position (optional) (default: last position): int
             Removes and returns the value at position.
+
         Returns
         ----------
         int:
             With the popped item.
         """
-        if not position:
-            position = len(self) - 1
-
-        value = self[position]
+        if position:
+            value = self[position]
+        else:
+            inverse_index = -1
+            value = self[inverse_index]
+            position = len(self) + inverse_index
 
         self.remove(position)
 
@@ -208,7 +250,7 @@ class Index:
         int:
             Describing the most similar resulting index.
         """
-        return self._index.get_nns_by_vector(tensor, n=1)[0]
+        return self.tree.get_nns_by_vector(tensor, n=1)[0]
 
     def search(self, tensor, results=16):
         """
@@ -223,12 +265,12 @@ class Index:
             How many results to return. If similar images are less than
             results, it exhausts and will be returned actual total.
         """
-        for result in self._index.get_nns_by_vector(tensor, n=results):
+        for result in self.tree.get_nns_by_vector(tensor, n=results):
             yield result
 
     def __len__(self):
         """Return how many items are indexed."""
-        return self._index.get_n_items()
+        return self.tree.get_n_items()
 
     def __iter__(self):
         """Return an iterable."""

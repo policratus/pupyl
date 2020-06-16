@@ -4,7 +4,7 @@ file_io Module.
 Operations over files, introspection and more.
 """
 import os
-from urllib.request import urlopen
+from urllib.request import urlopen, urlparse
 from enum import Enum, auto
 import mimetypes
 import tempfile
@@ -14,6 +14,7 @@ import gzip
 import zipfile
 import bz2
 import lzma
+from datetime import datetime
 
 from duplex import file_types
 from duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
@@ -73,7 +74,7 @@ class FileIO(file_types.FileType):
         Parameters
         ----------
         uri: str
-            Location where the file are stored
+            Location where the file are stored.
 
         Returns
         -------
@@ -88,6 +89,63 @@ class FileIO(file_types.FileType):
             return cls._get_url(uri)
 
         return Protocols.UNKNOWN
+
+    @classmethod
+    def get_metadata(cls, uri):
+        """
+        Return underlying file metadata
+
+        Parameters
+        ----------
+        uri: str
+            Location where the file are stored.
+
+        Returns
+        -------
+        dict:
+            Describing several file metadata
+        """
+        if cls._infer_protocol(uri) is Protocols.FILE:
+            file_statistics = os.stat(uri)
+
+            original_path, original_file_name = os.path.split(uri)
+            original_file_size = file_statistics.st_size // 2 ** 10
+            original_access_time = cls.timestamp_to_iso8601(
+                file_statistics.st_atime
+                )
+
+        if cls._infer_protocol(uri) is Protocols.HTTP:
+            parsed_url = urlparse(uri)
+            file_statistics = urlopen(uri).info()
+
+            original_path, original_file_name = os.path.split(
+                f'{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}'
+            )
+            original_file_size = int(
+                file_statistics.get_all('Content-Length')[0]
+                ) // 2 ** 10
+            original_access_time = file_statistics.get_all('Date')[0]
+
+        return {
+            'original_file_name': original_file_name,
+            'original_path': original_path,
+            'original_file_size': f'{original_file_size}K',
+            'original_access_time': original_access_time
+        }
+
+    @staticmethod
+    def timestamp_to_iso8601(timestamp):
+        """
+        Convert a Unix epoch integer formatted date to ISO8601 format.
+        The converted date is in UTC (GMT-0).
+
+        Parameters
+        ----------
+        timestamp: int
+            With a integer timestamp (seconds after zero hour of 1970)
+        """
+        return datetime.utcfromtimestamp(timestamp).\
+            strftime('%Y-%m-%dT%H:%M:%S')
 
     @staticmethod
     def _infer_protocol(uri):
@@ -104,7 +162,7 @@ class FileIO(file_types.FileType):
         Enum:
             Referencing the discovered protocol
         """
-        if uri.startswith('http'):
+        if urlparse(uri).scheme.startswith('http'):
             return Protocols.HTTP
 
         if uri.startswith('file') or os.path.exists(uri):
@@ -298,7 +356,7 @@ class FileIO(file_types.FileType):
                 for line in self.scan_csv(uri):
                     yield line
 
-            elif inferred_type in ('GZP', 'GZT'):
+            elif inferred_type == 'GZP':
                 for line in self.scan_csv_gzip(uri):
                     yield line
 

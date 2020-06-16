@@ -1,3 +1,2 @@
-h5py>=2.10.0
 tensorflow>=2.1.0
 annoy>=1.16.3

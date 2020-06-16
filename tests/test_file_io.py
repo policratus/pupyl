@@ -166,7 +166,7 @@ def test_scan_directory():
     test_against_tree = [
         abspath(f'{TEST_SCAN_DIR}{ffile}')
         for ffile in [*walk(TEST_SCAN_DIR)][0][-1]
-        ]
+    ]
 
     test_current_tree = [*file_io.scan(abspath(TEST_SCAN_DIR))]
 
@@ -247,6 +247,45 @@ def test_scan_csv_bzip2():
         assert method_row == util_row
 
 
+def test_get_metadata_http():
+    """Unit test for method get_metadata, http case."""
+    test_metadata = {
+        'original_file_name': '320px-Cheshm-Nazar.JPG',
+        'original_path': 'https://upload.wikimedia.org/' +
+                         'wikipedia/commons/thumb/e/e4/Cheshm-Nazar.JPG',
+        'original_file_size': '9K'
+    }
+
+    test_request_metadata = FileIO.get_metadata(TEST_URL)
+
+    del test_request_metadata['original_access_time']
+
+    assert test_metadata == test_request_metadata
+
+
+def test_get_metadata_local():
+    """Unit test for method get_metadata, local case."""
+    test_metadata = {
+        'original_file_name': 'test_image.jpg',
+        'original_path': abspath('tests'),
+        'original_file_size': '5K'
+    }
+
+    test_local_metadata = FileIO.get_metadata(TEST_LOCAL)
+
+    del test_local_metadata['original_access_time']
+
+    assert test_metadata == test_local_metadata
+
+
+def test_timestamp_to_iso8601():
+    """Unit test for method timestamp_to_iso8601"""
+    test_timestamp = 1591123280
+    expected_return = '2020-06-02T18:41:20'
+
+    assert FileIO.timestamp_to_iso8601(test_timestamp) == expected_return
+
+
 def test_infer_file_type_from_uri_with_mimetype():
     """
     Unit test for method infer_file_type_from_uri,
@@ -257,7 +296,7 @@ def test_infer_file_type_from_uri_with_mimetype():
     _, mime = file_io.infer_file_type_from_uri(
         TEST_LOCAL,
         mimetype=True
-        )
+    )
 
     assert mime == 'image/jpeg'
 
@@ -272,7 +311,7 @@ def test_infer_file_type_from_uri_no_mimetype():
     assert file_io.infer_file_type_from_uri(
         TEST_LOCAL,
         mimetype=False
-        ) == 'JPG'
+    ) == 'JPG'
 
 
 def test_infer_file_type_from_uri_unsupported():
@@ -285,7 +324,7 @@ def test_infer_file_type_from_uri_unsupported():
     assert file_io.infer_file_type_from_uri(
         TEST_UNSUPPORTED_FILE_TYPE,
         mimetype=True
-        ) == 'text/plain'
+    ) == 'text/plain'
 
 
 def test_infer_file_type_from_uri_remote():

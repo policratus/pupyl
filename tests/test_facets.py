@@ -1,21 +1,22 @@
 """Unit tests related to indexer.facets module."""
 import os
-import tempfile
 from unittest import TestCase
 
 import numpy
 
-from duplex.file_io import FileIO
 from indexer.facets import Index
-from indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet
+from indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
+    NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
+    NullTensorError
+from duplex.file_io import FileIO
 
 
-TEST_VECTOR_PATH = os.path.abspath('tests/test.idx')
-TEST_VECTOR_TEMP_FILE = f'{tempfile.gettempdir()}/temp.idx'
-TEST_VECTOR_INVALID_FILE = os.path.abspath('tests/not_image.txt')
+TEST_INDEX_PATH = os.path.abspath('tests/')
+TEST_INDEX_SEARCH_PATH = os.path.join(TEST_INDEX_PATH, 'test_search/')
+TEST_INDEX_INVALID_FILE = os.path.abspath('tests/test_index/')
 TEST_VECTOR_SIZE = 128
 
-INDEX = Index(TEST_VECTOR_PATH, TEST_VECTOR_SIZE)
+INDEX = Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH)
 ALL_ITEMS = list(INDEX.items())
 ALL_VALUES = list(INDEX.values())
 
@@ -26,22 +27,53 @@ class TestCases(TestCase):
     def test___next_stop_iteration(self):
         """Unit test for method __next__, StopIteration case."""
         with self.assertRaises(StopIteration):
-            index = Index(TEST_VECTOR_PATH, TEST_VECTOR_SIZE)
+            index = Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH)
             while True:
                 next(index)
 
     def test_open_invalid_file(self):
         """Unit test for method __init__, invalid file case."""
         with self.assertRaises(FileIsNotAnIndex):
-            Index(TEST_VECTOR_INVALID_FILE, TEST_VECTOR_SIZE)
+            Index(TEST_VECTOR_SIZE, TEST_INDEX_INVALID_FILE)
 
     def test_remove_new_file(self):
         """Unit test for method remove, new file case."""
         with self.assertRaises(IndexNotBuildYet):
-            tmp_file = FileIO.safe_temp_file()
-
-            with Index(tmp_file, 8) as index:
+            with Index(size=8, volatile=True) as index:
                 index.remove(0)
+
+    def test_data_dir_is_not_a_dir(self):
+        """Unit test for __init__, data dir. as file case."""
+        with self.assertRaises(OSError):
+            Index(
+                TEST_VECTOR_SIZE,
+                os.path.join(TEST_INDEX_PATH, 'pupyl.index')
+            )
+
+    def test_no_data_dir_for_perm_file(self):
+        """Unit test for __init__, no data dir for perm. file case."""
+        with self.assertRaises(NoDataDirForPermanentIndex):
+            Index(TEST_VECTOR_SIZE, data_dir=None)
+
+    def test_data_dir_for_volatile_file(self):
+        """Unit test for __init__, data dir for volatile file case."""
+        with self.assertRaises(DataDirDefinedForVolatileIndex):
+            Index(
+                TEST_VECTOR_SIZE,
+                data_dir=os.path.join(TEST_INDEX_PATH, 'pupyl.index'),
+                volatile=True
+            )
+
+    def test_raises_null_tensor_error(self):
+        """Unit test for append, null tensor case."""
+        with self.assertRaises(NullTensorError):
+            with Index(TEST_VECTOR_SIZE, volatile=True) as index:
+                index.append(numpy.zeros(shape=TEST_VECTOR_SIZE))
+
+    def test_remove_index_error(self):
+        """Unit test for remove, index error case."""
+        with self.assertRaises(IndexError):
+            INDEX.remove(999)
 
 
 def test_open_index():
@@ -51,7 +83,7 @@ def test_open_index():
 
 def test_context():
     """Unit test to test context opening and close."""
-    with Index(TEST_VECTOR_PATH, TEST_VECTOR_SIZE) as index:
+    with Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH) as index:
         assert isinstance(index, Index)
 
 
@@ -112,12 +144,17 @@ def test_size():
 
 def test_path_property():
     """Unit test for path property."""
-    assert INDEX.path == TEST_VECTOR_PATH
+    assert INDEX.path == os.path.join(TEST_INDEX_PATH, INDEX.index_name)
 
 
 def test_trees_property():
     """Unit test for path property."""
     assert INDEX.trees == .001
+
+
+def test_volatile_property():
+    """Unit test for volatile property."""
+    assert not INDEX.volatile
 
 
 def test_trees_property_setter():
@@ -129,20 +166,18 @@ def test_trees_property_setter():
 
 def test_open_new_index():
     """Unit test for new index opening."""
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
+    with Index(TEST_VECTOR_SIZE, volatile=True) as index:
         assert index.size == TEST_VECTOR_SIZE
 
 
-def test_append():
-    """Unit test for method safe_temp_file."""
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
+def test_append_new_file():
+    """Unit test for method append, new file case."""
+    with Index(TEST_VECTOR_SIZE, volatile=True) as index:
 
         test_size_before = len(index)
         new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
 
         index.append(new_tensor)
-
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
 
         test_size_after = len(index)
 
@@ -153,32 +188,38 @@ def test_append():
             )
 
 
-def test_save():
-    """Unit test for method save."""
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
+def test_append_new_created_file():
+    """Unit test for method append, created file case."""
+    test_size_before = len(INDEX)
+    new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
 
-        new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
+    INDEX.append(new_tensor)
 
-        index.append(new_tensor)
+    test_size_after = len(INDEX)
 
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
-        numpy.testing.assert_array_almost_equal(
-            index[-1], new_tensor, decimal=7
-            )
+    assert test_size_after == test_size_before + 1
+
+    numpy.testing.assert_array_almost_equal(
+        INDEX[-1], new_tensor, decimal=7
+        )
 
 
 def test_remove():
     """Unit test for method remove."""
-    index_to_remove = 0
+    index_to_remove = 8
 
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
-        new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
-        index.append(new_tensor)
+    temp_file = FileIO.safe_temp_file(file_name='pupyl.index')
+    temp_dir = os.path.dirname(temp_file)
 
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
+    with Index(TEST_VECTOR_SIZE, data_dir=temp_dir) as index:
+        for _ in range(16):
+            index.append(numpy.random.normal(size=TEST_VECTOR_SIZE))
+
         test_size_before = len(index)
+
         test_value = index[index_to_remove]
 
+    with Index(TEST_VECTOR_SIZE, data_dir=temp_dir) as index:
         index.remove(index_to_remove)
 
         assert len(index) == test_size_before - 1
@@ -193,30 +234,59 @@ def test_remove():
 
 def test_pop():
     """Unit test for method pop."""
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
-        new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
-        index.append(new_tensor)
+    temp_file = FileIO.safe_temp_file(file_name='pupyl.index')
+    temp_dir = os.path.dirname(temp_file)
 
-    with Index(TEST_VECTOR_TEMP_FILE, TEST_VECTOR_SIZE) as index:
+    with Index(TEST_VECTOR_SIZE, data_dir=temp_dir) as index:
+        for _ in range(16):
+            index.append(numpy.random.normal(size=TEST_VECTOR_SIZE))
+
         test_size_before = len(index)
 
-        popped_value = index.pop()
+        test_value_before = index[-1]
+
+    with Index(TEST_VECTOR_SIZE, data_dir=temp_dir) as index:
+        test_value_after = index.pop()
 
         assert len(index) == test_size_before - 1
 
-        numpy.testing.assert_raises(
-            AssertionError,
-            numpy.testing.assert_array_equal,
-            popped_value,
-            index[-1]
-            )
+        numpy.testing.assert_array_equal(
+            test_value_before,
+            test_value_after
+        )
+
+
+def test_pop_index():
+    """Unit test for method pop, index case."""
+    index_to_pop = 4
+
+    temp_file = FileIO.safe_temp_file(file_name='pupyl.index')
+    temp_dir = os.path.dirname(temp_file)
+
+    with Index(TEST_VECTOR_SIZE, data_dir=temp_dir) as index:
+        for _ in range(16):
+            index.append(numpy.random.normal(size=TEST_VECTOR_SIZE))
+
+        test_size_before = len(index)
+
+        test_value_before = index[index_to_pop]
+
+    with Index(TEST_VECTOR_SIZE, data_dir=temp_dir) as index:
+        test_value_after = index.pop(index_to_pop)
+
+        assert len(index) == test_size_before - 1
+
+        numpy.testing.assert_array_equal(
+            test_value_before,
+            test_value_after
+        )
 
 
 def test_index():
     """Unit test for method index."""
     test_position = 0
 
-    with Index(TEST_VECTOR_PATH, TEST_VECTOR_SIZE) as index:
+    with Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH) as index:
         test_value = index[test_position]
 
         assert index.index(test_value) == 0
@@ -224,11 +294,10 @@ def test_index():
 
 def test_search():
     """Unit test for method search."""
-    expected_search_result = [0, 4, 2, 3, 1, 9, 7, 8, 6, 5]
+    query_array = [-0.48870765, -0.57780915, -0.94986234, -1.90035123]
+    expected_search_result = [25, 78]
 
-    with Index(TEST_VECTOR_PATH, TEST_VECTOR_SIZE) as index:
-        test_value = index[0]
-
-        test_result = [*index.search(test_value)]
+    with Index(len(query_array), TEST_INDEX_SEARCH_PATH) as index:
+        test_result = [*index.search(query_array, results=2)]
 
     assert expected_search_result == test_result
