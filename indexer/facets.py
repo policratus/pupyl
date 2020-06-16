@@ -11,6 +11,7 @@ from annoy import AnnoyIndex
 from indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
     NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
     NullTensorError
+
 from addendum.operators import intmul
 from duplex.file_io import FileIO
 
@@ -238,6 +239,7 @@ class Index:
     def index(self, tensor):
         """
         Search for the first most similar image compared to the query.
+
         Parameters
         ----------
         tensor: numpy.ndarray or list

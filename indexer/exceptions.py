@@ -1,8 +1,6 @@
 """
 Exceptions regarding embeddings module operations
 """
-
-
 class Error(Exception):
     """
     Base exception class
