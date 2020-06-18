@@ -1,6 +1,4 @@
-"""
-Unit tests related to duplex.image module
-"""
+"""Unit tests related to duplex.image module."""
 import tempfile
 from os.path import abspath
 from unittest import TestCase

@@ -9,11 +9,10 @@ from tensorflow import io as io_ops
 from tensorflow import image as image_ops
 
 from duplex.file_io import FileIO
-from duplex.file_types import FileType
 from duplex.exceptions import FileIsNotImage
 
 
-class ImageIO(FileIO, FileType):
+class ImageIO(FileIO):
     """Operations of read and write over images."""
 
     @staticmethod

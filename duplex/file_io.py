@@ -15,9 +15,12 @@ import zipfile
 import bz2
 import lzma
 from datetime import datetime
+from itertools import cycle
+import termcolor
 
 from duplex import file_types
 from duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
+from addendum.operators import intmul
 
 
 class Protocols(Enum):
@@ -121,9 +124,17 @@ class FileIO(file_types.FileType):
             original_path, original_file_name = os.path.split(
                 f'{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}'
             )
-            original_file_size = int(
-                file_statistics.get_all('Content-Length')[0]
-                ) // 2 ** 10
+
+            try:
+                measured_size = int(
+                    file_statistics.get_all(
+                        'Content-Length'
+                    )[0]
+                )
+            except TypeError:
+                measured_size = len(urlopen(uri).read())
+
+            original_file_size = measured_size // (2 ** 10)
             original_access_time = file_statistics.get_all('Date')[0]
 
         return {
@@ -378,3 +389,72 @@ class FileIO(file_types.FileType):
             for root, _, files in os.walk(uri):
                 for ffile in files:
                     yield os.path.abspath(f'{root}/{ffile}')
+
+    @staticmethod
+    def progress(iterable, precise=False):
+        """
+        Utility method to interface process progress bar with users.
+        It supports two way of unpacking the iterable, throughout `precise`
+        parameters. If `precise` is set to `False` (which is the default),
+        the parameter `iterable` will be unpacked as is. This leads to an
+        imprecise rolling of items (in other words, the method doesn't know
+        apriori the total number of elements in `iterable`). Otherwise, if
+        `precise` is set to `True`, an `iterable` which is not unpacked (like
+        and `generator`) will be first unrolled, which is much slower in some
+        cases, but leads to a precise progress bar.
+
+        Parameters
+        ----------
+        iterable: iter
+            Objects which supports iteration.
+
+        precise (optional)(default: False): bool
+            If the progress should be precise
+            (with actual percentage of completion) or just an
+            interface during process running.
+        """
+        if precise:
+            try:
+                count = len(iterable)
+            except TypeError:
+                iterable = [*iterable]
+                count = len(iterable)
+
+            print(
+                termcolor.colored(
+                    'Processing, please wait.',
+                    color='green',
+                    attrs=['bold']
+                    )
+                )
+
+            for index, value in enumerate(iterable):
+                try:
+                    terminal_half_columns = os.get_terminal_size().columns // 4
+                except OSError:
+                    terminal_half_columns = 64
+
+                percentage = (index + 1) / count
+
+                columns_to_draw = percentage << intmul >> terminal_half_columns
+
+                print(
+                    ' ' + ('🟦' * columns_to_draw),
+                    f'{percentage << intmul >> 100}%',
+                    end='\r'
+                )
+
+                yield value
+        else:
+            clocks = '🕛🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚'
+
+            for index, value_clock in enumerate(
+                    zip(iterable, cycle(clocks))
+            ):
+                print(
+                    ' ' + value_clock[1],
+                    f' Processed {index + 1} items.',
+                    end='\r'
+                )
+
+                yield value_clock[0]
