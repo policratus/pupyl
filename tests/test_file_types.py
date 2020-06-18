@@ -10,7 +10,7 @@ from duplex.exceptions import FileTypeNotSupportedYet
 
 TEST_DIR = 'tests/'
 TEST_LOCAL = abspath(f'{TEST_DIR}test_image.jpg')
-TEST_UNKNOWN = abspath(f'{TEST_DIR}test.db')
+TEST_UNKNOWN = abspath(f'{TEST_DIR}compressed_image.npy')
 
 
 class TestCases(TestCase):

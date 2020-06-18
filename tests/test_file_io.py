@@ -19,7 +19,6 @@ TEST_UNSUPPORTED_FILE_TYPE = abspath(f'{TEST_DIR}not_image.txt')
 TEST_LOCAL = abspath(f'{TEST_DIR}test_image.jpg')
 TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/' + \
     'Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
-
 TEST_CSV = abspath(TEST_SCAN_DIR + 'test_csv.csv')
 TEST_CSV_ZIP = abspath(TEST_SCAN_DIR + 'test_csv.csv.zip')
 TEST_CSV_GZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.gz')
@@ -335,3 +334,43 @@ def test_infer_file_type_from_uri_remote():
     file_io = FileIO()
 
     assert file_io.infer_file_type_from_uri(TEST_URL) == 'JPG'
+
+
+def test_progress_not_precise():
+    """Unit test for method progress, not precise case."""
+    test_generator = range(10)
+    test_unpacked = [*test_generator]
+
+    test_result_generator = FileIO.progress(test_generator, precise=False)
+    test_result_unpacked = FileIO.progress(test_unpacked, precise=False)
+
+    for t_gen, r_gen in zip(test_generator, test_result_generator):
+        assert t_gen == r_gen
+
+    for t_unp, r_unp in zip(test_unpacked, test_result_unpacked):
+        assert t_unp == r_unp
+
+
+def test_progress_precise():
+    """Unit test for method progress, not precise case."""
+
+    def test_gen():
+        """Closure to test functions which returns generators."""
+        for value in range(10):
+            yield value
+
+    test_generator = range(10)
+    test_unpacked = [*test_generator]
+
+    test_result_generator = FileIO.progress(test_generator, precise=True)
+    test_result_unpacked = FileIO.progress(test_unpacked, precise=True)
+    test_result_func_gen = FileIO.progress(test_gen(), precise=True)
+
+    for t_gen, r_gen in zip(test_generator, test_result_generator):
+        assert t_gen == r_gen
+
+    for t_unp, r_unp in zip(test_unpacked, test_result_unpacked):
+        assert t_unp == r_unp
+
+    for t_fgen, r_fgen in zip(test_generator, test_result_func_gen):
+        assert t_fgen == r_fgen

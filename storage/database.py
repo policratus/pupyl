@@ -12,13 +12,13 @@ from duplex.image import ImageIO
 class ImageDatabase(ImageIO):
     """Handling of storage and IO operations over images."""
 
-    def __init__(self, import_images=True, directory=None, **kwargs):
+    def __init__(self, import_images, directory=None, **kwargs):
         """
         Image storage and operations.
 
         Parameters
         ----------
-        import_images (optional) (default=True): bool
+        import_images: bool
             If the images must be copied to internal database or not.
 
         directory (optional) (default=self.safe_temp_file()): str
@@ -165,7 +165,10 @@ class ImageDatabase(ImageIO):
 
         if self.is_image(bytess):
             with open(result_file_name, 'w') as json_file:
-                json.dump(self.get_metadata(uri), json_file)
+                metadata = self.get_metadata(uri)
+                metadata['id'] = index
+
+                json.dump(metadata, json_file)
 
     def insert(self, index, uri):
         """

@@ -26,23 +26,16 @@ class Characteristics(Enum):
 class Extractors(ImageIO):
     """Pretrained CNNs for embeddings generation."""
 
-    def __init__(
-            self,
-            characteristics=Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
-            ):
+    def __init__(self, characteristics):
         """
         Create embedding extractors.
 
         Parameters
         ----------
-        characteristics (optional): Enum
-            Default: Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
-
+        characteristics: Enum
             Describing the intended characteristics to transform images
             into embeddings
         """
-        super().__init__()
-
         self.acceleration_discovery()
 
         self._characteristics = characteristics

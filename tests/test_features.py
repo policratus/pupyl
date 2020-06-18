@@ -57,8 +57,9 @@ def test_extractors_context_manager():
     """
     Unit test for context manager Extractors
     """
-    with Extractors() as extractors:
-        assert isinstance(extractors, Extractors)
+    for characteristic in Characteristics:
+        with Extractors(characteristic) as extractors:
+            assert isinstance(extractors, Extractors)
 
 
 def test_preprocessor():
@@ -86,6 +87,13 @@ def test_acceleration_discovery(monkeypatch):
     Unit test for acceleration_discovery staticmethod
     """
     @staticmethod
+    def mocked___init__(characteristics):
+        """
+        Closure to mock __init__ behaviour
+        """
+        del characteristics
+
+    @staticmethod
     def mocked_acceleration_discovery():
         """
         Closure to mock acceleration_discovery behaviour
@@ -94,14 +102,23 @@ def test_acceleration_discovery(monkeypatch):
 
     monkeypatch.setattr(
         Extractors,
+        '__init__',
+        mocked___init__
+        )
+
+    monkeypatch.setattr(
+        Extractors,
         'acceleration_discovery',
         mocked_acceleration_discovery
         )
 
-    assert Extractors.acceleration_discovery()
+    assert Extractors(
+        Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
+    ).acceleration_discovery()
 
 
 def test_output_shape_property():
     """Unit test for property output_shape."""
-    with Extractors() as extractor:
-        extractor.output_shape == extractor._features_output_shape
+    for characteristic in Characteristics:
+        with Extractors(characteristic) as extractor:
+            extractor.output_shape == extractor._features_output_shape

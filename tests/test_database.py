@@ -12,6 +12,7 @@ TEST_IMAGE = abspath('tests/test_image.jpg')
 TEST_INDEX = 999
 
 TEST_METADATA = {
+    'id': 0,
     'original_file_name': 'test_image.jpg',
     'original_path': 'tests',
     'original_file_size': '5K'
@@ -24,14 +25,20 @@ class TestCases(TestCase):
     def test___get_item___not_found(self):
         """Unit test for method __get_item__, index not found case."""
         with self.assertRaises(IndexError):
-            image_database = ImageDatabase(directory=TEST_DIRECTORY)
+            image_database = ImageDatabase(
+                import_images=True,
+                directory=TEST_DIRECTORY
+            )
 
             _ = image_database[999]
 
     def test_load_image_metadata_not_found(self):
         """Unit test for method load_image_metadata, index not found case."""
         with self.assertRaises(IndexError):
-            image_database = ImageDatabase(directory=TEST_DIRECTORY)
+            image_database = ImageDatabase(
+                import_images=True,
+                directory=TEST_DIRECTORY
+            )
 
             _ = image_database.load_image_metadata(999)
 
@@ -59,7 +66,10 @@ def test_image_database_definition():
 def test___get_item__():
     """Unit test for __get_item__ method."""
 
-    image_database = ImageDatabase(directory=TEST_DIRECTORY)
+    image_database = ImageDatabase(
+        import_images=True,
+        directory=TEST_DIRECTORY
+    )
 
     test_metadata = image_database[0]
     del test_metadata['original_access_time']
@@ -69,7 +79,10 @@ def test___get_item__():
 
 def test_import_images_property():
     """Unit test for property import_images."""
-    image_database = ImageDatabase(directory=TEST_DIRECTORY)
+    image_database = ImageDatabase(
+        import_images=True,
+        directory=TEST_DIRECTORY
+    )
 
     test_import_images = True
     image_database.import_images = test_import_images
@@ -82,7 +95,10 @@ def test_import_images_property():
 
 def test_bucket_size_property():
     """Unit test for property bucket_size."""
-    image_database = ImageDatabase(directory=TEST_DIRECTORY)
+    image_database = ImageDatabase(
+        import_images=True,
+        directory=TEST_DIRECTORY
+    )
 
     test_bucket_size = 999
     image_database.bucket_size = test_bucket_size
@@ -142,7 +158,10 @@ def test_load_image():
     """Unit test for method load_image."""
     test_index = 0
 
-    image_database = ImageDatabase(directory=TEST_DIRECTORY)
+    image_database = ImageDatabase(
+        import_images=True,
+        directory=TEST_DIRECTORY
+    )
 
     def inst_load_image(index):
         """Closure for method load_image."""
@@ -159,7 +178,10 @@ def test_what_bucket():
     """Unit test for method what_bucket."""
     test_bucket_size = 10 ** 4
 
-    image_database = ImageDatabase(bucket_size=test_bucket_size)
+    image_database = ImageDatabase(
+        import_images=True,
+        bucket_size=test_bucket_size
+    )
 
     assert image_database.what_bucket(TEST_INDEX) == \
         TEST_INDEX // test_bucket_size
@@ -167,7 +189,11 @@ def test_what_bucket():
 
 def test_mount_file_name():
     """Unit test for method what_bucket."""
-    image_database = ImageDatabase(directory=TEST_DIRECTORY)
+    image_database = ImageDatabase(
+        import_images=True,
+        directory=TEST_DIRECTORY
+    )
+
     expected_path = join(
         TEST_DIRECTORY,
         str(image_database.what_bucket(TEST_INDEX)),
@@ -179,7 +205,10 @@ def test_mount_file_name():
 
 def test_load_image_metadata():
     """Unit test for method load_image_metadata."""
-    image_database = ImageDatabase(directory=TEST_DIRECTORY)
+    image_database = ImageDatabase(
+        import_images=True,
+        directory=TEST_DIRECTORY
+    )
 
     test_metadata = image_database.load_image_metadata(0)
 
@@ -192,7 +221,10 @@ def test_load_image_metadata():
 
 def test_save_image_metadata():
     """Unit test for method save_image_metadata."""
-    image_database = ImageDatabase(directory=TEST_TEMP_DIRECTORY)
+    image_database = ImageDatabase(
+        import_images=True,
+        directory=TEST_TEMP_DIRECTORY
+    )
 
     image_database.save_image_metadata(0, TEST_IMAGE)
 
