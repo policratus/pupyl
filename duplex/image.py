@@ -4,6 +4,8 @@ Image module.
 Performs multiple operations over images, like resizing,
 loading and so on.
 """
+from base64 import b64encode
+
 import numpy
 from tensorflow import io as io_ops
 from tensorflow import image as image_ops
@@ -77,6 +79,34 @@ class ImageIO(FileIO):
                 return cls.encoded_to_tensor(bytess)
 
             return bytess
+
+        raise FileIsNotImage
+
+    @classmethod
+    def get_image_base64(cls, uri):
+        """
+        Load an image as a base64 encoded string.
+
+        Parameters
+        ----------
+        uri: str
+            Location where the image is stored.
+        """
+        return b64encode(cls.get_image(uri, as_tensor=False))
+
+    @classmethod
+    def get_image_bytes_to_base64(cls, image_bytes):
+        """
+        Return the image representation in base64, from its
+        bytes representation.
+
+        Parameters
+        ----------
+        image_bytes: bytes
+            Bytes representation of some image.
+        """
+        if cls.is_image(image_bytes):
+            return b64encode(image_bytes)
 
         raise FileIsNotImage
 

@@ -12,7 +12,7 @@ from duplex.image import ImageIO
 class ImageDatabase(ImageIO):
     """Handling of storage and IO operations over images."""
 
-    def __init__(self, import_images, directory=None, **kwargs):
+    def __init__(self, import_images, data_dir=None, **kwargs):
         """
         Image storage and operations.
 
@@ -21,7 +21,7 @@ class ImageDatabase(ImageIO):
         import_images: bool
             If the images must be copied to internal database or not.
 
-        directory (optional) (default=self.safe_temp_file()): str
+        data_dir (optional) (default=self.safe_temp_file()): str
             Location to save the image storage files
 
         **bucket_size (optional) (default=1000): int
@@ -34,10 +34,10 @@ class ImageDatabase(ImageIO):
         """
         self._import_images = import_images
 
-        if directory:
-            self._directory = os.path.normpath(directory)
+        if data_dir:
+            self._data_dir = os.path.normpath(data_dir)
         else:
-            self._directory = self.safe_temp_file()
+            self._data_dir = self.safe_temp_file()
 
         if kwargs.get('bucket_size'):
             self._bucket_size = kwargs['bucket_size']
@@ -50,7 +50,7 @@ class ImageDatabase(ImageIO):
             else:
                 self._image_size = (800, 600)
 
-        os.makedirs(self._directory, exist_ok=True)
+        os.makedirs(self._data_dir, exist_ok=True)
 
     def __getitem__(self, position):
         """Return the item at index."""
@@ -118,12 +118,12 @@ class ImageDatabase(ImageIO):
             Describing the file extension
         """
         return os.path.join(
-            self._directory,
+            self._data_dir,
             str(self.what_bucket(index)),
             f'{index}.{extension}'
         )
 
-    def load_image_metadata(self, index):
+    def load_image_metadata(self, index, **kwargs):
         """
         Return the metadata inside image file metadata.
 
@@ -131,6 +131,9 @@ class ImageDatabase(ImageIO):
         ----------
         index: int
             Related to metadata file stored.
+
+        **filtered (optional): iterable
+            Describing which fields to filter (or select) for return.
 
         Returns
         -------
@@ -141,7 +144,16 @@ class ImageDatabase(ImageIO):
 
         try:
             with open(result_file_name) as json_file:
-                return json.load(json_file)
+                metadata = json.load(json_file)
+
+                if kwargs.get('filtered'):
+                    metadata = {
+                        key: value
+                        for key, value in metadata.items()
+                        if key in kwargs['filtered']
+                    }
+
+                return metadata
 
         except FileNotFoundError:
             raise IndexError
@@ -191,6 +203,30 @@ class ImageDatabase(ImageIO):
             )
 
         self.save_image_metadata(index, uri)
+
+    def list_images(self, return_index=False):
+        """
+        Return all images in current database.
+
+        Parameters
+        ----------
+        return_index (optional)(default: False): bool
+            If the method should also return the file index inside database.
+        """
+        for root, _, files in os.walk(self._data_dir):
+            for ffile in files:
+                ffile = os.path.join(root, ffile)
+
+                with open(ffile, 'rb') as t_file:
+                    if self.is_image(t_file.read()):
+                        if return_index:
+                            yield int(
+                                os.path.splitext(
+                                    os.path.split(ffile)[1]
+                                )[0]
+                            ), ffile
+                        else:
+                            yield ffile
 
     def load_image(self, index):
         """Return the image data at specified index."""

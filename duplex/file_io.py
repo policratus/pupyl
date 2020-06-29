@@ -18,7 +18,7 @@ from datetime import datetime
 from itertools import cycle
 import termcolor
 
-from duplex import file_types
+from duplex.file_types import FileType
 from duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
 from addendum.operators import intmul
 
@@ -31,7 +31,7 @@ class Protocols(Enum):
     FILE = auto()
 
 
-class FileIO(file_types.FileType):
+class FileIO(FileType):
     """Operations over files."""
 
     @staticmethod
