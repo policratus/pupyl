@@ -25,9 +25,9 @@ class PupylImageSearch:
         self._import_images = import_images
         self._characteristic = characteristic
 
-        self._image_database = ImageDatabase(
+        self.image_database = ImageDatabase(
             import_images=self._import_images,
-            directory=self._data_dir
+            data_dir=self._data_dir
         )
 
     def index(self, uri):
@@ -48,7 +48,7 @@ class PupylImageSearch:
                         extractor.scan(uri),
                         precise=True
                         ):
-                    self._image_database.insert(len(index), uri_file)
+                    self.image_database.insert(len(index), uri_file)
                     index.append(extractor.extract(uri_file))
 
     def search(self, query, top=4):

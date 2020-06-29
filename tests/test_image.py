@@ -2,6 +2,7 @@
 import tempfile
 from os.path import abspath
 from unittest import TestCase
+from base64 import b64encode
 
 import numpy
 from tensorflow import io as io_ops
@@ -26,6 +27,12 @@ class TestCases(TestCase):
         """Unit test for get_image method, not image case."""
         with self.assertRaises(FileIsNotImage):
             ImageIO.get_image(TEST_NOT_IMAGE)
+
+    def test_get_image_bytes_to_base64_no_image(self):
+        """Unit test to method get_image_bytes_to_base64."""
+        with self.assertRaises(FileIsNotImage):
+            with open(TEST_NOT_IMAGE, 'rb') as image_bytes:
+                ImageIO.get_image_bytes_to_base64(image_bytes.read())
 
 
 def test_get_image_as_tensor():
@@ -100,3 +107,21 @@ def test_save_image():
         ImageIO.save_image(temp_file.name, test_tensor_bytes)
 
         assert test_tensor_bytes == ImageIO.get_image(temp_file.name)
+
+
+def test_get_image_base64():
+    """Unit test for method get_image_base64."""
+    with open(TEST_LOCAL, 'rb') as image_bytes:
+        image_bytes = image_bytes.read()
+        test_image_b64 = b64encode(image_bytes)
+
+    assert test_image_b64 == ImageIO.get_image_base64(TEST_LOCAL)
+
+
+def test_get_image_bytes_to_base64():
+    """Unit test for method get_image_bytes_to_base64."""
+    with open(TEST_LOCAL, 'rb') as image_bytes:
+        image_bytes = image_bytes.read()
+        test_image_b64 = b64encode(image_bytes)
+
+    assert test_image_b64 == ImageIO.get_image_bytes_to_base64(image_bytes)

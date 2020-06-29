@@ -27,7 +27,7 @@ class TestCases(TestCase):
         with self.assertRaises(IndexError):
             image_database = ImageDatabase(
                 import_images=True,
-                directory=TEST_DIRECTORY
+                data_dir=TEST_DIRECTORY
             )
 
             _ = image_database[999]
@@ -51,14 +51,14 @@ def test_image_database_definition():
 
     image_database = ImageDatabase(
         import_images=test_import_images,
-        directory=TEST_TEMP_DIRECTORY,
+        data_dir=TEST_TEMP_DIRECTORY,
         bucket_size=test_bucket_size,
         image_size=test_image_size
     )
 
     assert isinstance(image_database, ImageDatabase)
     assert image_database.import_images == test_import_images
-    assert image_database._directory == TEST_TEMP_DIRECTORY
+    assert image_database._data_dir == TEST_TEMP_DIRECTORY
     assert image_database.bucket_size == test_bucket_size
     assert image_database.image_size == test_image_size
 
@@ -68,11 +68,14 @@ def test___get_item__():
 
     image_database = ImageDatabase(
         import_images=True,
-        directory=TEST_DIRECTORY
+        data_dir=TEST_DIRECTORY
     )
 
     test_metadata = image_database[0]
     del test_metadata['original_access_time']
+
+    test_metadata['original_path'] = test_metadata[
+        'original_path'].split('/')[-1]
 
     assert test_metadata == TEST_METADATA
 
@@ -81,7 +84,7 @@ def test_import_images_property():
     """Unit test for property import_images."""
     image_database = ImageDatabase(
         import_images=True,
-        directory=TEST_DIRECTORY
+        data_dir=TEST_DIRECTORY
     )
 
     test_import_images = True
@@ -97,7 +100,7 @@ def test_bucket_size_property():
     """Unit test for property bucket_size."""
     image_database = ImageDatabase(
         import_images=True,
-        directory=TEST_DIRECTORY
+        data_dir=TEST_DIRECTORY
     )
 
     test_bucket_size = 999
@@ -108,7 +111,7 @@ def test_bucket_size_property():
 def test_image_size_property():
     """Unit test for property image_size."""
     image_database = ImageDatabase(
-        directory=TEST_DIRECTORY,
+        data_dir=TEST_DIRECTORY,
         import_images=True
         )
 
@@ -120,7 +123,7 @@ def test_image_size_property():
 def test_image_size_property_no_import_images():
     """Unit test for property image_size, no import images case."""
     image_database = ImageDatabase(
-        directory=TEST_DIRECTORY,
+        data_dir=TEST_DIRECTORY,
         import_images=False
         )
 
@@ -131,7 +134,7 @@ def test_image_size_property_no_import_images():
 def test_insert_import_images():
     """Unit test for method insert, import images case."""
     image_database = ImageDatabase(
-        directory=TEST_TEMP_DIRECTORY,
+        data_dir=TEST_TEMP_DIRECTORY,
         import_images=True
         )
 
@@ -144,7 +147,7 @@ def test_insert_import_images():
 def test_insert_no_import_images():
     """Unit test for method insert, no import images case."""
     image_database = ImageDatabase(
-        directory=TEST_TEMP_DIRECTORY,
+        data_dir=TEST_TEMP_DIRECTORY,
         import_images=False
         )
 
@@ -160,7 +163,7 @@ def test_load_image():
 
     image_database = ImageDatabase(
         import_images=True,
-        directory=TEST_DIRECTORY
+        data_dir=TEST_DIRECTORY
     )
 
     def inst_load_image(index):
@@ -191,7 +194,7 @@ def test_mount_file_name():
     """Unit test for method what_bucket."""
     image_database = ImageDatabase(
         import_images=True,
-        directory=TEST_DIRECTORY
+        data_dir=TEST_DIRECTORY
     )
 
     expected_path = join(
@@ -207,23 +210,73 @@ def test_load_image_metadata():
     """Unit test for method load_image_metadata."""
     image_database = ImageDatabase(
         import_images=True,
-        directory=TEST_DIRECTORY
+        data_dir=TEST_DIRECTORY
     )
 
     test_metadata = image_database.load_image_metadata(0)
 
     del test_metadata['original_access_time']
 
-    test_metadata['original_path'] = relpath(test_metadata['original_path'])
+    test_metadata['original_path'] = test_metadata[
+        'original_path'].split('/')[-1]
 
     assert test_metadata == TEST_METADATA
+
+
+def test_load_image_metadata_filtered():
+    """Unit test for method load_image_metadata, filtered input case."""
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    test_filter = ('id', 'original_file_size')
+
+    test_metadata = image_database.load_image_metadata(0, filtered=test_filter)
+
+    for key in test_metadata:
+        assert key in test_filter
+
+
+def test_list_images():
+    """Unit test for method list_images."""
+    expected_result = abspath('tests/test_database/0/0.jpg')
+
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    actual_result = [*image_database.list_images()][0]
+
+    assert expected_result == actual_result
+
+
+def test_list_images_return_index():
+    """Unit test for method list_images, return index case."""
+    expected_path = abspath('tests/test_database/0/0.jpg')
+    expected_index = 0
+    expected_result = (expected_index, expected_path)
+
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    actual_index_path = [
+        *image_database.list_images(
+            return_index=True
+        )
+    ][0]
+
+    assert actual_index_path == expected_result
 
 
 def test_save_image_metadata():
     """Unit test for method save_image_metadata."""
     image_database = ImageDatabase(
         import_images=True,
-        directory=TEST_TEMP_DIRECTORY
+        data_dir=TEST_DIRECTORY
     )
 
     image_database.save_image_metadata(0, TEST_IMAGE)
