@@ -14,7 +14,7 @@ from duplex.exceptions import FileIsNotImage
 TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/' + \
     'Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
 TEST_LOCAL = abspath('tests/test_image.jpg')
-TEST_NOT_IMAGE = abspath('tests/not_image.txt')
+TEST_NOT_IMAGE = abspath('tests/not_image.jpg')
 TEST_SAVED_TENSOR = abspath('tests/compressed_image.npy')
 TEST_SIZE = (280, 260)
 TEST_RESIZE = (100, 100)

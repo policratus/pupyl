@@ -15,7 +15,7 @@ from duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
 TEST_DIR = 'tests/'
 TEST_SCAN_DIR = TEST_DIR + 'test_scan/'
 TEST_UNKNOWN = 'unk://path'
-TEST_UNSUPPORTED_FILE_TYPE = abspath(f'{TEST_DIR}not_image.txt')
+TEST_UNSUPPORTED_FILE_TYPE = abspath(f'{TEST_DIR}not_image.inv')
 TEST_LOCAL = abspath(f'{TEST_DIR}test_image.jpg')
 TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/' + \
     'Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
@@ -74,6 +74,19 @@ class TestCases(TestCase):
 
         with self.assertRaises(FileTypeNotSupportedYet):
             next(file_io.scan_csv(TEST_UNKNOWN))
+
+    def test_infer_file_type_from_uri_unsupported(self):
+        """
+        Unit test for method infer_file_type_from_uri,
+        unsupported file type case
+        """
+        file_io = FileIO()
+
+        with self.assertRaises(FileTypeNotSupportedYet):
+            file_io.infer_file_type_from_uri(
+                TEST_UNSUPPORTED_FILE_TYPE,
+                mimetype=True
+            )
 
 
 def test_safe_temp_file():
@@ -311,19 +324,6 @@ def test_infer_file_type_from_uri_no_mimetype():
         TEST_LOCAL,
         mimetype=False
     ) == 'JPG'
-
-
-def test_infer_file_type_from_uri_unsupported():
-    """
-    Unit test for method infer_file_type_from_uri,
-    unsupported file type case
-    """
-    file_io = FileIO()
-
-    assert file_io.infer_file_type_from_uri(
-        TEST_UNSUPPORTED_FILE_TYPE,
-        mimetype=True
-    ) == 'text/plain'
 
 
 def test_infer_file_type_from_uri_remote():
