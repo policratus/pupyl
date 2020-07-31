@@ -22,6 +22,17 @@ class Characteristics(Enum):
     # NASNetLarge
     HEAVYWEIGHT_HUGE_PRECISION = auto()
 
+    def by_name(name):
+        """
+        Return a characteristic by name.
+
+        Parameters
+        ----------
+        name: str
+            String representation of enumerator
+        """
+        return Characteristics[name]
+
 
 class Extractors(ImageIO):
     """Pretrained CNNs for embeddings generation."""

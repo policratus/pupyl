@@ -11,6 +11,7 @@ from embeddings.exceptions import UnknownCharacteristics
 
 
 TEST_LOCAL = abspath('tests/test_image.jpg')
+UNKNOWN_CHARACTERISTICS = 'UNKNOWN'
 
 
 class TestCharacteristics(Enum):
@@ -28,11 +29,14 @@ class TestCases(TestCase):
     """
 
     def test_unknown_network_instance(self):
-        """
-        Unit test for an unknown network characteristic
-        """
+        """Unit test for an unknown network characteristic."""
         with self.assertRaises(UnknownCharacteristics):
-            Extractors('UNKNOWN')
+            Extractors(UNKNOWN_CHARACTERISTICS)
+
+    def test_unknown_characteristic(self):
+        """Unit test for an unknown characteristic key."""
+        with self.assertRaises(KeyError):
+            Characteristics[UNKNOWN_CHARACTERISTICS]
 
 
 def test_characteristics():
