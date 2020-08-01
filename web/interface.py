@@ -5,6 +5,7 @@ Create a web interface to query images and see results
 based on indexed images on database.
 """
 import os
+import webbrowser
 from http.server import SimpleHTTPRequestHandler
 import socketserver
 from urllib.parse import urlparse, parse_qs
@@ -16,8 +17,19 @@ STATIC_FOLDER = os.path.abspath(os.path.join('web', 'static'))
 TEMPLATE_FILE = os.path.join(STATIC_FOLDER, 'template.html')
 
 
-def serve(data_dir):
-    """Function to start the web server."""
+def serve(data_dir, port=None):
+    """
+    Function to start the web server.
+
+    Parameters
+    ----------
+    data_dir: str
+        Place where the image database was saved.
+
+    port (optional): int
+        The (network) port which the web interface will
+        respond.
+    """
 
     pupyl_image_search = PupylImageSearch(data_dir)
 
@@ -133,7 +145,8 @@ def serve(data_dir):
                 return image_tags
 
             for index, image in pupyl_image_search.image_database.list_images(
-                    return_index=True
+                    return_index=True,
+                    top=9
             ):
                 image_base64 = pupyl_image_search.image_database.\
                     get_image_base64(
@@ -149,5 +162,9 @@ def serve(data_dir):
 
             return image_tags
 
-    with socketserver.TCPServer(('', 8080), RequestHandler) as httpd:
+    if not port:
+        port = 8080
+
+    with socketserver.TCPServer(('', port), RequestHandler) as httpd:
+        webbrowser.open_new_tab(f'http://localhost:{port}')
         httpd.serve_forever()
