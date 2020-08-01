@@ -7,6 +7,7 @@ images in milliseconds.
 """
 import os
 import json
+import concurrent.futures
 
 from embeddings.features import Extractors, Characteristics
 from storage.database import ImageDatabase
@@ -97,12 +98,23 @@ class PupylImageSearch:
 
                 self._index_configuration('w')
 
-                for uri_file in extractor.progress(
-                        extractor.scan(uri),
-                        precise=True
-                        ):
-                    self.image_database.insert(len(index), uri_file)
-                    index.append(extractor.extract(uri_file))
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    futures = {
+                        executor.submit(
+                            extractor.extract,
+                            uri_file
+                        ): uri_file
+                        for uri_file in extractor.scan(uri)
+                    }
+
+                    for future in extractor.progress(
+                            concurrent.futures.as_completed(futures)
+                            ):
+                        uri = futures[future]
+
+                        self.image_database.insert(len(index), uri)
+
+                        index.append(future.result())
 
     def search(self, query, top=4):
         """
