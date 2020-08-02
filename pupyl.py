@@ -107,14 +107,15 @@ class PupylImageSearch:
                         for uri_file in extractor.scan(uri)
                     }
 
-                    for future in extractor.progress(
-                            concurrent.futures.as_completed(futures)
-                            ):
-                        uri = futures[future]
+                    for future in concurrent.futures.as_completed(futures):
+                    # for future in extractor.progress(
+                    #         concurrent.futures.as_completed(futures)
+                    #         ):
+                    #     uri = futures[future]
 
-                        self.image_database.insert(len(index), uri)
+                    #     self.image_database.insert(len(index), uri)
 
-                        index.append(future.result())
+                    #     index.append(future.result())
 
     def search(self, query, top=4):
         """
