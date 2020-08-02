@@ -7,6 +7,7 @@ based on indexed images on database.
 import os
 from http.server import SimpleHTTPRequestHandler
 import socketserver
+import termcolor
 from urllib.parse import urlparse, parse_qs
 
 from pupyl import PupylImageSearch
@@ -16,8 +17,16 @@ STATIC_FOLDER = os.path.abspath(os.path.join('web', 'static'))
 TEMPLATE_FILE = os.path.join(STATIC_FOLDER, 'template.html')
 
 
-def serve(data_dir):
-    """Function to start the web server."""
+def serve(data_dir, port=8080):
+    """
+    Start the web server.
+
+    Parameters
+    ----------
+    port (optional)(default: 8080): int
+        Defines the network port which the web server
+        will start listening.
+    """
 
     pupyl_image_search = PupylImageSearch(data_dir)
 
@@ -149,5 +158,25 @@ def serve(data_dir):
 
             return image_tags
 
-    with socketserver.TCPServer(('', 8080), RequestHandler) as httpd:
-        httpd.serve_forever()
+    try:
+        with socketserver.TCPServer(('', port), RequestHandler) as httpd:
+            print(
+                termcolor.colored(
+                    f'Server listening on port {port}.',
+                    color='green',
+                    attrs=['bold']
+                )
+            )
+
+            httpd.serve_forever()
+
+    except OSError:
+        print(
+            termcolor.colored(
+                f'Port {port} already in use. Trying {port + 1}...',
+                color='red',
+                attrs=['bold']
+            )
+        )
+
+        serve(data_dir=data_dir, port=port + 1)
