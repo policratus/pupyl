@@ -184,3 +184,26 @@ class Extractors(ImageIO):
         return self.network.predict(
             self.preprocessor(uri)
             ).ravel()
+
+    @staticmethod
+    def save_tensor(func_gen, uri, file_name):
+        """
+        Saves an arbitrary tensor to file.
+
+        Parameters
+        ----------
+        func_gen: function
+            The generator function of the tensor.
+
+        uri: str
+            Location of image to generate tensor.
+
+        file_name: str
+            Path with file name.
+        """
+        numpy.save(
+            file_name,
+            func_gen(uri),
+            allow_pickle=False,
+            fix_imports=False
+        )

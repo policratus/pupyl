@@ -101,21 +101,18 @@ class PupylImageSearch:
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     futures = {
                         executor.submit(
+                            extractor.save_tensor,
                             extractor.extract,
-                            uri_file
-                        ): uri_file
-                        for uri_file in extractor.scan(uri)
+                            uri_from_file,
+                            self.image_database.mount_file_name(rank, '.npy')
+                        ): uri_from_file
+                        for rank, uri_from_file in enumerate(extractor.scan(uri))
                     }
 
                     for future in concurrent.futures.as_completed(futures):
-                    # for future in extractor.progress(
-                    #         concurrent.futures.as_completed(futures)
-                    #         ):
-                    #     uri = futures[future]
+                        print(future.result())
 
-                    #     self.image_database.insert(len(index), uri)
-
-                    #     index.append(future.result())
+                        self.image_database.insert(len(index), uri)
 
     def search(self, query, top=4):
         """
