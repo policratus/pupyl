@@ -204,7 +204,7 @@ class ImageDatabase(ImageIO):
 
         self.save_image_metadata(index, uri)
 
-    def list_images(self, return_index=False):
+    def list_images(self, return_index=False, top=None):
         """
         Return all images in current database.
 
@@ -212,13 +212,26 @@ class ImageDatabase(ImageIO):
         ----------
         return_index (optional)(default: False): bool
             If the method should also return the file index inside database.
+
+        top (optional): int
+            How many pictures from image database should be listed.
         """
+        if top:
+            counter = 0
+
         for root, _, files in os.walk(self._data_dir):
             for ffile in files:
+
                 ffile = os.path.join(root, ffile)
 
                 with open(ffile, 'rb') as t_file:
                     if self.is_image(t_file.read()):
+                        if top:
+                            counter += 1
+
+                            if counter > top:
+                                return
+
                         if return_index:
                             yield int(
                                 os.path.splitext(

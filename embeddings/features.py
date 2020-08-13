@@ -1,4 +1,5 @@
 """Factory for image feature extraction."""
+import os
 import warnings
 from enum import Enum, auto
 import termcolor
@@ -201,9 +202,28 @@ class Extractors(ImageIO):
         file_name: str
             Path with file name.
         """
+        os.makedirs(os.path.dirname(file_name), exist_ok=True)
+
         numpy.save(
             file_name,
             func_gen(uri),
+            allow_pickle=False,
+            fix_imports=False
+        )
+
+    @staticmethod
+    def load_tensor(file_name):
+        """
+        Saves an arbitrary tensor to file.
+
+        Parameters
+        ----------
+        file_name: str
+            The file name inside features database.
+        """
+        return numpy.load(
+            file_name,
+            mmap_mode='r',
             allow_pickle=False,
             fix_imports=False
         )
