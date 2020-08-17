@@ -49,7 +49,8 @@ class FileIO(FileType):
         bytes:
             With image binary information
         """
-        return urlopen(url).read()
+        with urlopen(url) as ffile:
+            return ffile.read()
 
     @staticmethod
     def _get_local(path):
@@ -119,7 +120,9 @@ class FileIO(FileType):
 
         if cls._infer_protocol(uri) is Protocols.HTTP:
             parsed_url = urlparse(uri)
-            file_statistics = urlopen(uri).info()
+
+            with urlopen(uri) as ffile:
+                file_statistics = ffile.info()
 
             original_path, original_file_name = os.path.split(
                 f'{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}'
@@ -132,7 +135,8 @@ class FileIO(FileType):
                     )[0]
                 )
             except TypeError:
-                measured_size = len(urlopen(uri).read())
+                with urlopen(uri) as ffile:
+                    measured_size = len(ffile.read())
 
             original_file_size = measured_size // (2 ** 10)
             original_access_time = file_statistics.get_all('Date')[0]
