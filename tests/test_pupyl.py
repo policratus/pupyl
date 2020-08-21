@@ -1,5 +1,6 @@
 """Unit tests for main module pupyl."""
 import os
+import json
 from tempfile import gettempdir, TemporaryDirectory
 from pupyl import PupylImageSearch
 from embeddings.features import Characteristics
@@ -9,6 +10,7 @@ TEST_DATA_DIR = os.path.join(gettempdir(), 'pupyl_tests/')
 PUPYL = PupylImageSearch(data_dir=TEST_DATA_DIR)
 TEST_SCAN_DIR = os.path.abspath('tests/test_scan/test_csv.csv.gz')
 TEST_QUERY_IMAGE = 'https://static.flickr.com/210/500863916_bdd4b8cc5a.jpg'
+TEST_CONFIG_DIR = os.path.abspath('tests/test_index/')
 
 
 def test_index_no_config_file():
@@ -38,6 +40,24 @@ def test_index_creation_chosen_parameters():
         assert pupyl_test._import_images and \
             pupyl_test._characteristic == Characteristics.\
             LIGHTWEIGHT_REGULAR_PRECISION
+
+
+def test_index_config_file():
+    """Unit test for index creation, with config. file case."""
+    test_config_file = 'index.json'
+
+    with open(
+        os.path.join(TEST_CONFIG_DIR, test_config_file)
+    ) as config:
+        configurations = json.load(config)
+
+    test_pupyl = PupylImageSearch(TEST_CONFIG_DIR)
+
+    assert configurations['import_images'] == \
+        test_pupyl._import_images
+
+    assert configurations['characteristic'] == \
+        test_pupyl._characteristic.name
 
 
 def test_index():
