@@ -8,8 +8,8 @@ import os
 import webbrowser
 from http.server import SimpleHTTPRequestHandler
 import socketserver
-import termcolor
 from urllib.parse import urlparse, parse_qs
+import termcolor
 
 from pupyl import PupylImageSearch
 
