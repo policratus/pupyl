@@ -219,7 +219,8 @@ class ImageDatabase(ImageIO):
 
         top (optional): int
             How many pictures from image database should be listed. Not setting
-            this parameter will return all images in the database.
+            this parameter (which means not referencing it or setting it to zero or below)
+            will return all images in the database.
         """
         if top:
             counter = 0
