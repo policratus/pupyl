@@ -392,7 +392,7 @@ class FileIO(FileType):
         except IsADirectoryError:
             for root, _, files in os.walk(uri):
                 for ffile in files:
-                    yield os.path.abspath(f'{root}/{ffile}')
+                    yield os.path.join(root, ffile)
 
     @staticmethod
     def progress(iterable, precise=False):

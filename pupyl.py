@@ -69,7 +69,8 @@ class PupylImageSearch:
                 if mode == 'r':
 
                     return json.load(config_file)
-                elif mode == 'w':
+
+                if mode == 'w':
 
                     configurations = {
                         'import_images': self._import_images,
@@ -77,6 +78,8 @@ class PupylImageSearch:
                     }
 
                     json.dump(configurations, config_file)
+
+                return True
         except FileNotFoundError:
             return False
 
@@ -89,36 +92,40 @@ class PupylImageSearch:
         uri: str
             Directory or file, or http(s) location.
         """
-        with Extractors(characteristics=self._characteristic) as extractor, \
-                Index(extractor.output_shape, data_dir=self._data_dir) as index, \
-                concurrent.futures.ThreadPoolExecutor() as executor:
+        with Extractors(
+                characteristics=self._characteristic
+            ) as extractor, Index(
+                extractor.output_shape,
+                data_dir=self._data_dir
+            ) as index, concurrent.futures.ThreadPoolExecutor() \
+                as executor:
 
-                self._index_configuration('w')
+            self._index_configuration('w')
 
-                futures = {
-                    executor.submit(
-                        extractor.save_tensor,
-                        extractor.extract,
-                        uri_from_file,
-                        self.image_database.mount_file_name(rank, 'npy')
-                    ): {'id': rank, 'uri': uri_from_file}
-                    for rank, uri_from_file in enumerate(extractor.scan(uri))
-                }
+            futures = {
+                executor.submit(
+                    extractor.save_tensor,
+                    extractor.extract,
+                    uri_from_file,
+                    self.image_database.mount_file_name(rank, 'npy')
+                ): {'id': rank, 'uri': uri_from_file}
+                for rank, uri_from_file in enumerate(extractor.scan(uri))
+            }
 
-                for future in self.image_database.progress(
+            for future in self.image_database.progress(
                     concurrent.futures.as_completed(futures)
-                ):
+            ):
 
-                    self.image_database.insert(len(index), futures[future]['uri'])
+                self.image_database.insert(len(index), futures[future]['uri'])
 
-                    features_tensor_name = self.image_database.mount_file_name(
-                        futures[future]['id'],
-                        'npy'
-                    )
+                features_tensor_name = self.image_database.mount_file_name(
+                    futures[future]['id'],
+                    'npy'
+                )
 
-                    index.append(extractor.load_tensor(features_tensor_name))
+                index.append(extractor.load_tensor(features_tensor_name))
 
-                    os.remove(features_tensor_name)
+                os.remove(features_tensor_name)
 
     def search(self, query, top=4):
         """
@@ -136,7 +143,7 @@ class PupylImageSearch:
             with Index(
                     extractor.output_shape,
                     data_dir=self._data_dir
-                    ) as index:
+            ) as index:
                 for result in index.search(
                         extractor.extract(query),
                         results=top

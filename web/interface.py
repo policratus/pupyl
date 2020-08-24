@@ -5,9 +5,11 @@ Create a web interface to query images and see results
 based on indexed images on database.
 """
 import os
+import webbrowser
 from http.server import SimpleHTTPRequestHandler
 import socketserver
 from urllib.parse import urlparse, parse_qs
+import termcolor
 
 from pupyl import PupylImageSearch
 
@@ -16,18 +18,15 @@ STATIC_FOLDER = os.path.abspath(os.path.join('web', 'static'))
 TEMPLATE_FILE = os.path.join(STATIC_FOLDER, 'template.html')
 
 
-def serve(data_dir, port=None):
+def serve(data_dir, port=8080):
     """
-    Function to start the web server.
+    Start the web server.
 
     Parameters
     ----------
-    data_dir: str
-        Place where the image database was saved.
-
-    port (optional): int
-        The (network) port which the web interface will
-        respond.
+    port (optional)(default: 8080): int
+        Defines the network port which the web server
+        will start listening.
     """
 
     pupyl_image_search = PupylImageSearch(data_dir)
@@ -164,5 +163,26 @@ def serve(data_dir, port=None):
     if not port:
         port = 8080
 
-    with socketserver.TCPServer(('', port), RequestHandler) as httpd:
-        httpd.serve_forever()
+    try:
+        with socketserver.TCPServer(('', port), RequestHandler) as httpd:
+            print(
+                termcolor.colored(
+                    f'Server listening on port {port}.',
+                    color='green',
+                    attrs=['bold']
+                )
+            )
+
+            webbrowser.open_new_tab(f'http://localhost:{port}')
+            httpd.serve_forever()
+
+    except OSError:
+        print(
+            termcolor.colored(
+                f'Port {port} already in use. Trying {port + 1}...',
+                color='red',
+                attrs=['bold']
+            )
+        )
+
+        serve(data_dir=data_dir, port=port + 1)
