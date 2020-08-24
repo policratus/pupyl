@@ -80,6 +80,16 @@ def test___get_item__():
     assert test_metadata == TEST_METADATA
 
 
+def test___len__():
+    """Unit test for __len__ method."""
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    assert len(image_database) == 1
+
+
 def test_import_images_property():
     """Unit test for property import_images."""
     image_database = ImageDatabase(
@@ -270,6 +280,34 @@ def test_list_images_return_index():
     ][0]
 
     assert actual_index_path == expected_result
+
+
+def test_list_images_length_filtered():
+    """Unit test for method list_images, length filter case."""
+    expected_length = 1
+
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    actual_result = [*image_database.list_images(top=expected_length)]
+
+    assert len(actual_result) == expected_length
+
+
+def test_list_images_less_than_count():
+    """Unit test for method list_images, less than counter case."""
+    expected_length = -1
+
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    actual_result = [*image_database.list_images(top=expected_length)]
+
+    assert len(actual_result) == 0
 
 
 def test_save_image_metadata():

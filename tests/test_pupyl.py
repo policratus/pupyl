@@ -71,7 +71,11 @@ def test_index():
 
 def test_search():
     """Unit test for method search."""
-    expected_results = [0]
-    test_results = PUPYL.search(TEST_QUERY_IMAGE, top=1)
+    expected_length_results = 1
 
-    assert [*test_results] == expected_results
+    test_results = PUPYL.search(
+        TEST_QUERY_IMAGE,
+        top=expected_length_results
+    )
+
+    assert len([*test_results]) == expected_length_results
