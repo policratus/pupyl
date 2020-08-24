@@ -141,11 +141,11 @@ class PupylImageSearch:
         """
         with Extractors(characteristics=self._characteristic) as extractor:
             with Index(
-                    extractor.output_shape,
-                    data_dir=self._data_dir
+                extractor.output_shape,
+                data_dir=self._data_dir
             ) as index:
                 for result in index.search(
-                        extractor.extract(query),
-                        results=top
+                    extractor.extract(query),
+                    results=top
                 ):
                     yield result
