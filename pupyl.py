@@ -113,7 +113,7 @@ class PupylImageSearch:
             }
 
             for future in self.image_database.progress(
-                    concurrent.futures.as_completed(futures)
+                concurrent.futures.as_completed(futures)
             ):
 
                 self.image_database.insert(len(index), futures[future]['uri'])
