@@ -1,8 +1,10 @@
 """
 Unit tests related to duplex.file_io module
 """
+import os
 import csv
 import tempfile
+from tarfile import is_tarfile
 from os import walk
 from os.path import abspath, exists, join
 from pathlib import Path
@@ -374,3 +376,64 @@ def test_progress_precise():
 
     for t_fgen, r_fgen in zip(test_generator, test_result_func_gen):
         assert t_fgen == r_fgen
+
+
+def test_resolve_path_end():
+    """Unit test for method test_resolve_path_end."""
+    test_path_with_sep = '/just/a/test/path/'
+    test_path_without_sep = '/just/a/test/path'
+
+    expected_return = '/just/a/test/path'
+
+    assert FileIO.resolve_path_end(test_path_with_sep) == expected_return
+    assert FileIO.resolve_path_end(test_path_without_sep) == expected_return
+
+
+def test_dump():
+    """Unit test for method dump."""
+    file_io = FileIO()
+
+    file_io.dump(TEST_SCAN_DIR, tempfile.gettempdir())
+
+    assert is_tarfile(
+        os.path.join(
+            tempfile.gettempdir(),
+            '.'.join(
+                (
+                    os.path.basename(
+                        file_io.resolve_path_end(TEST_SCAN_DIR)
+                    ),
+                    'pupyl'
+                )
+            )
+        )
+    )
+
+
+def test_bind():
+    """Unit test for method bind."""
+    file_io = FileIO()
+
+    file_io.dump(TEST_SCAN_DIR, tempfile.gettempdir())
+
+    file_io.bind(
+        os.path.join(
+            tempfile.gettempdir(),
+            '.'.join(
+                (
+                    os.path.basename(
+                        file_io.resolve_path_end(TEST_SCAN_DIR)
+                    ),
+                    'pupyl'
+                )
+            )
+        ),
+        os.path.join(tempfile.gettempdir(), TEST_SCAN_DIR)
+    )
+
+    assert os.path.isdir(
+        os.path.join(
+            tempfile.gettempdir(),
+            TEST_SCAN_DIR
+        )
+    )

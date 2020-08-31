@@ -14,6 +14,7 @@ import gzip
 import zipfile
 import bz2
 import lzma
+import tarfile
 from datetime import datetime
 from itertools import cycle
 import termcolor
@@ -462,3 +463,64 @@ class FileIO(FileType):
                 )
 
                 yield value_clock[0]
+
+    @staticmethod
+    def resolve_path_end(path):
+        """
+        Removes directory separators from the end of
+        some path (if exists).
+
+        Parameters
+        ----------
+        path: str
+            Complete path to be analyzed.
+        """
+        if path[-1] == os.path.sep:
+            path = list(path)
+            _ = path.pop()
+
+            return ''.join(path)
+
+        return path
+
+    def dump(self, data_dir, output_dir):
+        """
+        Read an entire database tree, compress and export it.
+
+        Parameters
+        ----------
+        data_dir: str
+            The directory containing all database assets.
+
+        output_dir: str
+            Location where to save the export file.
+        """
+        data_dir = self.resolve_path_end(data_dir)
+        base_name = os.path.basename(data_dir)
+        dump_name = '.'.join((base_name, 'pupyl'))
+        dump_path = os.path.join(output_dir, dump_name)
+
+        with tarfile.open(dump_path, 'w:xz') as tar:
+            for path in self.progress(self.scan(data_dir)):
+                path_split = path.split(os.path.sep)
+                archive_name = os.path.join(
+                    *path_split[path_split.index(base_name):]
+                )
+
+                tar.add(path, arcname=archive_name)
+
+    @staticmethod
+    def bind(dump_file, output_dir):
+        """
+        Read a packaged database and import it.
+
+        Parameters
+        ----------
+        dump_file: str
+            The directory containing all database assets.
+
+        output_dir: str
+            Location where to save the export file.
+        """
+        with tarfile.open(dump_file) as dfile:
+            dfile.extractall(output_dir)
