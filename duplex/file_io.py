@@ -467,7 +467,8 @@ class FileIO(FileType):
     @staticmethod
     def resolve_path_end(path):
         """
-        Removes directory separator from path (if exists).
+        Removes directory separators from the end of
+        some path (if exists).
 
         Parameters
         ----------
