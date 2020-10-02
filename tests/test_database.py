@@ -1,4 +1,5 @@
 """Unit tests related to storage.database module."""
+from os import sep
 from os.path import abspath, join, relpath, exists
 import tempfile
 from unittest import TestCase
@@ -74,8 +75,12 @@ def test___get_item__():
     test_metadata = image_database[0]
     del test_metadata['original_access_time']
 
-    test_metadata['original_path'] = test_metadata[
-        'original_path'].split('/')[-1]
+    if test_metadata['original_path'].startswith('http'):
+        test_metadata['original_path'] = test_metadata[
+            'original_path'].split('/')[-1]
+    else:
+        test_metadata['original_path'] = test_metadata[
+            'original_path'].split(sep)[-1]
 
     assert test_metadata == TEST_METADATA
 
@@ -227,8 +232,12 @@ def test_load_image_metadata():
 
     del test_metadata['original_access_time']
 
-    test_metadata['original_path'] = test_metadata[
-        'original_path'].split('/')[-1]
+    if test_metadata['original_path'].startswith('http'):
+        test_metadata['original_path'] = test_metadata[
+            'original_path'].split('/')[-1]
+    else:
+        test_metadata['original_path'] = test_metadata[
+            'original_path'].split(sep)[-1]
 
     assert test_metadata == TEST_METADATA
 
