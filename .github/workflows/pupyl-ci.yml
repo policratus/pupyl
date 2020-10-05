@@ -28,3 +28,5 @@ jobs:
         pip install pytest pytest-cov
         make test
         make coverage
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v1.1.2
