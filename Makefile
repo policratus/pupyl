@@ -32,3 +32,6 @@ coverage: clean
 coverage-html: clean
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=html --cov=.
 	$(OPEN_EXECUTABLE) htmlcov/index.html
+
+version:
+	python version.py
