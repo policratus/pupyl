@@ -19,6 +19,22 @@ TEST_METADATA = {
     'original_file_size': '5K'
 }
 
+TEST_METADATA_HTTP = {
+    'id': 1,
+    'original_file_name': 'test_image.jpg',
+    'original_path': 'https://domain.com/tests/',
+    'original_file_size': '5K'
+}
+
+
+def resolve_original_path(test_metadata):
+    """Acknowledge the protocol of original path data."""
+    if not test_metadata['original_path'].startswith('http'):
+        test_metadata['original_path'] = test_metadata[
+            'original_path'].split(sep)[-1]
+
+    return test_metadata
+
 
 class TestCases(TestCase):
     """Unit tests over special cases."""
@@ -75,14 +91,16 @@ def test___get_item__():
     test_metadata = image_database[0]
     del test_metadata['original_access_time']
 
-    if test_metadata['original_path'].startswith('http'):
-        test_metadata['original_path'] = test_metadata[
-            'original_path'].split('/')[-1]
-    else:
-        test_metadata['original_path'] = test_metadata[
-            'original_path'].split(sep)[-1]
+    test_metadata = resolve_original_path(test_metadata)
 
     assert test_metadata == TEST_METADATA
+
+    test_metadata = image_database[1]
+    del test_metadata['original_access_time']
+
+    test_metadata = resolve_original_path(test_metadata)
+
+    assert test_metadata == TEST_METADATA_HTTP
 
 
 def test___len__():
@@ -232,14 +250,17 @@ def test_load_image_metadata():
 
     del test_metadata['original_access_time']
 
-    if test_metadata['original_path'].startswith('http'):
-        test_metadata['original_path'] = test_metadata[
-            'original_path'].split('/')[-1]
-    else:
-        test_metadata['original_path'] = test_metadata[
-            'original_path'].split(sep)[-1]
+    test_metadata = resolve_original_path(test_metadata)
 
     assert test_metadata == TEST_METADATA
+
+    test_metadata = image_database.load_image_metadata(1)
+
+    del test_metadata['original_access_time']
+
+    test_metadata = resolve_original_path(test_metadata)
+
+    assert test_metadata == TEST_METADATA_HTTP
 
 
 def test_load_image_metadata_filtered():

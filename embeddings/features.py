@@ -13,6 +13,9 @@ from embeddings import exceptions
 from duplex.image import ImageIO
 
 
+tensorflow.autograph.set_verbosity(0)
+
+
 class Characteristics(Enum):
     """Describes high level characteristics of complex feature extractors."""
 

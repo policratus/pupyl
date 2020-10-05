@@ -1,2 +1,4 @@
 [run]
-omit = web/*
+omit =
+    web/*
+    setup.py
