@@ -28,8 +28,4 @@ jobs:
         pip install pytest pytest-cov
         make test
         make coverage
-        coveralls
-    - name: Coveralls GitHub Action
-      uses: coverallsapp/github-action@v1.1.2
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        bash <(curl -s https://codecov.io/bash)

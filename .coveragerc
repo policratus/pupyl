@@ -1,4 +1,5 @@
 [run]
+source = pupyl
 omit =
     web/*
     setup.py
