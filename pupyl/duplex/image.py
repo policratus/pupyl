@@ -11,8 +11,8 @@ import tensorflow
 from tensorflow import io as io_ops
 from tensorflow import image as image_ops
 
-from duplex.file_io import FileIO
-from duplex.exceptions import FileIsNotImage
+from pupyl.duplex.file_io import FileIO
+from pupyl.duplex.exceptions import FileIsNotImage
 
 
 tensorflow.autograph.set_verbosity(0)

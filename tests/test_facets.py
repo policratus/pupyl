@@ -4,11 +4,11 @@ from unittest import TestCase
 
 import numpy
 
-from indexer.facets import Index
-from indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
+from pupyl.indexer.facets import Index
+from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
     NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
     NullTensorError
-from duplex.file_io import FileIO
+from pupyl.duplex.file_io import FileIO
 
 
 TEST_INDEX_PATH = os.path.abspath('tests/')

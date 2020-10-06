@@ -19,8 +19,8 @@ setuptools.setup(
     url="https://github.com/policratus/pupyl",
     packages=setuptools.find_packages(),
     install_requires=[
-        'tensorflow>=2.1.0',
-        'annoy>=1.16.3'
+        'tensorflow>=2.3.0',
+        'annoy>=1.17.0'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
