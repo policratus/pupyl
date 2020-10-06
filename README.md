@@ -1,5 +1,5 @@
 
-![pupyl](docs/pupyl.png)
+![pupyl](https://github.com/policratus/pupyl/raw/master/docs/pupyl.png)
 
 ![pupyl-ci](https://github.com/policratus/pupyl/workflows/pupyl-ci/badge.svg)
 [![codecov](https://codecov.io/gh/policratus/pupyl/branch/master/graph/badge.svg)](https://codecov.io/gh/policratus/pupyl)
