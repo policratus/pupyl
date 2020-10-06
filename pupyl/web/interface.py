@@ -11,7 +11,7 @@ import socketserver
 from urllib.parse import urlparse, parse_qs
 import termcolor
 
-from pupyl import PupylImageSearch
+from pupyl.search import PupylImageSearch
 
 
 STATIC_FOLDER = os.path.abspath(os.path.join('web', 'static'))
