@@ -30,16 +30,17 @@ from pupyl.search import PupylImageSearch
 from pupyl.web import interface
 
 
-SAMPLES = 'https://github.com/policratus/pupyl' +
+SAMPLES = 'https://github.com/policratus/pupyl' + \
     '/raw/master/samples/pupyl.txt.xz'
+DATA_DIR = tempfile.gettempdir()
 
-SEARCH = PupylImageSearch(data_dir=tempfile.gettempdir())
+SEARCH = PupylImageSearch(data_dir=DATA_DIR)
 
 SEARCH.index(SAMPLES)
 
 🕐 Processed 12942 items
 
-interface.serve()
+interface.serve(DATA_DIR)
 ```
 
 ## 📌 Dependencies
