@@ -4,8 +4,8 @@ Unit tests related to duplex.image module
 from os.path import abspath
 from unittest import TestCase
 
-from duplex.file_types import FileType
-from duplex.exceptions import FileTypeNotSupportedYet
+from pupyl.duplex.file_types import FileType
+from pupyl.duplex.exceptions import FileTypeNotSupportedYet
 
 
 TEST_DIR = 'tests/'

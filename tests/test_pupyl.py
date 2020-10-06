@@ -2,8 +2,8 @@
 import os
 import json
 from tempfile import gettempdir, TemporaryDirectory
-from pupyl import PupylImageSearch
-from embeddings.features import Characteristics
+from pupyl.search import PupylImageSearch
+from pupyl.embeddings.features import Characteristics
 
 
 TEST_DATA_DIR = os.path.join(gettempdir(), 'pupyl_tests/')

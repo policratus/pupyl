@@ -5,7 +5,7 @@ Operations of file and mime type discovery, based on file content.
 """
 from enum import Enum
 
-from duplex import exceptions
+from pupyl.duplex import exceptions
 
 
 class FileHeaderHex(Enum):

@@ -7,8 +7,8 @@ from base64 import b64encode
 import numpy
 from tensorflow import io as io_ops
 
-from duplex.image import ImageIO
-from duplex.exceptions import FileIsNotImage
+from pupyl.duplex.image import ImageIO
+from pupyl.duplex.exceptions import FileIsNotImage
 
 
 TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/' + \

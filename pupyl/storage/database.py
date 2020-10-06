@@ -6,7 +6,7 @@ Operations and storage for images.
 import os
 import json
 
-from duplex.image import ImageIO
+from pupyl.duplex.image import ImageIO
 
 
 class ImageDatabase(ImageIO):
