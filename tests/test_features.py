@@ -5,9 +5,8 @@ from os.path import abspath
 from enum import Enum, auto
 from unittest import TestCase
 
-from embeddings.features import Characteristics
-from embeddings.features import Extractors
-from embeddings.exceptions import UnknownCharacteristics
+from pupyl.embeddings.features import Characteristics, Extractors
+from pupyl.embeddings.exceptions import UnknownCharacteristics
 
 
 TEST_LOCAL = abspath('tests/test_image.jpg')

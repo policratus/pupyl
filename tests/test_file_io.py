@@ -10,8 +10,8 @@ from os.path import abspath, exists, join
 from pathlib import Path
 from unittest import TestCase
 
-from duplex.file_io import FileIO, Protocols
-from duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
+from pupyl.duplex.file_io import FileIO, Protocols
+from pupyl.duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
 
 
 TEST_DIR = 'tests/'

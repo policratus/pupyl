@@ -4,7 +4,7 @@ from os.path import abspath, join, relpath, exists
 import tempfile
 from unittest import TestCase
 
-from storage.database import ImageDatabase
+from pupyl.storage.database import ImageDatabase
 
 
 TEST_TEMP_DIRECTORY = tempfile.gettempdir()

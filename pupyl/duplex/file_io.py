@@ -19,9 +19,9 @@ from datetime import datetime
 from itertools import cycle
 import termcolor
 
-from duplex.file_types import FileType
-from duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
-from addendum.operators import intmul
+from pupyl.duplex.file_types import FileType
+from pupyl.duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
+from pupyl.addendum.operators import intmul
 
 
 class Protocols(Enum):

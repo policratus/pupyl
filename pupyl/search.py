@@ -12,9 +12,9 @@ import os
 import json
 import concurrent.futures
 
-from embeddings.features import Extractors, Characteristics
-from storage.database import ImageDatabase
-from indexer.facets import Index
+from pupyl.embeddings.features import Extractors, Characteristics
+from pupyl.storage.database import ImageDatabase
+from pupyl.indexer.facets import Index
 
 
 class PupylImageSearch:

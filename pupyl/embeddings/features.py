@@ -9,8 +9,8 @@ import tensorflow
 import tensorflow.keras.applications as networks
 import tensorflow.keras.backend as backend
 
-from embeddings import exceptions
-from duplex.image import ImageIO
+from pupyl.embeddings import exceptions
+from pupyl.duplex.image import ImageIO
 
 
 tensorflow.autograph.set_verbosity(0)

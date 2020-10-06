@@ -8,12 +8,11 @@ from shutil import move
 
 from annoy import AnnoyIndex
 
-from indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
+from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
     NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
     NullTensorError
-
-from addendum.operators import intmul
-from duplex.file_io import FileIO
+from pupyl.addendum.operators import intmul
+from pupyl.duplex.file_io import FileIO
 
 
 class Index:

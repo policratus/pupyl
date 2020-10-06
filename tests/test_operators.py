@@ -1,5 +1,5 @@
 """Unit tests related to addendum.operators module."""
-from addendum.operators import intmul
+from pupyl.addendum.operators import intmul
 
 
 TEST_VALUE = 123123
