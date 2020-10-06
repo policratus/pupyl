@@ -11,7 +11,8 @@ from pathlib import Path
 from unittest import TestCase
 
 from pupyl.duplex.file_io import FileIO, Protocols
-from pupyl.duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
+from pupyl.duplex.exceptions import FileTypeNotSupportedYet, \
+    FileScanNotPossible
 
 
 TEST_DIR = 'tests/'

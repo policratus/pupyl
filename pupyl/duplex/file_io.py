@@ -20,7 +20,8 @@ from itertools import cycle
 import termcolor
 
 from pupyl.duplex.file_types import FileType
-from pupyl.duplex.exceptions import FileTypeNotSupportedYet, FileScanNotPossible
+from pupyl.duplex.exceptions import FileTypeNotSupportedYet, \
+    FileScanNotPossible
 from pupyl.addendum.operators import intmul
 
 
@@ -210,14 +211,14 @@ class FileIO(FileType):
                 raise FileTypeNotSupportedYet
 
             return self.guess_file_type(file_bytes, mimetype=mimetype)
-        except FileTypeNotSupportedYet:
+        except FileTypeNotSupportedYet as file_type_not_supported_yet:
             file_type = mimetypes.guess_type(uri)[0]
 
             if file_type:
                 return file_type if mimetype else \
                     file_type.split('/')[1].upper()
 
-            raise FileTypeNotSupportedYet
+            raise file_type_not_supported_yet
 
     @classmethod
     def scan_csv(cls, uri):
