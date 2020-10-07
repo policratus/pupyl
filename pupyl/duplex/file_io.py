@@ -17,6 +17,8 @@ import lzma
 import tarfile
 from datetime import datetime
 from itertools import cycle
+from io import BytesIO
+
 import termcolor
 
 from pupyl.duplex.file_types import FileType
@@ -245,7 +247,7 @@ class FileIO(FileType):
         reader = csv.reader(csv_string)
 
         for row in reader:
-            yield row
+            yield row[0]
 
     @classmethod
     def scan_csv_gzip(cls, uri):
@@ -262,9 +264,14 @@ class FileIO(FileType):
         generator of str:
             With the discovery file paths
         """
-        with gzip.open(uri, 'rt') as gzip_file:
-            for row in gzip_file:
-                yield row.replace('\n', '')
+        file_bytes = cls.get(uri)
+
+        gzip_file = gzip.decompress(
+            file_bytes
+        ).decode('utf-8').splitlines()
+
+        for row in gzip_file:
+            yield row.replace('\n', '')
 
     @staticmethod
     def safe_temp_file(**kwargs):
@@ -307,9 +314,14 @@ class FileIO(FileType):
         generator of str:
             With the discovery file paths
         """
-        with bz2.open(uri, 'rt') as bz2_file:
-            for row in bz2_file:
-                yield row.replace('\n', '')
+        file_bytes = cls.get(uri)
+
+        bz2_file = bz2.decompress(
+            file_bytes
+        ).decode('utf-8').splitlines()
+
+        for row in bz2_file:
+            yield row.replace('\n', '')
 
     @classmethod
     def scan_csv_zip(cls, uri):
@@ -326,8 +338,10 @@ class FileIO(FileType):
         generator of str:
             With the discovery file paths
         """
-        for ffile in zipfile.ZipFile(uri).namelist():
-            with zipfile.ZipFile(uri).open(ffile) as ufile:
+        file_bytes = BytesIO(cls.get(uri))
+
+        for ffile in zipfile.ZipFile(file_bytes).namelist():
+            with zipfile.ZipFile(file_bytes).open(ffile) as ufile:
                 for row in ufile:
                     yield row.decode('utf-8').replace('\n', '')
 
@@ -346,9 +360,14 @@ class FileIO(FileType):
         generator of str:
             With the discovery file paths
         """
-        with lzma.open(uri, 'rt') as xz_file:
-            for row in xz_file:
-                yield row.replace('\n', '')
+        file_bytes = cls.get(uri)
+
+        xz_file = lzma.decompress(
+            file_bytes
+        ).decode('utf-8').splitlines()
+
+        for row in xz_file:
+            yield row.replace('\n', '')
 
     def scan(self, uri):
         """

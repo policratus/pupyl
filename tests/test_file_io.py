@@ -195,7 +195,7 @@ def test_scan_csv():
 
     for method_row, util_row in zip(file_io.scan(TEST_CSV),
                                     util_test_csv(TEST_CSV)):
-        assert method_row[0] == util_row
+        assert method_row == util_row
 
 
 def test_scan_scan_gzip():
