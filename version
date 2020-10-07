@@ -1,38 +1,113 @@
 #!/usr/bin/env python3
-"""Updates the version based on git tag."""
+"""Updates pupyl version."""
 import re
+import argparse
 import subprocess
 
+from termcolor import cprint
 
-VERSION = subprocess.check_output(
+
+CURRENT_VERSION = subprocess.check_output(
     'git describe --abbrev=0'.split(),
     text=True
 ).rstrip()
 
+PARSER = argparse.ArgumentParser(
+    prog='Pupyl version updater.',
+    description='Updates pupyl version on entire library.'
+)
 
-with open('pupyl/search.py') as MAIN_MODULE, \
-        open('setup.py') as SETUP_MODULE:
-    FILE_MODULE = MAIN_MODULE.read()
-    SETUP_FILE = SETUP_MODULE.read()
+PARSER.add_argument(
+    'version',
+    metavar='version',
+    type=str,
+    nargs=1,
+    help='Updates the current version of pupyl throughout the library.'
+)
 
-    NEW_VERSION = f"__version__ = '{VERSION}'"
+PARSER.add_argument(
+    '--patch',
+    help='Defines it as a patch update.',
+    action='store_true'
+)
 
-    MAIN_MODULE_MODIFIED = re.sub(
-        r'^.*\b(\w*__version__\w*)\b.*',
-        NEW_VERSION,
-        FILE_MODULE,
-        flags=re.MULTILINE
+PARSER.add_argument(
+    '--minor',
+    help='Defines it as a minor update.',
+    action='store_true'
+)
+
+PARSER.add_argument(
+    '--major',
+    help='Defines it as a major update.',
+    action='store_true'
+)
+
+ARGUMENTS = PARSER.parse_args()
+
+VERSION = ARGUMENTS.version[0]
+
+SUITABLE_VERSION = CURRENT_VERSION.split('.')
+
+
+if ARGUMENTS.patch:
+    COMPARISON_VERSION = '.'.join(
+        [
+            SUITABLE_VERSION[0][1:],
+            SUITABLE_VERSION[1],
+            str(int(SUITABLE_VERSION[2]) + 1)
+        ]
+    )
+elif ARGUMENTS.minor:
+    COMPARISON_VERSION = '.'.join(
+        [
+            SUITABLE_VERSION[0][1:],
+            str(int(SUITABLE_VERSION[1]) + 1),
+            '0'
+        ]
+    )
+elif ARGUMENTS.major:
+    COMPARISON_VERSION = '.'.join(
+        [
+            str(int(SUITABLE_VERSION[0][1:]) + 1),
+            '0',
+            '0'
+        ]
     )
 
-    SETUP_MODULE_MODIFIED = re.sub(
-        r'^.*\b(\w*version\w*)\b.*',
-        f'    version="{VERSION[1:].replace("rc", "rc0")}",',
-        SETUP_FILE,
-        flags=re.MULTILINE
+
+if VERSION == COMPARISON_VERSION:
+    with open('pupyl/search.py') as MAIN_MODULE, \
+            open('setup.py') as SETUP_MODULE:
+        FILE_MODULE = MAIN_MODULE.read()
+        SETUP_FILE = SETUP_MODULE.read()
+
+        NEW_VERSION = f"__version__ = 'v{VERSION}'"
+
+        MAIN_MODULE_MODIFIED = re.sub(
+            r'^.*\b(\w*__version__\w*)\b.*',
+            NEW_VERSION,
+            FILE_MODULE,
+            flags=re.MULTILINE
+        )
+
+        SETUP_MODULE_MODIFIED = re.sub(
+            r'^.*\b(\w*version\w*)\b.*',
+            f'    version="{VERSION.replace("rc", "rc0")}",',
+            SETUP_FILE,
+            flags=re.MULTILINE
+        )
+
+
+    with open('pupyl/search.py', 'w') as MAIN_MODULE, \
+            open('setup.py', 'w') as SETUP_MODULE:
+        MAIN_MODULE.write(MAIN_MODULE_MODIFIED)
+        SETUP_MODULE.write(SETUP_MODULE_MODIFIED)
+
+    cprint(f'Version updated to {VERSION}', 'blue')
+else:
+    cprint(
+        f'Version {VERSION} is not valid with ' + \
+        f'next version {COMPARISON_VERSION}',
+        'red'
     )
-
-
-with open('pupyl/search.py', 'w') as MAIN_MODULE, \
-        open('setup.py', 'w') as SETUP_MODULE:
-    MAIN_MODULE.write(MAIN_MODULE_MODIFIED)
-    SETUP_MODULE.write(SETUP_MODULE_MODIFIED)
