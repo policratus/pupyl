@@ -1,5 +1,5 @@
 {% set name = "pupyl" %}
-{% set version = "0.9.9"%}
+{% set version = "0.9.8"%}
 
 package:
   name: "{{ name|lower }}"
@@ -45,4 +45,4 @@ about:
 
 extra:
   recipe-maintainers:
-    - your-github-id-here
+    - 827563
