@@ -1,0 +1,48 @@
+{% set name = "pupyl" %}
+{% set version = "0.9.8"%}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  git_url: https://github.com/policratus/pupyl.git
+  git_rev: "{{ version }}"
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - annoy >=1.17.0
+    - pip
+    - python
+    - tensorflow >=2.3.0
+  run:
+    - annoy >=1.17.0
+    - python
+    - tensorflow >=2.3.0
+
+test:
+  imports:
+    - pupyl
+    - pupyl.addendum
+    - pupyl.duplex
+    - pupyl.embeddings
+    - pupyl.indexer
+    - pupyl.storage
+    - pupyl.web
+
+about:
+  home: "https://github.com/policratus/pupyl"
+  license: "GNU Lesser General Public v3 (LGPLv3)"
+  license_family: LGPL
+  license_file: "https://raw.githubusercontent.com/policratus/pupyl/master/LICENSE"
+  summary: "🧿 Pupyl is a really fast image search library which you can index your own (millions of) images and find similar images in millisecond."
+  doc_url:
+  dev_url:
+
+extra:
+  recipe-maintainers:
+    - 827563
