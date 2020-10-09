@@ -38,8 +38,10 @@ about:
   license: "GNU Lesser General Public v3 (LGPLv3)"
   license_family: LGPL
   license_file: "../LICENSE"
-  summary: "🧿 Pupyl is a really fast image search library which you can index your own (millions of) images and find similar images in millisecond."
-  doc_url:
+  summary: "🧿 Pupyl is a really fast image search library which you can index your own (millions of) images and find similar images in millisecond"
+  description: |
+    The pupyl project (pronounced pyoo·piel) is a pythonic library to image search. It's intended to made easy to read, index, retrieve and maintain a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
+  doc_url: "https://pypi.org/project/pupyl/"
   dev_url:
 
 extra:
