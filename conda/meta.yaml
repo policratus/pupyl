@@ -6,8 +6,7 @@ package:
   version: "{{ version }}"
 
 source:
-  git_url: https://github.com/policratus/pupyl.git
-  git_rev: "{{ version }}"
+    path: ..
 
 build:
   number: 0
@@ -15,13 +14,11 @@ build:
 
 requirements:
   host:
-    - git
     - python-annoy >=1.17.0
     - pip
     - python
     - tensorflow >=2.2.0
   run:
-    - git
     - python-annoy >=1.17.0
     - python
     - tensorflow >=2.2.0
