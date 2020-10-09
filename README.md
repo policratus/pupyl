@@ -1,14 +1,15 @@
-
 ![pupyl](https://github.com/policratus/pupyl/raw/master/docs/pupyl.png)
-
 ![pupyl-ci](https://github.com/policratus/pupyl/workflows/pupyl-ci/badge.svg)
 [![codecov](https://codecov.io/gh/policratus/pupyl/branch/master/graph/badge.svg)](https://codecov.io/gh/policratus/pupyl)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4325/badge)](https://bestpractices.coreinfrastructure.org/projects/4325)
+-[![anaconda](https://anaconda.org/policratus/pupyl/badges/version.svg)](https://anaconda.org/policratus/pupyl/badges/version.svg)
+-[![PyPI version](https://badge.fury.io/py/pupyl.svg)](https://badge.fury.io/py/pupyl)
 
 # pupyl - A Python Image Search Library
 
 ## 🧿 pupyl what?
-The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to image search. It's intended to made easy to read, index, retrieve and maintain a complete a reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
+
+The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform image search tasks. It's intended to made easy reading, indexing, retrieving and maintaining a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
 
 ## 🎉 Getting started
 ### 📦 Installation

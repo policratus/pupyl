@@ -14,12 +14,12 @@ build:
 
 requirements:
   host:
-    - python-annoy >=1.17.0
+    - python-annoy >=1.16.3
     - pip
     - python
     - tensorflow >=2.2.0
   run:
-    - python-annoy >=1.17.0
+    - python-annoy >=1.16.3
     - python
     - tensorflow >=2.2.0
 
