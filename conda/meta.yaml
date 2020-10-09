@@ -21,6 +21,7 @@ requirements:
     - python
     - tensorflow >=2.2.0
   run:
+    - git
     - python-annoy >=1.17.0
     - python
     - tensorflow >=2.2.0
