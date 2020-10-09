@@ -37,7 +37,7 @@ about:
   home: "https://github.com/policratus/pupyl"
   license: "GNU Lesser General Public v3 (LGPLv3)"
   license_family: LGPL
-  license_file: "https://raw.githubusercontent.com/policratus/pupyl/master/LICENSE"
+  license_file: "../LICENSE"
   summary: "🧿 Pupyl is a really fast image search library which you can index your own (millions of) images and find similar images in millisecond."
   doc_url:
   dev_url:
