@@ -4,6 +4,7 @@
 ![pupyl-ci](https://github.com/policratus/pupyl/workflows/pupyl-ci/badge.svg)
 [![codecov](https://codecov.io/gh/policratus/pupyl/branch/master/graph/badge.svg)](https://codecov.io/gh/policratus/pupyl)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4325/badge)](https://bestpractices.coreinfrastructure.org/projects/4325)
+[![anaconda](https://anaconda.org/policratus/pupyl/badges/version.svg)](https://anaconda.org/policratus/pupyl/badges/version.svg)
 
 # pupyl - A Python Image Search Library
 
