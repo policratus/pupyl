@@ -5,15 +5,16 @@ from unittest import TestCase
 from base64 import b64encode
 
 import numpy
+import tensorflow
 from tensorflow import io as io_ops
 
 from pupyl.duplex.image import ImageIO
 from pupyl.duplex.exceptions import FileIsNotImage
 
 
-TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/' + \
-    'Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
 TEST_LOCAL = abspath('tests/test_image.jpg')
+TEST_LOCAL_RBGA = abspath('tests/test_png.png')
+TEST_LOCAL_GRAY = abspath('tests/test_grayscale.jpg')
 TEST_NOT_IMAGE = abspath('tests/not_image.jpg')
 TEST_SAVED_TENSOR = abspath('tests/compressed_image.npy')
 TEST_SIZE = (280, 260)
@@ -40,7 +41,19 @@ def test_get_image_as_tensor():
     Unit test for get_image method, as_tensor optional parameter set
     """
     assert isinstance(
-        ImageIO.get_image(TEST_LOCAL, as_tensor=True), numpy.ndarray)
+        ImageIO.get_image(TEST_LOCAL, as_tensor=True),
+        tensorflow.python.framework.ops.EagerTensor
+    )
+
+    assert isinstance(
+        ImageIO.get_image(TEST_LOCAL_GRAY, as_tensor=True),
+        tensorflow.python.framework.ops.EagerTensor
+    )
+
+    assert isinstance(
+        ImageIO.get_image(TEST_LOCAL_RBGA, as_tensor=True),
+        tensorflow.python.framework.ops.EagerTensor
+    )
 
 
 def test_size_size():
@@ -72,7 +85,7 @@ def test_compress():
             progressive=True,
             optimize_size=True,
             chroma_downsampling=True
-            )
+        )
 
     test_image_bytes = ImageIO.get_image(TEST_LOCAL)
     test_tensor = ImageIO.encoded_to_tensor(test_image_bytes)
@@ -80,7 +93,7 @@ def test_compress():
     numpy.testing.assert_array_equal(
         ImageIO.compress(test_tensor),
         behaviour_compress(test_tensor)
-        )
+    )
 
     numpy.testing.assert_array_equal(
         ImageIO.compress(test_tensor, as_tensor=True),
@@ -90,12 +103,12 @@ def test_compress():
 
 def test_encoded_to_compressed_tensor():
     """Unit test for encoded_to_compressed_tensor method."""
-    saved_tensor = numpy.load(TEST_SAVED_TENSOR, allow_pickle=False)
+    saved_tensor = numpy.load(TEST_SAVED_TENSOR)
     test_tensor = ImageIO.encoded_to_compressed_tensor(
         ImageIO.get_image(TEST_LOCAL)
-        )
+    )
 
-    assert test_tensor.ndim == 1 and test_tensor.size == 6104
+    assert test_tensor.ndim == 1 and test_tensor.shape == 6104
     numpy.testing.assert_array_equal(saved_tensor, test_tensor)
 
 

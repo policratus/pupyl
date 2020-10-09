@@ -8,9 +8,9 @@ from shutil import move
 
 from annoy import AnnoyIndex
 
-from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
-    NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
-    NullTensorError
+from pupyl.indexer.exceptions import FileIsNotAnIndex, \
+    IndexNotBuildYet, NoDataDirForPermanentIndex, \
+    DataDirDefinedForVolatileIndex, NullTensorError
 from pupyl.addendum.operators import intmul
 from pupyl.duplex.file_io import FileIO
 
@@ -45,8 +45,7 @@ class Index:
 
         if self._data_dir and not self._volatile:
             if os.path.isfile(self._data_dir):
-                raise OSError('data_dir parameter is not a directory' +
-                              ', is a file.')
+                raise OSError('data_dir parameter is not a directory')
 
             os.makedirs(self._data_dir, exist_ok=True)
             self._path = os.path.join(self._data_dir, self.index_name)
@@ -67,8 +66,8 @@ class Index:
                 self.tree.load(self._path)
 
                 self._is_new_index = False
-            except OSError:
-                raise FileIsNotAnIndex
+            except OSError as os_error:
+                raise FileIsNotAnIndex from os_error
         else:
             self.tree = AnnoyIndex(size, metric='angular')
             self._is_new_index = True
@@ -140,7 +139,7 @@ class Index:
 
         return self.tree.get_item_vector(
             self.tree.get_n_items() - abs(position)
-            )
+        )
 
     def refresh(self):
         """Update all information regarding index file."""

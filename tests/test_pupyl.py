@@ -69,6 +69,13 @@ def test_index():
         os.path.isfile(os.path.join(TEST_DATA_DIR, '0', '0.jpg'))
 
 
+def test_pupyl_temp_data_dir():
+    """Unit test for instance saving on temporary dir."""
+    pupyl_test = PupylImageSearch()
+
+    assert isinstance(pupyl_test, PupylImageSearch)
+
+
 def test_search():
     """Unit test for method search."""
     expected_length_results = 1

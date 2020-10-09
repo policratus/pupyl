@@ -8,7 +8,7 @@ with open('README.md') as readme:
 
 setuptools.setup(
     name="pupyl",
-    version="0.9.9",
+    version="0.10.0",
     author="Nelson Forte",
     author_email="policratus@gmail.com",
     description="🧿 Pupyl is a really fast image search "
@@ -24,8 +24,10 @@ setuptools.setup(
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: GNU Lesser General ' +
-        'Public License v3 (LGPLv3)',
+        (
+            'License :: OSI Approved :: '
+            'GNU Lesser General Public License v3 (LGPLv3)'
+        ),
         'Operating System :: OS Independent',
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python :: 3.6',

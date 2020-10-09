@@ -6,16 +6,15 @@ loading and so on.
 """
 from base64 import b64encode
 
-import numpy
+from pupyl.verbosity import quiet_tf
+quiet_tf()
+
 import tensorflow
-from tensorflow import io as io_ops
 from tensorflow import image as image_ops
+from tensorflow import io as io_ops
 
-from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.exceptions import FileIsNotImage
-
-
-tensorflow.autograph.set_verbosity(0)
+from pupyl.duplex.file_io import FileIO
 
 
 class ImageIO(FileIO):
@@ -35,7 +34,7 @@ class ImageIO(FileIO):
         -------
         numpy.ndarray
         """
-        return numpy.array(memoryview(io_ops.decode_raw(encoded, 'uint8')))
+        return io_ops.decode_raw(encoded, 'uint8')
 
     @staticmethod
     def encoded_to_tensor(encoded):
@@ -52,7 +51,7 @@ class ImageIO(FileIO):
         numpy.ndarray
             Describing the compressed image tensor
         """
-        return numpy.array(memoryview(io_ops.decode_image(encoded)))
+        return io_ops.decode_image(encoded)
 
     @classmethod
     def get_image(cls, uri, as_tensor=False):
@@ -80,7 +79,21 @@ class ImageIO(FileIO):
 
         if cls.is_image(bytess):
             if as_tensor:
-                return cls.encoded_to_tensor(bytess)
+                tensor = cls.encoded_to_tensor(bytess)
+
+                last_dimensions = tensor.get_shape()[-1]
+
+                if last_dimensions == 1:
+                    tensor = image_ops.grayscale_to_rgb(tensor)
+                elif last_dimensions == 4:
+                    tensor = io_ops.decode_png(bytess, channels=3)
+
+                tensor = tensorflow.dtypes.cast(
+                    tensor,
+                    tensorflow.float32
+                )
+
+                return tensor
 
             return bytess
 
@@ -157,15 +170,11 @@ class ImageIO(FileIO):
                 was passed through
         """
         if new_size:
-            return numpy.array(
-                memoryview(
-                    image_ops.resize(
-                        cls.get_image(uri, as_tensor=True),
-                        new_size,
-                        method=image_ops.ResizeMethod.NEAREST_NEIGHBOR,
-                        preserve_aspect_ratio=keep_aspect
-                    )
-                )
+            return image_ops.resize(
+                cls.get_image(uri, as_tensor=True),
+                new_size,
+                method=image_ops.ResizeMethod.NEAREST_NEIGHBOR,
+                preserve_aspect_ratio=keep_aspect
             )
 
         return cls.get_image(uri, as_tensor=True).shape[:2]
@@ -189,6 +198,12 @@ class ImageIO(FileIO):
         numpy.ndarray
             An encoded image, in bytes or numpy.ndarray
         """
+        if tensor.dtype is not tensorflow.uint8:
+            tensor = tensorflow.dtypes.cast(
+                tensor,
+                tensorflow.uint8
+            )
+
         compressed = image_ops.encode_jpeg(
             tensor,
             quality=80,

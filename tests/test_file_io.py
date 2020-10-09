@@ -20,8 +20,8 @@ TEST_SCAN_DIR = TEST_DIR + 'test_scan/'
 TEST_UNKNOWN = 'unk://path'
 TEST_UNSUPPORTED_FILE_TYPE = abspath(f'{TEST_DIR}not_image.inv')
 TEST_LOCAL = abspath(f'{TEST_DIR}test_image.jpg')
-TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/' + \
-    'Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
+TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/' + \
+    'thumb/e/e4/Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
 TEST_CSV = abspath(TEST_SCAN_DIR + 'test_csv.csv')
 TEST_CSV_ZIP = abspath(TEST_SCAN_DIR + 'test_csv.csv.zip')
 TEST_CSV_GZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.gz')
@@ -266,8 +266,8 @@ def test_get_metadata_http():
     """Unit test for method get_metadata, http case."""
     test_metadata = {
         'original_file_name': '320px-Cheshm-Nazar.JPG',
-        'original_path': 'https://upload.wikimedia.org/' +
-                         'wikipedia/commons/thumb/e/e4/Cheshm-Nazar.JPG',
+        'original_path': """https://upload.wikimedia.org/wikipedia/commons/
+        thumb/e/e4/Cheshm-Nazar.JPG""".replace('\n        ', ''),
         'original_file_size': '9K'
     }
 

@@ -5,6 +5,7 @@ Create a web interface to query images and see results
 based on indexed images on database.
 """
 import os
+import tempfile
 import webbrowser
 from http.server import SimpleHTTPRequestHandler
 import socketserver
@@ -18,7 +19,7 @@ STATIC_FOLDER = os.path.abspath(os.path.join('web', 'static'))
 TEMPLATE_FILE = os.path.join(STATIC_FOLDER, 'template.html')
 
 
-def serve(data_dir, port=8080):
+def serve(data_dir=None, port=8080):
     """
     Start the web server.
 
@@ -28,6 +29,8 @@ def serve(data_dir, port=8080):
         Defines the network port which the web server
         will start listening.
     """
+    if not data_dir:
+        data_dir = tempfile.gettempdir()
 
     pupyl_image_search = PupylImageSearch(data_dir)
 

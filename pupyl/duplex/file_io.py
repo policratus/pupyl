@@ -120,7 +120,7 @@ class FileIO(FileType):
             original_file_size = file_statistics.st_size // 2 ** 10
             original_access_time = cls.timestamp_to_iso8601(
                 file_statistics.st_atime
-                )
+            )
 
         if cls._infer_protocol(uri) is Protocols.HTTP:
             parsed_url = urlparse(uri)
@@ -450,8 +450,8 @@ class FileIO(FileType):
                     'Processing, please wait.',
                     color='green',
                     attrs=['bold']
-                    )
                 )
+            )
 
             for index, value in enumerate(iterable):
                 try:

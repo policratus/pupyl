@@ -5,12 +5,12 @@ Pupyl is a really fast image search library which you
 can index your own (millions of) images and find similar
 images in milliseconds.
 """
-__version__ = 'v0.9.9'
+__version__ = 'v0.10.0'
 
 
 import os
 import json
-import concurrent.futures
+import tempfile
 
 from pupyl.embeddings.features import Extractors, Characteristics
 from pupyl.storage.database import ImageDatabase
@@ -24,10 +24,14 @@ class PupylImageSearch:
     """
     def __init__(
             self,
-            data_dir,
+            data_dir=None,
             **kwargs
     ):
-        self._data_dir = data_dir
+        if data_dir:
+            self._data_dir = data_dir
+        else:
+            self._data_dir = tempfile.gettempdir()
+
         self._index_config_path = os.path.join(self._data_dir, 'index.json')
 
         configurations = self._index_configuration('r')
@@ -97,34 +101,28 @@ class PupylImageSearch:
         """
         with Extractors(
                 characteristics=self._characteristic
-            ) as extractor, Index(
-                extractor.output_shape,
-                data_dir=self._data_dir
-            ) as index, concurrent.futures.ThreadPoolExecutor() \
-                as executor:
+        ) as extractor, Index(
+            extractor.output_shape,
+            data_dir=self._data_dir
+        ) as index:
 
             self._index_configuration('w')
 
-            futures = {
-                executor.submit(
-                    extractor.save_tensor,
-                    extractor.extract,
-                    uri_from_file,
-                    self.image_database.mount_file_name(rank, 'npy')
-                ): {'id': rank, 'uri': uri_from_file}
-                for rank, uri_from_file in enumerate(extractor.scan(uri))
-            }
-
-            for future in self.image_database.progress(
-                concurrent.futures.as_completed(futures)
+            for rank, uri_from_file in enumerate(
+                    extractor.progress(extractor.scan(uri))
             ):
-
-                self.image_database.insert(len(index), futures[future]['uri'])
-
                 features_tensor_name = self.image_database.mount_file_name(
-                    futures[future]['id'],
+                    rank,
                     'npy'
                 )
+
+                extractor.save_tensor(
+                    extractor.extract,
+                    uri_from_file,
+                    features_tensor_name
+                )
+
+                self.image_database.insert(len(index), uri_from_file)
 
                 index.append(extractor.load_tensor(features_tensor_name))
 
@@ -144,11 +142,11 @@ class PupylImageSearch:
         """
         with Extractors(characteristics=self._characteristic) as extractor:
             with Index(
-                extractor.output_shape,
-                data_dir=self._data_dir
+                    extractor.output_shape,
+                    data_dir=self._data_dir
             ) as index:
                 for result in index.search(
-                    extractor.extract(query),
-                    results=top
+                        extractor.extract(query),
+                        results=top
                 ):
                     yield result

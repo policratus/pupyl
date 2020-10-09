@@ -21,7 +21,7 @@ clean:
 	@find . -name "build" | xargs rm -rf
 
 flake8: clean
-	@flake8 . --show-source
+	@flake8 --show-source --ignore=E402 .
 
 test: clean
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs
