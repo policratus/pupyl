@@ -22,6 +22,8 @@ TEST_UNSUPPORTED_FILE_TYPE = abspath(f'{TEST_DIR}not_image.inv')
 TEST_LOCAL = abspath(f'{TEST_DIR}test_image.jpg')
 TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/' + \
     'thumb/e/e4/Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
+TEST_URL_NO_DATE = 'http://images.protopage.com/view/572714/' + \
+    'axuvb8oxm7liskynxggfczfus.jpg'
 TEST_CSV = abspath(TEST_SCAN_DIR + 'test_csv.csv')
 TEST_CSV_ZIP = abspath(TEST_SCAN_DIR + 'test_csv.csv.zip')
 TEST_CSV_GZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.gz')
@@ -274,6 +276,22 @@ def test_get_metadata_http():
     test_request_metadata = FileIO.get_metadata(TEST_URL)
 
     del test_request_metadata['original_access_time']
+
+    assert test_metadata == test_request_metadata
+
+
+def test_get_metadata_http_no_date():
+    """Unit test for method get_metadata, http and not date case."""
+    test_metadata = {
+        'original_file_name': 'axuvb8oxm7liskynxggfczfus.jpg',
+        'original_path': """http://images.protopage.com/view/
+        572714""".replace('\n        ', '')
+    }
+
+    test_request_metadata = FileIO.get_metadata(TEST_URL_NO_DATE)
+
+    del test_request_metadata['original_access_time']
+    del test_request_metadata['original_file_size']
 
     assert test_metadata == test_request_metadata
 

@@ -5,17 +5,18 @@ Create a web interface to query images and see results
 based on indexed images on database.
 """
 import os
-import tempfile
 import webbrowser
 from http.server import SimpleHTTPRequestHandler
 import socketserver
 from urllib.parse import urlparse, parse_qs
+
 import termcolor
 
+from pupyl.duplex.file_io import FileIO
 from pupyl.search import PupylImageSearch
 
 
-STATIC_FOLDER = os.path.abspath(os.path.join('web', 'static'))
+STATIC_FOLDER = os.path.abspath(os.path.join('pupyl', 'web', 'static'))
 TEMPLATE_FILE = os.path.join(STATIC_FOLDER, 'template.html')
 
 
@@ -30,7 +31,7 @@ def serve(data_dir=None, port=8080):
         will start listening.
     """
     if not data_dir:
-        data_dir = tempfile.gettempdir()
+        data_dir = FileIO.pupyl_temp_data_dir()
 
     pupyl_image_search = PupylImageSearch(data_dir)
 
@@ -117,7 +118,7 @@ def serve(data_dir=None, port=8080):
 
             image_tags = ''
             img_src = '<figure class="figure">' + \
-                '<img class="img-fluid border rounded-circle"' + \
+                '<img class="img-fluid border"' + \
                 'src="data:image/jpg;base64, {image_b64}" ' + \
                 'alt="&#129535; Pupyl"><figcaption class="figure-caption">' + \
                 '{figure_caption}</figcaption></figure>'

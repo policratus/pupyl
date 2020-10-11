@@ -32,7 +32,7 @@ from pupyl.web import interface
 
 SAMPLES = (
     'https://github.com/policratus/pupyl'
-    + '/raw/master/samples/pupyl.txt.xz'
+    + '/raw/master/samples/pupyl1kflickr.txt.xz'
 )
 
 SEARCH = PupylImageSearch()

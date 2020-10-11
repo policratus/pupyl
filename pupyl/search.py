@@ -10,11 +10,14 @@ __version__ = 'v0.10.0'
 
 import os
 import json
-import tempfile
+from urllib.error import URLError
+from http.client import RemoteDisconnected
 
+from pupyl.duplex.file_io import FileIO
 from pupyl.embeddings.features import Extractors, Characteristics
 from pupyl.storage.database import ImageDatabase
 from pupyl.indexer.facets import Index
+from pupyl.duplex.exceptions import FileIsNotImage
 
 
 class PupylImageSearch:
@@ -22,6 +25,7 @@ class PupylImageSearch:
     Encapsulates every aspect of pupyl, from feature extraction
     to indexing and image database.
     """
+
     def __init__(
             self,
             data_dir=None,
@@ -30,7 +34,7 @@ class PupylImageSearch:
         if data_dir:
             self._data_dir = data_dir
         else:
-            self._data_dir = tempfile.gettempdir()
+            self._data_dir = FileIO.pupyl_temp_data_dir()
 
         self._index_config_path = os.path.join(self._data_dir, 'index.json')
 
@@ -116,13 +120,19 @@ class PupylImageSearch:
                     'npy'
                 )
 
-                extractor.save_tensor(
-                    extractor.extract,
-                    uri_from_file,
-                    features_tensor_name
-                )
+                try:
+                    extractor.save_tensor(
+                        extractor.extract,
+                        uri_from_file,
+                        features_tensor_name
+                    )
 
-                self.image_database.insert(len(index), uri_from_file)
+                    self.image_database.insert(len(index), uri_from_file)
+                except (
+                        URLError, FileIsNotImage,
+                        RemoteDisconnected, ConnectionResetError
+                ):
+                    continue
 
                 index.append(extractor.load_tensor(features_tensor_name))
 
