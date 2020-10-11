@@ -103,7 +103,7 @@ def test_items_values():
     """Unit test for method items_values."""
     for items_values, test_item, test_value in zip(
             INDEX.items_values(), ALL_ITEMS, ALL_VALUES
-            ):
+    ):
         method_item, method_value = items_values
 
         assert test_item == method_item and \
@@ -185,7 +185,7 @@ def test_append_new_file():
 
         numpy.testing.assert_array_almost_equal(
             index[-1], new_tensor, decimal=7
-            )
+        )
 
 
 def test_append_new_created_file():
@@ -201,7 +201,7 @@ def test_append_new_created_file():
 
     numpy.testing.assert_array_almost_equal(
         INDEX[-1], new_tensor, decimal=7
-        )
+    )
 
 
 def test_remove():
@@ -229,7 +229,7 @@ def test_remove():
             numpy.testing.assert_array_equal,
             test_value,
             index[index_to_remove]
-            )
+        )
 
 
 def test_pop():

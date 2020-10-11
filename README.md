@@ -2,8 +2,9 @@
 ![pupyl-ci](https://github.com/policratus/pupyl/workflows/pupyl-ci/badge.svg)
 [![codecov](https://codecov.io/gh/policratus/pupyl/branch/master/graph/badge.svg)](https://codecov.io/gh/policratus/pupyl)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4325/badge)](https://bestpractices.coreinfrastructure.org/projects/4325)
--[![anaconda](https://anaconda.org/policratus/pupyl/badges/version.svg)](https://anaconda.org/policratus/pupyl/badges/version.svg)
--[![PyPI version](https://badge.fury.io/py/pupyl.svg)](https://badge.fury.io/py/pupyl)
+[![anaconda](https://anaconda.org/policratus/pupyl/badges/version.svg)](https://anaconda.org/policratus/pupyl/badges/version.svg)
+[![PyPI version](https://badge.fury.io/py/pupyl.svg)](https://badge.fury.io/py/pupyl)
+[![Downloads](https://pepy.tech/badge/pupyl)](https://pepy.tech/project/pupyl)
 
 # pupyl - A Python Image Search Library
 
@@ -14,35 +15,33 @@ The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform i
 ## 🎉 Getting started
 ### 📦 Installation
 Installing `pupyl` on your environment is pretty easy:
-```
+```python
 # pypi
 pip install pupyl
 ```
 or
-```
+```python
 # anaconda
 conda install pupyl
 ```
 ## 🚸 Usage
-```
-import tempfile
-
+```python
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
 
 
-SAMPLES = 'https://github.com/policratus/pupyl' + \
-    '/raw/master/samples/pupyl.txt.xz'
-DATA_DIR = tempfile.gettempdir()
+SAMPLES = (
+    'https://github.com/policratus/pupyl'
+    + '/raw/master/samples/pupyl1kflickr.txt.xz'
+)
 
-SEARCH = PupylImageSearch(data_dir=DATA_DIR)
+SEARCH = PupylImageSearch()
 
 SEARCH.index(SAMPLES)
 
-🕐 Processed 12942 items
-
-interface.serve(DATA_DIR)
+interface.serve()
 ```
+_Disclaimer: the example above creates `pupyl` assets on your temporary directory. To define a non-volatile database, you should define `data_dir` parameter._
 
 ## 📌 Dependencies
 See all dependencies here: [dependencies](https://github.com/policratus/pupyl/network/dependencies).

@@ -9,6 +9,7 @@ from pupyl.embeddings.features import Characteristics
 TEST_DATA_DIR = os.path.join(gettempdir(), 'pupyl_tests/')
 PUPYL = PupylImageSearch(data_dir=TEST_DATA_DIR)
 TEST_SCAN_DIR = os.path.abspath('tests/test_scan/test_csv.csv.gz')
+TEST_INVALID_URL = os.path.abspath('tests/test_scan/invalid.csv')
 TEST_QUERY_IMAGE = 'https://static.flickr.com/210/500863916_bdd4b8cc5a.jpg'
 TEST_CONFIG_DIR = os.path.abspath('tests/test_index/')
 
@@ -67,6 +68,20 @@ def test_index():
     assert os.path.isdir(TEST_DATA_DIR) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, 'pupyl.index')) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, '0', '0.jpg'))
+
+
+def test_index_invalid_url():
+    """Unit test for method index, invalid url case."""
+    PUPYL.index(TEST_INVALID_URL)
+
+    assert True
+
+
+def test_pupyl_temp_data_dir():
+    """Unit test for instance saving on temporary dir."""
+    pupyl_test = PupylImageSearch()
+
+    assert isinstance(pupyl_test, PupylImageSearch)
 
 
 def test_search():

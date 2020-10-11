@@ -123,6 +123,6 @@ class FileType:
             return cls.guess_file_type(
                 bytess,
                 mimetype=True
-                )[1].split('/')[0] == 'image'
+            )[1].split('/')[0] == 'image'
         except exceptions.FileTypeNotSupportedYet:
             return False

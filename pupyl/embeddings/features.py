@@ -1,19 +1,19 @@
 """Factory for image feature extraction."""
-import os
-import warnings
 from enum import Enum, auto
+import warnings
+import os
+
+from pupyl.verbosity import quiet_tf
+quiet_tf()
+
+import tensorflow.keras.backend as backend
+import tensorflow.keras.applications as networks
+import tensorflow
+import numpy
 import termcolor
 
-import numpy
-import tensorflow
-import tensorflow.keras.applications as networks
-import tensorflow.keras.backend as backend
-
-from pupyl.embeddings import exceptions
 from pupyl.duplex.image import ImageIO
-
-
-tensorflow.autograph.set_verbosity(0)
+from pupyl.embeddings import exceptions
 
 
 class Characteristics(Enum):
@@ -26,6 +26,7 @@ class Characteristics(Enum):
     # NASNetLarge
     HEAVYWEIGHT_HUGE_PRECISION = auto()
 
+    @staticmethod
     def by_name(name):
         """
         Return a characteristic by name.
@@ -94,8 +95,8 @@ class Extractors(ImageIO):
                     'extraction acceleration.',
                     color='blue',
                     attrs=['bold']
-                    )
                 )
+            )
 
             try:
                 tensorflow.config.experimental.set_memory_growth(gpu, True)
@@ -106,9 +107,9 @@ class Extractors(ImageIO):
                         'already initialized GPU',
                         color='blue',
                         attrs=['bold']
-                        ),
+                    ),
                     ResourceWarning
-                    )
+                )
 
     def _infer_network(self):
         """Translate a characteristic to a network architecture."""
@@ -127,7 +128,7 @@ class Extractors(ImageIO):
                     pooling=pooling,
                     include_top=include_top,
                     input_shape=input_shape
-                    )
+                )
 
         if self._characteristics is \
                 Characteristics.MEDIUMWEIGHT_GOOD_PRECISION:
@@ -137,7 +138,7 @@ class Extractors(ImageIO):
                     pooling=pooling,
                     include_top=include_top,
                     input_shape=input_shape
-                    )
+                )
 
         if self._characteristics is \
                 Characteristics.HEAVYWEIGHT_HUGE_PRECISION:
@@ -148,7 +149,7 @@ class Extractors(ImageIO):
                     include_top=include_top,
                     # Specific shape for NASNetLarge
                     input_shape=input_shape_nasnet_large
-                    )
+                )
 
         raise exceptions.UnknownCharacteristics
 
@@ -169,7 +170,7 @@ class Extractors(ImageIO):
         return numpy.expand_dims(
             self.converter(self.size(uri, self.image_input_shape)),
             axis=0
-            )
+        )
 
     def extract(self, uri):
         """
@@ -187,7 +188,7 @@ class Extractors(ImageIO):
         """
         return self.network.predict(
             self.preprocessor(uri)
-            ).ravel()
+        ).ravel()
 
     @staticmethod
     def save_tensor(func_gen, uri, file_name):

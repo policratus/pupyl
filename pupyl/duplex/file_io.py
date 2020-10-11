@@ -120,7 +120,7 @@ class FileIO(FileType):
             original_file_size = file_statistics.st_size // 2 ** 10
             original_access_time = cls.timestamp_to_iso8601(
                 file_statistics.st_atime
-                )
+            )
 
         if cls._infer_protocol(uri) is Protocols.HTTP:
             parsed_url = urlparse(uri)
@@ -143,7 +143,11 @@ class FileIO(FileType):
                     measured_size = len(ffile.read())
 
             original_file_size = measured_size // (2 ** 10)
-            original_access_time = file_statistics.get_all('Date')[0]
+
+            try:
+                original_access_time = file_statistics.get_all('Date')[0]
+            except TypeError:
+                original_access_time = datetime.strftime(datetime.now(), '%c')
 
         return {
             'original_file_name': original_file_name,
@@ -299,6 +303,14 @@ class FileIO(FileType):
 
         return file_name
 
+    @staticmethod
+    def pupyl_temp_data_dir():
+        """Returns a safe data directory."""
+        return os.path.join(
+            tempfile.gettempdir(),
+            'pupyl'
+        )
+
     @classmethod
     def scan_csv_bzip2(cls, uri):
         """
@@ -450,8 +462,8 @@ class FileIO(FileType):
                     'Processing, please wait.',
                     color='green',
                     attrs=['bold']
-                    )
                 )
+            )
 
             for index, value in enumerate(iterable):
                 try:

@@ -107,13 +107,13 @@ def test_acceleration_discovery(monkeypatch):
         Extractors,
         '__init__',
         mocked___init__
-        )
+    )
 
     monkeypatch.setattr(
         Extractors,
         'acceleration_discovery',
         mocked_acceleration_discovery
-        )
+    )
 
     assert Extractors(
         Characteristics.LIGHTWEIGHT_REGULAR_PRECISION

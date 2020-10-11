@@ -146,7 +146,7 @@ def test_image_size_property():
     image_database = ImageDatabase(
         data_dir=TEST_DIRECTORY,
         import_images=True
-        )
+    )
 
     test_image_size = (320, 200)
     image_database.image_size = test_image_size
@@ -158,7 +158,7 @@ def test_image_size_property_no_import_images():
     image_database = ImageDatabase(
         data_dir=TEST_DIRECTORY,
         import_images=False
-        )
+    )
 
     test_image_size = (800, 600)
     assert image_database.image_size == test_image_size
@@ -169,7 +169,7 @@ def test_insert_import_images():
     image_database = ImageDatabase(
         data_dir=TEST_TEMP_DIRECTORY,
         import_images=True
-        )
+    )
 
     image_database.insert(10, 'tests/test_image.jpg')
 
@@ -182,7 +182,7 @@ def test_insert_no_import_images():
     image_database = ImageDatabase(
         data_dir=TEST_TEMP_DIRECTORY,
         import_images=False
-        )
+    )
 
     image_database.insert(20, 'tests/test_image.jpg')
 
@@ -203,7 +203,7 @@ def test_load_image():
         """Closure for method load_image."""
         return image_database.get_image(
             image_database.mount_file_name(index, 'jpg')
-            )
+        )
 
     test_image = image_database.load_image(test_index)
 
