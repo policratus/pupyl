@@ -76,6 +76,7 @@ def test_index_invalid_url():
 
     assert True
 
+
 def test_pupyl_temp_data_dir():
     """Unit test for instance saving on temporary dir."""
     pupyl_test = PupylImageSearch()
