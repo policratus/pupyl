@@ -16,8 +16,7 @@ from pupyl.duplex.file_io import FileIO
 from pupyl.search import PupylImageSearch
 
 
-STATIC_FOLDER = os.path.abspath(os.path.join('pupyl', 'web', 'static'))
-TEMPLATE_FILE = os.path.join(STATIC_FOLDER, 'template.html')
+TEMPLATE_FILE = os.path.join('pupyl', 'web', 'template.html')
 
 
 def serve(data_dir=None, port=8080):
