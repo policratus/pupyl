@@ -4,7 +4,6 @@ interface Module.
 Create a web interface to query images and see results
 based on indexed images on database.
 """
-import os
 import webbrowser
 from http.server import SimpleHTTPRequestHandler
 import socketserver
@@ -16,7 +15,48 @@ from pupyl.duplex.file_io import FileIO
 from pupyl.search import PupylImageSearch
 
 
-TEMPLATE_FILE = os.path.join('pupyl', 'web', 'template.html')
+TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet"
+href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+crossorigin="anonymous">
+<meta charset="UTF-8">
+<title>
+&#129535; Pupyl is a really fast image search library which you can index your
+own (thousands of) images and find similar images in milliseconds.
+</title>
+</head>
+<body>
+<div class="jumbotron text-center">
+<h1>&#129535; Pupyl Image Search</h1>
+<p class="lead">Pupyl is a really fast image search library which you can index
+your own (thousands of) images and find similar images in milliseconds.</p>
+<form>
+<div class="form-group">
+<label for="uri">Choose an image url as query.</label>
+<input type="url" class="form-control" id="uri" name="uri"
+placeholder="Place an image url here for search." aria-describedby="url_help">
+<small id="url_help" class="form-text text-muted">
+Image's URL to use as query.</small>
+</div>
+<button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<br>
+<div class="text-center">
+<figure class="figure">
+{query}
+</figure>
+</div>
+</div>
+<div class="text-center">
+{images}
+</div>
+</body>
+</html>
+"""
 
 
 def serve(data_dir=None, port=8080):
@@ -59,9 +99,6 @@ def serve(data_dir=None, port=8080):
 
             image_tags = self.images(query_list)
 
-            with open(TEMPLATE_FILE) as template:
-                html_template = template.read()
-
             if query_list:
                 query_image = '<img class="img-thumbnail" ' + \
                     f'src="{query_list[0]}">' + \
@@ -70,7 +107,7 @@ def serve(data_dir=None, port=8080):
 
             self.wfile.write(
                 bytes(
-                    html_template.format(
+                    TEMPLATE.format(
                         images=image_tags,
                         query=query_image if query_image else ''),
                     'utf-8'
