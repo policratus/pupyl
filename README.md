@@ -15,14 +15,14 @@ The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform i
 ## 🎉 Getting started
 ### 📦 Installation
 Installing `pupyl` on your environment is pretty easy:
-```python
+```shell
 # pypi
 pip install pupyl
 ```
 or
-```python
+```shell
 # anaconda
-conda install pupyl
+conda install -c policratus pupyl
 ```
 ## 🚸 Usage
 ```python
@@ -48,11 +48,11 @@ See all dependencies here: [dependencies](https://github.com/policratus/pupyl/ne
 
 ### 🐧 Linux
 Some linux distros are packaged without some essential applications to built `pupyl` dependencies. If during the installation you face errors like this:
-```
+```shell
 error: command 'x86_64-linux-gnu-gcc' failed with exit status 1
 ```
 try install `C/C++` build dependencies and `python` development headers, like this:
-```
+```shell
 # Debian/Ubuntu
 sudo apt install build-essential python3-dev
 

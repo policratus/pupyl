@@ -23,9 +23,13 @@ jobs:
       run: |
         pip install flake8
         make flake8
-    - name: Tests and coverage
+    - name: Tests
       run: |
         pip install pytest pytest-cov
         make test
-        make coverage
-        bash <(curl -s https://codecov.io/bash)
+    - name: Coverage report
+      run: make coverage
+    - name: CodeCov upload
+      uses: codecov/codecov-action@v1
+      with:
+        fail_ci_if_error: true

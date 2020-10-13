@@ -226,3 +226,5 @@ def serve(data_dir=None, port=8080):
         )
 
         serve(data_dir=data_dir, port=port + 1)
+    except KeyboardInterrupt:
+        print('🧿 Pupyl says bye.')

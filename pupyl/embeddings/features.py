@@ -23,7 +23,7 @@ class Characteristics(Enum):
     LIGHTWEIGHT_REGULAR_PRECISION = auto()
     # DenseNet169
     MEDIUMWEIGHT_GOOD_PRECISION = auto()
-    # NASNetLarge
+    # EfficientNetB7
     HEAVYWEIGHT_HUGE_PRECISION = auto()
 
     @staticmethod
@@ -118,7 +118,6 @@ class Extractors(ImageIO):
         pooling = 'max'
         include_top = False
         input_shape = (224, 224, 3)
-        input_shape_nasnet_large = (331, 331, 3)
 
         if self._characteristics is \
                 Characteristics.LIGHTWEIGHT_REGULAR_PRECISION:
@@ -142,13 +141,12 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.HEAVYWEIGHT_HUGE_PRECISION:
-            return networks.nasnet.preprocess_input, \
-                networks.nasnet.NASNetLarge(
+            return networks.efficientnet.preprocess_input, \
+                networks.efficientnet.EfficientNetB7(
                     weights=weights,
                     pooling=pooling,
                     include_top=include_top,
-                    # Specific shape for NASNetLarge
-                    input_shape=input_shape_nasnet_large
+                    input_shape=input_shape
                 )
 
         raise exceptions.UnknownCharacteristics
