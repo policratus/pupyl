@@ -22,7 +22,7 @@ pip install pupyl
 or
 ```python
 # anaconda
-conda install pupyl
+conda install -c policratus pupyl
 ```
 ## 🚸 Usage
 ```python
