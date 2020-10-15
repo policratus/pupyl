@@ -428,7 +428,7 @@ class FileIO(FileType):
                     yield os.path.join(root, ffile)
 
     @staticmethod
-    def progress(iterable, precise=False):
+    def progress(iterable, precise=False, message=None):
         """
         Utility method to interface process progress bar with users.
         It supports two way of unpacking the iterable, throughout `precise`
@@ -449,7 +449,13 @@ class FileIO(FileType):
             If the progress should be precise
             (with actual percentage of completion) or just an
             interface during process running.
+
+        message: (optional)(default: None): str
+            A custom message when reporting progress.
         """
+        if not message:
+            message = 'Processing, please wait.'
+
         if precise:
             try:
                 count = len(iterable)
@@ -459,7 +465,7 @@ class FileIO(FileType):
 
             print(
                 termcolor.colored(
-                    'Processing, please wait.',
+                    message,
                     color='green',
                     attrs=['bold']
                 )
@@ -490,7 +496,7 @@ class FileIO(FileType):
             ):
                 print(
                     ' ' + value_clock[1],
-                    f' Processed {index + 1} items.',
+                    ' '.join((message, f'{index + 1} items.')),
                     end='\r'
                 )
 

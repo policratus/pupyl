@@ -5,19 +5,17 @@ Pupyl is a really fast image search library which you
 can index your own (millions of) images and find similar
 images in milliseconds.
 """
-__version__ = 'v0.10.2'
+__version__ = 'v0.10.3'
 
 
 import os
 import json
-from urllib.error import URLError
-from http.client import RemoteDisconnected
+import concurrent.futures
 
 from pupyl.duplex.file_io import FileIO
 from pupyl.embeddings.features import Extractors, Characteristics
 from pupyl.storage.database import ImageDatabase
 from pupyl.indexer.facets import Index
-from pupyl.duplex.exceptions import FileIsNotImage
 
 
 class PupylImageSearch:
@@ -58,7 +56,7 @@ class PupylImageSearch:
                 self._characteristic = characteristic
             else:
                 self._characteristic = Characteristics.\
-                    LIGHTWEIGHT_REGULAR_PRECISION
+                    HEAVYWEIGHT_HUGE_PRECISION
 
         self.image_database = ImageDatabase(
             import_images=self._import_images,
@@ -112,31 +110,51 @@ class PupylImageSearch:
 
             self._index_configuration('w')
 
-            for rank, uri_from_file in enumerate(
-                    extractor.progress(extractor.scan(uri))
-            ):
-                features_tensor_name = self.image_database.mount_file_name(
-                    rank,
-                    'npy'
-                )
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                futures = {
+                    executor.submit(
+                        self.image_database.insert,
+                        rank,
+                        uri_from_file
+                    ): rank
+                    for rank, uri_from_file in enumerate(extractor.scan(uri))
+                }
 
-                try:
+                ranks = []
+
+                for future in extractor.progress(
+                        concurrent.futures.as_completed(futures),
+                        message='Importing images.'
+                ):
+                    ranks.append(futures[future])
+
+                for rank in extractor.progress(
+                    sorted(ranks),
+                    precise=True,
+                    message='Indexing images.'
+                ):
+                    features_tensor_name = self.image_database.\
+                        mount_file_name(
+                            rank,
+                            'npy'
+                        )
+
                     extractor.save_tensor(
                         extractor.extract,
-                        uri_from_file,
+                        self.image_database.mount_file_name(
+                            rank,
+                            'jpg'
+                        ),
                         features_tensor_name
                     )
 
-                    self.image_database.insert(len(index), uri_from_file)
-                except (
-                        URLError, FileIsNotImage,
-                        RemoteDisconnected, ConnectionResetError
-                ):
-                    continue
+                    index.append(
+                        extractor.load_tensor(
+                            features_tensor_name
+                        )
+                    )
 
-                index.append(extractor.load_tensor(features_tensor_name))
-
-                os.remove(features_tensor_name)
+                    os.remove(features_tensor_name)
 
     def search(self, query, top=4):
         """

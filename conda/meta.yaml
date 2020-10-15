@@ -1,5 +1,5 @@
 {% set name = "pupyl" %}
-{% set version = "0.10.2"%}
+{% set version = "0.10.3"%}
 
 package:
   name: "{{ name|lower }}"
@@ -42,7 +42,7 @@ about:
   description: |
     The pupyl project (pronounced pyoo·piel) is a pythonic library to image search. It's intended to made easy to read, index, retrieve and maintain a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
   doc_url: "https://pypi.org/project/pupyl/"
-  dev_url:
+  dev_url: "https://github.com/policratus/pupyl"
 
 extra:
   recipe-maintainers:
