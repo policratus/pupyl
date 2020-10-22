@@ -422,7 +422,7 @@ class FileIO(FileType):
 
             else:
                 raise FileScanNotPossible
-        except IsADirectoryError:
+        except (IsADirectoryError, PermissionError):
             for root, _, files in os.walk(uri):
                 for ffile in files:
                     yield os.path.join(root, ffile)
