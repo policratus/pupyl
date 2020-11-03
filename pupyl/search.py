@@ -16,6 +16,7 @@ from pupyl.duplex.file_io import FileIO
 from pupyl.embeddings.features import Extractors, Characteristics
 from pupyl.storage.database import ImageDatabase
 from pupyl.indexer.facets import Index
+from pupyl.duplex.exceptions import FileIsNotImage
 
 
 class PupylImageSearch:
@@ -139,14 +140,17 @@ class PupylImageSearch:
                             'npy'
                         )
 
-                    extractor.save_tensor(
-                        extractor.extract,
-                        self.image_database.mount_file_name(
-                            rank,
-                            'jpg'
-                        ),
-                        features_tensor_name
-                    )
+                    try:
+                        extractor.save_tensor(
+                            extractor.extract,
+                            self.image_database.mount_file_name(
+                                rank,
+                                'jpg'
+                            ),
+                            features_tensor_name
+                        )
+                    except FileIsNotImage:
+                        continue
 
                     index.append(
                         extractor.load_tensor(
