@@ -74,5 +74,14 @@ sudo pacman -S base-devel python3-dev
 sudo swupd bundle-add c-basic python-basic-dev
 ```
 
+### 🪟 Windows
+When installing `pupyl` on Windows, a `C++` compiler must be installed on the system. If there isn't a suitable compiler, you will probably see the error below.
+
+```shell
+error: Microsoft Visual C++ 14.0 is required. Get it with "Build Tools for Visual Studio": https://visualstudio.microsoft.com/downloads
+```
+
+Install the `C++` compiler donwloading it from [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+
 ## 📝 Documentation
 See a quick reference guide on the repository [wiki](https://github.com/policratus/pupyl/wiki). Complete API reference coming soon.
