@@ -39,6 +39,14 @@ class FileIO(FileType):
     """Operations over files."""
 
     @staticmethod
+    def pupyl_temp_data_dir():
+        """Returns a safe data directory."""
+        return os.path.join(
+            tempfile.gettempdir(),
+            'pupyl'
+        )
+
+    @staticmethod
     def _get_url(url):
         """
         Load a file from a remote (http(s)) location.
@@ -210,6 +218,14 @@ class FileIO(FileType):
         str:
             If described file type
         """
+        guessed_init_type = mimetypes.guess_type(uri)
+
+        if guessed_init_type[0] == 'application/x-tar':
+            return self.tar_compressed_types_resolve(
+                guessed_init_type[1],
+                mimetype
+            )
+
         file_bytes = self.get(uri)
 
         try:
@@ -303,14 +319,6 @@ class FileIO(FileType):
 
         return file_name
 
-    @staticmethod
-    def pupyl_temp_data_dir():
-        """Returns a safe data directory."""
-        return os.path.join(
-            tempfile.gettempdir(),
-            'pupyl'
-        )
-
     @classmethod
     def scan_csv_bzip2(cls, uri):
         """
@@ -397,6 +405,12 @@ class FileIO(FileType):
         generator of str:
             With the discovery file paths
         """
+        tar_compressed_file_readers = {
+            'TZ2': 'r{stream_type}bz2',
+            'TGZ': 'r{stream_type}gz',
+            'TXZ': 'r{stream_type}xz'
+        }
+
         try:
             inferred_type = self.infer_file_type_from_uri(uri)
 
@@ -420,12 +434,59 @@ class FileIO(FileType):
                 for line in self.scan_csv_xz(uri):
                     yield line
 
+            elif inferred_type in ('TXZ', 'TZ2', 'TGZ'):
+                for line in self.scan_compressed_tar_file(
+                    uri,
+                    tar_compressed_file_readers[inferred_type]
+                ):
+                    yield line
+
             else:
                 raise FileScanNotPossible
         except (IsADirectoryError, PermissionError):
             for root, _, files in os.walk(uri):
                 for ffile in files:
                     yield os.path.join(root, ffile)
+
+    @classmethod
+    def scan_compressed_tar_file(cls, uri, file_reader):
+        """
+        Scan a compressed tar file
+
+        Parameters
+        ----------
+        uri: str
+            Location where the tar file is stored
+
+        file_reader: str
+            Suitable file reader type.
+        """
+        # Waiting to explicitly remove the temporary directory
+        temp_directory = tempfile.TemporaryDirectory().name
+
+        inferred_protocol = cls._infer_protocol(uri)
+
+        if inferred_protocol is Protocols.FILE:
+
+            with tarfile.open(
+                uri,
+                file_reader.format(stream_type=':')
+            ) as tar_file:
+                tar_file.extractall(temp_directory)
+
+        elif inferred_protocol is Protocols.HTTP:
+
+            with urlopen(uri) as opened_url, \
+                tarfile.open(
+                    fileobj=opened_url,
+                    mode=file_reader.format(stream_type='|')
+            ) as tar_file:
+                for member in cls.progress(tar_file):
+                    tar_file.extract(member, path=temp_directory)
+
+        for root, _, files in os.walk(temp_directory):
+            for ffile in files:
+                yield os.path.join(root, ffile)
 
     @staticmethod
     def progress(iterable, precise=False, message=None):
