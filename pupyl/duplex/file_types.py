@@ -32,6 +32,37 @@ class FileMimeTypes(Enum):
     BZ2 = 'application/x-bzip2'
     ZIP = 'application/zip'
     LXZ = 'application/x-xz'
+    TXZ = 'application/tar-xz'
+    TGZ = 'application/tar-gz'
+    TZ2 = 'application/tar-bz2'
+
+
+class TarCompressedTypes:
+    """Describes all supported tar compressed types."""
+    _types = {
+        'gzip': {
+            'mimetype': FileMimeTypes.TGZ.value,
+            'name': FileMimeTypes.TGZ.name
+        },
+        'xz': {
+            'mimetype': FileMimeTypes.TXZ.value,
+            'name': FileMimeTypes.TXZ.name
+        },
+        'bzip2': {
+            'mimetype': FileMimeTypes.TZ2.value,
+            'name': FileMimeTypes.TZ2.name
+        }
+    }
+
+    @classmethod
+    def name(cls, sub_type):
+        """Return the name of some sub type"""
+        return cls._types[sub_type]['name']
+
+    @classmethod
+    def mime(cls, sub_type):
+        """Return the mime type of some sub type"""
+        return cls._types[sub_type]['mimetype']
 
 
 class FileType:
@@ -91,8 +122,8 @@ class FileType:
         """
         try:
             header = cls.header(bytess)
-        except TypeError:
-            raise exceptions.FileTypeNotSupportedYet
+        except TypeError as type_error:
+            raise exceptions.FileTypeNotSupportedYet from type_error
 
         for hexa in FileHeaderHex:
             if hexa.value == header:
@@ -103,6 +134,28 @@ class FileType:
                 return hexa.name
 
         raise exceptions.FileTypeNotSupportedYet
+
+    @staticmethod
+    def tar_compressed_types_resolve(sub_type, mimetype=False):
+        """
+        Resolve tar file compression type (if any)
+
+        Parameters
+        ----------
+        sub_type: str
+            The sub type of the tar compressed type
+
+        mimetype (optional: default False): bool
+            If should be returned the MIME type instead of internal
+            file type name.
+
+        Returns
+        -------
+        str:
+            With inferred tar (compressed) type
+        """
+        return TarCompressedTypes.mime(sub_type) \
+            if mimetype else TarCompressedTypes.name(sub_type)
 
     @classmethod
     def is_image(cls, bytess):

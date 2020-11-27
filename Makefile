@@ -19,16 +19,20 @@ clean:
 	@find . -name "*.log" | xargs rm -rf
 	@find . -name "*.egg-info" | xargs rm -rf
 	@find . -name "build" | xargs rm -rf
+	@-pkill -f 8888 || true
 
 flake8: clean
 	@flake8 --show-source --ignore=E402 .
 
-test: clean
+test_http_server:
+	@python -c "import http.server;import socketserver;import os;os.chdir(os.path.join('tests', 'tar_files'));httpd = socketserver.TCPServer(('', 8888), http.server.SimpleHTTPRequestHandler);httpd.serve_forever()" &
+
+test: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs
 
-coverage: clean
+coverage: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test --cov-report=xml --cov=.
 
-coverage-html: clean
+coverage-html: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=html --cov=.
 	$(OPEN_EXECUTABLE) htmlcov/index.html

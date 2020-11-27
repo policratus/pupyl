@@ -4,12 +4,14 @@ Unit tests related to duplex.file_io module
 import os
 import csv
 import tempfile
+import mimetypes
 from tarfile import is_tarfile
 from os import walk
 from os.path import abspath, exists, join
 from pathlib import Path
 from unittest import TestCase
 
+from pupyl.duplex.file_types import TarCompressedTypes
 from pupyl.duplex.file_io import FileIO, Protocols
 from pupyl.duplex.exceptions import FileTypeNotSupportedYet, \
     FileScanNotPossible
@@ -29,6 +31,7 @@ TEST_CSV_ZIP = abspath(TEST_SCAN_DIR + 'test_csv.csv.zip')
 TEST_CSV_GZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.gz')
 TEST_CSV_BZ2 = abspath(TEST_SCAN_DIR + 'test_csv.csv.bz2')
 TEST_CSV_XZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.xz')
+TEST_TAR_LOCATION = TEST_DIR + 'tar_files'
 
 
 def util_test_csv(path):
@@ -123,9 +126,7 @@ def test__infer_protocol_local():
 
 
 def test__infer_protocol_unknown():
-    """
-    Unit tests for _infer_protocol method, unknown case.
-    """
+    """ Unit tests for _infer_protocol method, unknown case.  """
     assert FileIO._infer_protocol(TEST_UNKNOWN) is Protocols.UNKNOWN
 
 
@@ -357,6 +358,35 @@ def test_infer_file_type_from_uri_remote():
     assert file_io.infer_file_type_from_uri(TEST_URL) == 'JPG'
 
 
+def test_infer_file_type_tar_files():
+    """Unit test for method infer_file_type_from_uri, tar file case."""
+    file_io = FileIO()
+
+    for ffile in os.listdir(TEST_TAR_LOCATION):
+        test_file_type = mimetypes.guess_type(
+            os.path.join(
+                TEST_TAR_LOCATION,
+                ffile
+            )
+        )[1]
+
+        assert file_io.infer_file_type_from_uri(
+            os.path.join(
+                TEST_TAR_LOCATION,
+                ffile
+            ),
+            mimetype=True
+        ) == TarCompressedTypes.mime(test_file_type)
+
+        assert file_io.infer_file_type_from_uri(
+            os.path.join(
+                TEST_TAR_LOCATION,
+                ffile
+            ),
+            mimetype=False
+        ) == TarCompressedTypes.name(test_file_type)
+
+
 def test_progress_not_precise():
     """Unit test for method progress, not precise case."""
     test_generator = range(10)
@@ -456,3 +486,52 @@ def test_bind():
             TEST_SCAN_DIR
         )
     )
+
+
+def test_scan_tar_files():
+    """Unit test for method scan, compressed tar file case."""
+    file_io = FileIO()
+
+    for ffile in os.listdir(TEST_TAR_LOCATION):
+        for dfile in file_io.scan(
+            os.path.join(TEST_TAR_LOCATION, ffile)
+        ):
+            assert os.path.exists(dfile)
+
+
+def test_scan_compressed_tar_file_local():
+    """Unit test for method scan_compressed_tar_file, local case."""
+    test_tar_compressed_file_readers = {
+        'TZ2': 'r:bz2',
+        'TGZ': 'r:gz',
+        'TXZ': 'r:xz'
+    }
+
+    file_io = FileIO()
+
+    for ffile in os.listdir(TEST_TAR_LOCATION):
+        test_file_type = mimetypes.guess_type(
+            os.path.join(
+                TEST_TAR_LOCATION,
+                ffile
+            )
+        )[1]
+
+        for dfile in file_io.scan_compressed_tar_file(
+            os.path.join(TEST_TAR_LOCATION, ffile),
+            test_tar_compressed_file_readers[
+                TarCompressedTypes.name(test_file_type)
+            ]
+        ):
+            assert os.path.exists(dfile)
+
+
+def test_scan_compressed_tar_file_http():
+    """Unit test for method scan_compressed_tar_file, http case."""
+    test_uri = 'http://localhost:8888/images.tar.xz'
+    test_file_reader = 'r|xz'
+
+    file_io = FileIO()
+
+    for ffile in file_io.scan_compressed_tar_file(test_uri, test_file_reader):
+        assert os.path.exists(ffile)
