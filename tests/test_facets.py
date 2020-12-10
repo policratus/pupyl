@@ -1,5 +1,6 @@
 """Unit tests related to indexer.facets module."""
 import os
+import tempfile
 from unittest import TestCase
 
 import numpy
@@ -7,13 +8,15 @@ import numpy
 from pupyl.indexer.facets import Index
 from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
     NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
-    NullTensorError
+    NullTensorError, TopNegativeOrZero, EmptyIndexError
 from pupyl.duplex.file_io import FileIO
 
 
-TEST_INDEX_PATH = os.path.abspath('tests/')
-TEST_INDEX_SEARCH_PATH = os.path.join(TEST_INDEX_PATH, 'test_search/')
-TEST_INDEX_INVALID_FILE = os.path.abspath('tests/test_index/')
+TEST_INDEX_PATH = os.path.abspath('tests')
+TEST_INDEX_SEARCH_PATH = os.path.join(TEST_INDEX_PATH, 'test_search')
+TEST_INDEX_INVALID_FILE = os.path.join(TEST_INDEX_PATH, 'test_index')
+TEST_INDEX_EXPORT = os.path.join(TEST_INDEX_PATH, 'test_index_export')
+TEST_EMPTY_INDEX = os.path.join(TEST_INDEX_PATH, 'test_empty_index')
 TEST_VECTOR_SIZE = 128
 
 INDEX = Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH)
@@ -74,6 +77,19 @@ class TestCases(TestCase):
         """Unit test for remove, index error case."""
         with self.assertRaises(IndexError):
             INDEX.remove(999)
+
+    def test_negative_top(self):
+        """Unit test for top parameter, negative case."""
+
+        with self.assertRaises(TopNegativeOrZero):
+            with Index(4, TEST_INDEX_SEARCH_PATH) as index:
+                _ = [*index.group_by(top=-1)]
+
+    def test_empty_index(self):
+        """Unit test for top parameter, negative case."""
+        with self.assertRaises(EmptyIndexError):
+            with Index(1, TEST_EMPTY_INDEX) as index:
+                _ = [*index.group_by()]
 
 
 def test_open_index():
@@ -301,3 +317,61 @@ def test_search():
         test_result = [*index.search(query_array, results=2)]
 
     assert expected_search_result == test_result
+
+
+def test_group_by():
+    """Unit test for method group_by."""
+    expected_result = {0: [25]}
+
+    with Index(4, TEST_INDEX_SEARCH_PATH) as index:
+        test_result = [*index.group_by(top=1)][0]
+
+    assert expected_result == test_result
+
+
+def test_group_by_position():
+    """Unit test for method group_by."""
+    expected_result = [25, 89, 88, 44, 38, 64, 10, 101, 78, 67]
+
+    with Index(4, TEST_INDEX_SEARCH_PATH) as index:
+        test_result = [*index.group_by(position=0)][0]
+
+    assert expected_result == test_result
+
+
+def test_export_group_by():
+    """Unit test for method export_group_by method."""
+    test_vector_size = 2560
+
+    test_files = set([f'{fname}.jpg' for fname in range(16)])
+    test_files.add('group.jpg')
+
+    with Index(test_vector_size, data_dir=TEST_INDEX_EXPORT) as index:
+        for _ in range(2):
+            index.append(numpy.random.normal(size=test_vector_size))
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            index.export_by_group_by(temp_dir)
+
+            for _, _, files in os.walk(temp_dir):
+                for ffile in files:
+                    assert ffile in test_files
+
+
+def test_export_group_by_position():
+    """Unit test for method export_group_by method, position case."""
+    test_vector_size = 2560
+
+    test_files = set([f'{fname}.jpg' for fname in range(16)])
+    test_files.add('group.jpg')
+
+    with Index(test_vector_size, data_dir=TEST_INDEX_EXPORT) as index:
+        for _ in range(2):
+            index.append(numpy.random.normal(size=test_vector_size))
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            index.export_by_group_by(temp_dir, top=1, position=0)
+
+            for _, _, files in os.walk(temp_dir):
+                for ffile in files:
+                    assert ffile in test_files
