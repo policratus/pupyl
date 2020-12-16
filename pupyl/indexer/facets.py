@@ -4,15 +4,17 @@ facets Module.
 Hyperspace indexing and operations.
 """
 import os
-from shutil import move
+from shutil import move, copyfile
 
 from annoy import AnnoyIndex
 
 from pupyl.indexer.exceptions import FileIsNotAnIndex, \
     IndexNotBuildYet, NoDataDirForPermanentIndex, \
-    DataDirDefinedForVolatileIndex, NullTensorError
+    DataDirDefinedForVolatileIndex, NullTensorError, \
+    TopNegativeOrZero, EmptyIndexError
 from pupyl.addendum.operators import intmul
 from pupyl.duplex.file_io import FileIO
+from pupyl.storage.database import ImageDatabase
 
 
 class Index:
@@ -71,6 +73,11 @@ class Index:
         else:
             self.tree = AnnoyIndex(size, metric='angular')
             self._is_new_index = True
+
+        self._image_database = ImageDatabase(
+            import_images=True,
+            data_dir=self._data_dir,
+        )
 
     @property
     def size(self):
@@ -285,3 +292,125 @@ class Index:
             return all_values[self._position]
 
         raise StopIteration
+
+    def group_by(self, top=10, **kwargs):
+        """
+        Returns all (or some position) on the index that is similar
+        with other elements inside index.
+
+        Parameters
+        ----------
+        top (optional, default 10): int
+            How many similar internal images should be returned
+
+        position (optional): int
+            Returns the groups based on a specified position.
+
+        Returns
+        -------
+        list:
+            If a position is defined
+
+        or
+
+        dict:
+            Generator with a dictionary containing internal ids
+            as key and a list of similar images as values.
+        """
+        position = kwargs.get('position')
+
+        if len(self) <= 1:
+            raise EmptyIndexError
+
+        if top >= 1:
+            if isinstance(position, int):
+
+                results = self.tree.get_nns_by_item(position, top + 1)
+
+                if len(results) > 1:
+
+                    yield results[1:]
+
+            else:
+
+                for item in range(self.tree.get_n_items()):
+
+                    yield {
+                        item: self.tree.get_nns_by_item(
+                            item,
+                            top + 1
+                        )[1:]
+                    }
+        else:
+
+            raise TopNegativeOrZero
+
+    def export_by_group_by(self, path, top=10, **kwargs):
+        """
+        Saves images, creating directories, based on their groups.
+
+        Parameters
+        ----------
+        path: str
+            Place to create the directories and export images
+
+        top (optional, default 10):
+            How many similar internal images should be returned
+
+        position (optional): int
+            Returns the groups based on a specified position.
+        """
+        for element in FileIO.progress(
+            self.group_by(
+                top=top,
+                position=kwargs.get('position')
+            )
+        ):
+            if isinstance(element, dict):
+                item = [*element.keys()][0]
+                similars = element[item]
+            elif isinstance(element, list):
+                item = kwargs['position']
+                similars = element
+
+            save_path = os.path.join(
+                path,
+                str(item)
+            )
+
+            os.makedirs(
+                save_path,
+                exist_ok=True
+            )
+
+            try:
+                copyfile(
+                    self._image_database.mount_file_name(
+                        item,
+                        'jpg'
+                    ),
+                    os.path.join(
+                        save_path,
+                        'group.jpg'
+                    )
+                )
+            except FileNotFoundError:
+                continue
+
+            for rank, similar in enumerate(similars):
+
+                original_file_path = self._image_database.mount_file_name(
+                    similar,
+                    'jpg'
+                )
+
+                try:
+                    copyfile(
+                        original_file_path,
+                        os.path.join(
+                            save_path,
+                            f'{rank + 1}.jpg'
+                        )
+                    )
+                except FileNotFoundError:
+                    continue
