@@ -173,27 +173,29 @@ class Index:
             raise NullTensorError
 
         if self._is_new_index:
-            self.tree.add_item(len(self), tensor)
-        else:
-            with Index(self.size, volatile=True, trees=self.trees) as tmp_idx:
-                for value in self.values():
-                    tmp_idx.append(value)
+            if check_unique and len(self) > 1:
 
-                if check_unique:
-                    tmp_idx.tree.build(self.size << intmul >> self.trees)
-
-                    result = tmp_idx.item(
-                        tmp_idx.index(tensor),
+                try:
+                    result = self.item(
+                        self.index(tensor),
                         top=1,
                         distances=True
                     )
-
+                except IndexError:
+                    pass
+                else:
                     if result[1][0] == 0.:
                         raise UniqueItemError
 
-                    tmp_idx.tree.unbuild()
+            self.tree.add_item(len(self), tensor)
 
-                tmp_idx.append(tensor)
+        else:
+
+            with Index(self.size, volatile=True, trees=self.trees) as tmp_idx:
+                for value in self.values():
+                    tmp_idx.append(value, check_unique)
+
+                tmp_idx.append(tensor, check_unique)
 
                 _temp_file = tmp_idx.path
 
