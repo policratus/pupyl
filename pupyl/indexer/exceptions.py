@@ -33,3 +33,7 @@ class TopNegativeOrZero(Error):
 
 class EmptyIndexError(Error):
     """Raised when a loaded index is empty."""
+
+
+class UniqueItemError(Error):
+    """Raised when a check for duplicates is performed and it finds one."""

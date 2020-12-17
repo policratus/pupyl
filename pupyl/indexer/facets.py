@@ -11,7 +11,7 @@ from annoy import AnnoyIndex
 from pupyl.indexer.exceptions import FileIsNotAnIndex, \
     IndexNotBuildYet, NoDataDirForPermanentIndex, \
     DataDirDefinedForVolatileIndex, NullTensorError, \
-    TopNegativeOrZero, EmptyIndexError
+    TopNegativeOrZero, EmptyIndexError, UniqueItemError
 from pupyl.addendum.operators import intmul
 from pupyl.duplex.file_io import FileIO
 from pupyl.storage.database import ImageDatabase
@@ -126,7 +126,7 @@ class Index:
 
     def items(self):
         """Return the indexed items."""
-        for item in range(self.tree.get_n_items()):
+        for item in range(len(self)):
             yield item
 
     def values(self):
@@ -145,7 +145,7 @@ class Index:
             return self.tree.get_item_vector(position)
 
         return self.tree.get_item_vector(
-            self.tree.get_n_items() - abs(position)
+            len(self) - abs(position)
         )
 
     def refresh(self):
@@ -153,7 +153,7 @@ class Index:
         self.tree.unload()
         self.tree.load(self.path)
 
-    def append(self, tensor):
+    def append(self, tensor, check_unique=False):
         """
         Insert a new tensor at the end of the index.
         Be advised that this operation is linear on index size ($O(n)$).
@@ -162,6 +162,12 @@ class Index:
         ----------
         tensor: numpy.ndarray or list
             A vector to insert into index.
+
+        check_unique (optional, default: False): bool
+            Defines if append method should verify the existence
+            of a really similar tensor on the current index. In other words,
+            it checks for the unicity of the value. Be advised that this check
+            creates an overhead on the append process.
         """
         if sum(tensor) == 0.:
             raise NullTensorError
@@ -172,6 +178,20 @@ class Index:
             with Index(self.size, volatile=True, trees=self.trees) as tmp_idx:
                 for value in self.values():
                     tmp_idx.append(value)
+
+                if check_unique:
+                    tmp_idx.tree.build(self.size << intmul >> self.trees)
+
+                    result = tmp_idx.item(
+                        tmp_idx.index(tensor),
+                        top=1,
+                        distances=True
+                    )
+
+                    if result[1][0] == 0.:
+                        raise UniqueItemError
+
+                    tmp_idx.tree.unbuild()
 
                 tmp_idx.append(tensor)
 
@@ -248,7 +268,7 @@ class Index:
         Parameters
         ----------
         tensor: numpy.ndarray or list
-            A vector to insert into index.
+            A vector to search for the most similar.
 
         Returns
         ----------
@@ -257,14 +277,45 @@ class Index:
         """
         return self.tree.get_nns_by_vector(tensor, n=1)[0]
 
+    def item(self, position, top=10, distances=False):
+        """
+        Search the index using an internal position
+
+        Parameters
+        ----------
+        position: int
+            The item id within index.
+
+        top (optional, default 10): int
+            How many similar items should be returned.
+
+        distances (optional, default 10): bool
+            If should be returned also the distances between
+            items.
+
+        Returns
+        -------
+        if distances is True:
+            list of tuples:
+                Containing pairs of item and distances
+        else:
+            list:
+                Containing similar items.
+        """
+        return self.tree.get_nns_by_item(
+            position,
+            top,
+            include_distances=distances
+        )
+
     def search(self, tensor, results=16):
         """
-        Search for the first most similar image compared to the query.
+        Search for the first most similars image compared to the query.
 
         Parameters
         ----------
         tensor: numpy.ndarray or list
-            A vector to insert into index
+            A vector to search for the most similar images.
 
         results: int
             How many results to return. If similar images are less than
@@ -325,7 +376,7 @@ class Index:
         if top >= 1:
             if isinstance(position, int):
 
-                results = self.tree.get_nns_by_item(position, top + 1)
+                results = self.item(position, top + 1)
 
                 if len(results) > 1:
 
@@ -333,10 +384,10 @@ class Index:
 
             else:
 
-                for item in range(self.tree.get_n_items()):
+                for item in self.items():
 
                     yield {
-                        item: self.tree.get_nns_by_item(
+                        item: self.item(
                             item,
                             top + 1
                         )[1:]
