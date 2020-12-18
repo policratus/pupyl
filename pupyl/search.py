@@ -102,7 +102,7 @@ class PupylImageSearch:
         except FileNotFoundError:
             return False
 
-    def index(self, uri):
+    def index(self, uri, **kwargs):
         """
         Performs image indexing.
 
@@ -110,6 +110,10 @@ class PupylImageSearch:
         ----------
         uri: str
             Directory or file, or http(s) location.
+
+        **check_unique (optional): bool
+            If, during the index process, imported images
+            should have their unicity verified (to avoid duplicates).
         """
         with Extractors(
                 characteristics=self._characteristic
@@ -127,7 +131,9 @@ class PupylImageSearch:
                         rank,
                         uri_from_file
                     ): rank
-                    for rank, uri_from_file in enumerate(extractor.scan(uri))
+                    for rank, uri_from_file in enumerate(
+                        extractor.scan_images(uri)
+                    )
                 }
 
                 ranks = []
@@ -158,10 +164,16 @@ class PupylImageSearch:
                         features_tensor_name
                     )
 
+                    check_unique = kwargs.get('check_unique')
+
+                    if check_unique is None:
+                        check_unique = False
+
                     index.append(
                         extractor.load_tensor(
                             features_tensor_name
-                        )
+                        ),
+                        check_unique=check_unique
                     )
 
                     os.remove(features_tensor_name)

@@ -4,6 +4,7 @@ facets Module.
 Hyperspace indexing and operations.
 """
 import os
+from warnings import warn as warning
 from shutil import move, copyfile
 
 from annoy import AnnoyIndex
@@ -11,7 +12,7 @@ from annoy import AnnoyIndex
 from pupyl.indexer.exceptions import FileIsNotAnIndex, \
     IndexNotBuildYet, NoDataDirForPermanentIndex, \
     DataDirDefinedForVolatileIndex, NullTensorError, \
-    TopNegativeOrZero, EmptyIndexError, UniqueItemError
+    TopNegativeOrZero, EmptyIndexError
 from pupyl.addendum.operators import intmul
 from pupyl.duplex.file_io import FileIO
 from pupyl.storage.database import ImageDatabase
@@ -115,14 +116,14 @@ class Index:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context closing index."""
-        del exc_type, exc_val, exc_tb
+        if not exc_type:
 
-        if self._is_new_index:
-            self.tree.build(self.size << intmul >> self.trees)
+            if self._is_new_index:
+                self.tree.build(self.size << intmul >> self.trees)
 
-            self.tree.save(self.path)
+                self.tree.save(self.path)
 
-        self.tree.unload()
+            self.tree.unload()
 
     def items(self):
         """Return the indexed items."""
@@ -173,21 +174,32 @@ class Index:
             raise NullTensorError
 
         if self._is_new_index:
+
+            index_it = True
+
             if check_unique and len(self) > 1:
 
-                try:
-                    result = self.item(
-                        self.index(tensor),
-                        top=1,
-                        distances=True
-                    )
-                except IndexError:
-                    pass
-                else:
-                    if result[1][0] == 0.:
-                        raise UniqueItemError
+                self.tree.build(self.size << intmul >> self.trees)
 
-            self.tree.add_item(len(self), tensor)
+                result = self.item(
+                    self.index(tensor),
+                    top=1,
+                    distances=True
+                )
+
+                if result[1][0] <= .05:
+                    warning(
+                        'Tensor being indexed already exists in '
+                        'the database and the check for duplicates '
+                        'are on. Refusing to store again this tensor.'
+                    )
+
+                    index_it = False
+
+                self.tree.unbuild()
+
+            if index_it:
+                self.tree.add_item(len(self), tensor)
 
         else:
 

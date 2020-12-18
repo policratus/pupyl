@@ -29,13 +29,12 @@ _For installation troubleshooting, visit [troubleshooting](TROUBLESHOOTING.md)._
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
 
-
-SAMPLES = 'https://github.com/policratus/pupyl' + \
-          '/raw/master/samples/images.tar.xz'
-
 SEARCH = PupylImageSearch()
 
-SEARCH.index(SAMPLES)
+SEARCH.index(
+    'https://github.com/policratus/pupyl'
+    '/raw/master/samples/images.tar.xz'
+)
 
 interface.serve()
 ```
