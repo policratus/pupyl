@@ -347,7 +347,7 @@ def test_export_group_by():
     test_files.add('group.jpg')
 
     with Index(test_vector_size, data_dir=TEST_INDEX_EXPORT) as index:
-        for _ in range(2):
+        for _ in range(8):
             index.append(numpy.random.normal(size=test_vector_size))
 
         with tempfile.TemporaryDirectory() as temp_dir:

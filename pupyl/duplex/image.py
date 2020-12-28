@@ -111,6 +111,21 @@ class ImageIO(FileIO):
         """
         return b64encode(cls.get_image(uri, as_tensor=False))
 
+    def scan_images(self, uri):
+        """
+        Scans a source looking for images.
+
+        Parameters
+        ----------
+        uri: str
+            Location where the source is stored.
+        """
+        for ffile in self.scan(uri):
+            file_bytes = self.get(ffile)
+
+            if self.is_image(file_bytes):
+                yield ffile
+
     @classmethod
     def get_image_bytes_to_base64(cls, image_bytes):
         """

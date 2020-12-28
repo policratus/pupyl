@@ -2,6 +2,9 @@
 import os
 import json
 from tempfile import gettempdir, TemporaryDirectory
+from unittest import TestCase
+from urllib.error import URLError
+
 from pupyl.search import PupylImageSearch
 from pupyl.embeddings.features import Characteristics
 
@@ -12,6 +15,15 @@ TEST_SCAN_DIR = os.path.abspath('tests/test_scan/test_csv.csv.gz')
 TEST_INVALID_URL = os.path.abspath('tests/test_scan/invalid.csv')
 TEST_QUERY_IMAGE = 'https://static.flickr.com/210/500863916_bdd4b8cc5a.jpg'
 TEST_CONFIG_DIR = os.path.abspath('tests/test_index/')
+
+
+class TestCases(TestCase):
+    """Unit tests over special cases."""
+
+    def test_index_invalid_url(self):
+        """Unit test for method index, invalid url case."""
+        with self.assertRaises(URLError):
+            PUPYL.index(TEST_INVALID_URL)
 
 
 def test_index_no_config_file():
@@ -68,13 +80,6 @@ def test_index():
     assert os.path.isdir(TEST_DATA_DIR) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, 'pupyl.index')) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, '0', '0.jpg'))
-
-
-def test_index_invalid_url():
-    """Unit test for method index, invalid url case."""
-    PUPYL.index(TEST_INVALID_URL)
-
-    assert True
 
 
 def test_pupyl_temp_data_dir():

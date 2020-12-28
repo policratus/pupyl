@@ -117,7 +117,9 @@ class PupylImageSearch:
                         rank,
                         uri_from_file
                     ): rank
-                    for rank, uri_from_file in enumerate(extractor.scan(uri))
+                    for rank, uri_from_file in enumerate(
+                        extractor.scan_images(uri)
+                    )
                 }
 
                 ranks = []
