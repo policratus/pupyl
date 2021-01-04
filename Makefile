@@ -30,7 +30,7 @@ test_http_server:
 test: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs
 
-coverage: clean test_http_server
+coverage:
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test --cov-report=xml --cov=.
 
 coverage-html: clean test_http_server
