@@ -1,6 +1,7 @@
 """Unit tests related to indexer.facets module."""
 import os
 import tempfile
+import warnings
 from unittest import TestCase
 
 import numpy
@@ -10,6 +11,7 @@ from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
     NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
     NullTensorError, TopNegativeOrZero, EmptyIndexError
 from pupyl.duplex.file_io import FileIO
+from pupyl.embeddings.features import Extractors, Characteristics
 
 
 TEST_INDEX_PATH = os.path.abspath('tests')
@@ -17,6 +19,7 @@ TEST_INDEX_SEARCH_PATH = os.path.join(TEST_INDEX_PATH, 'test_search')
 TEST_INDEX_INVALID_FILE = os.path.join(TEST_INDEX_PATH, 'test_index')
 TEST_INDEX_EXPORT = os.path.join(TEST_INDEX_PATH, 'test_index_export')
 TEST_EMPTY_INDEX = os.path.join(TEST_INDEX_PATH, 'test_empty_index')
+TEST_CHECK_UNIQUE = os.path.join(TEST_INDEX_PATH, 'test_check_unique')
 TEST_VECTOR_SIZE = 128
 
 INDEX = Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH)
@@ -90,6 +93,30 @@ class TestCases(TestCase):
         with self.assertRaises(EmptyIndexError):
             with Index(1, TEST_EMPTY_INDEX) as index:
                 _ = [*index.group_by()]
+
+
+def test_append_check_unique():
+    """Unit test for method append, check unique case."""
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter('always')
+
+        with Extractors(
+            Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
+        ) as extractor, \
+                Index(extractor.output_shape, volatile=True) as index:
+            for image in extractor.scan(TEST_CHECK_UNIQUE):
+                index.append(
+                    extractor.extract(image),
+                    check_unique=True
+                )
+
+        assert len(caught_warnings) == 1
+        assert issubclass(caught_warnings[-1].category, UserWarning)
+        assert str(
+            caught_warnings[-1].message
+        ) == 'Tensor being indexed already exists in the database ' + \
+            'and the check for duplicates are on. Refusing to store ' + \
+            'again this tensor.'
 
 
 def test_open_index():
@@ -343,7 +370,7 @@ def test_export_group_by():
     """Unit test for method export_group_by method."""
     test_vector_size = 2560
 
-    test_files = set([f'{fname}.jpg' for fname in range(16)])
+    test_files = set(f'{fname}.jpg' for fname in range(16))
     test_files.add('group.jpg')
 
     with Index(test_vector_size, data_dir=TEST_INDEX_EXPORT) as index:
@@ -362,7 +389,7 @@ def test_export_group_by_position():
     """Unit test for method export_group_by method, position case."""
     test_vector_size = 2560
 
-    test_files = set([f'{fname}.jpg' for fname in range(16)])
+    test_files = set(f'{fname}.jpg' for fname in range(16))
     test_files.add('group.jpg')
 
     with Index(test_vector_size, data_dir=TEST_INDEX_EXPORT) as index:

@@ -4,6 +4,7 @@ facets Module.
 Hyperspace indexing and operations.
 """
 import os
+from warnings import warn as warning
 from shutil import move, copyfile
 
 from annoy import AnnoyIndex
@@ -115,18 +116,18 @@ class Index:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context closing index."""
-        del exc_type, exc_val, exc_tb
+        if not exc_type:
 
-        if self._is_new_index:
-            self.tree.build(self.size << intmul >> self.trees)
+            if self._is_new_index:
+                self.tree.build(self.size << intmul >> self.trees)
 
-            self.tree.save(self.path)
+                self.tree.save(self.path)
 
-        self.tree.unload()
+            self.tree.unload()
 
     def items(self):
         """Return the indexed items."""
-        for item in range(self.tree.get_n_items()):
+        for item in range(len(self)):
             yield item
 
     def values(self):
@@ -145,7 +146,7 @@ class Index:
             return self.tree.get_item_vector(position)
 
         return self.tree.get_item_vector(
-            self.tree.get_n_items() - abs(position)
+            len(self) - abs(position)
         )
 
     def refresh(self):
@@ -153,7 +154,7 @@ class Index:
         self.tree.unload()
         self.tree.load(self.path)
 
-    def append(self, tensor):
+    def append(self, tensor, check_unique=False):
         """
         Insert a new tensor at the end of the index.
         Be advised that this operation is linear on index size ($O(n)$).
@@ -162,18 +163,51 @@ class Index:
         ----------
         tensor: numpy.ndarray or list
             A vector to insert into index.
+
+        check_unique (optional, default: False): bool
+            Defines if append method should verify the existence
+            of a really similar tensor on the current index. In other words,
+            it checks for the unicity of the value. Be advised that this check
+            creates an overhead on the append process.
         """
         if sum(tensor) == 0.:
             raise NullTensorError
 
         if self._is_new_index:
-            self.tree.add_item(len(self), tensor)
+
+            index_it = True
+
+            if check_unique and len(self) > 1:
+
+                self.tree.build(self.size << intmul >> self.trees)
+
+                result = self.item(
+                    self.index(tensor),
+                    top=1,
+                    distances=True
+                )
+
+                if result[1][0] <= .05:
+                    warning(
+                        'Tensor being indexed already exists in '
+                        'the database and the check for duplicates '
+                        'are on. Refusing to store again this tensor.'
+                    )
+
+                    index_it = False
+
+                self.tree.unbuild()
+
+            if index_it:
+                self.tree.add_item(len(self), tensor)
+
         else:
+
             with Index(self.size, volatile=True, trees=self.trees) as tmp_idx:
                 for value in self.values():
-                    tmp_idx.append(value)
+                    tmp_idx.append(value, check_unique)
 
-                tmp_idx.append(tensor)
+                tmp_idx.append(tensor, check_unique)
 
                 _temp_file = tmp_idx.path
 
@@ -248,7 +282,7 @@ class Index:
         Parameters
         ----------
         tensor: numpy.ndarray or list
-            A vector to insert into index.
+            A vector to search for the most similar.
 
         Returns
         ----------
@@ -257,14 +291,45 @@ class Index:
         """
         return self.tree.get_nns_by_vector(tensor, n=1)[0]
 
+    def item(self, position, top=10, distances=False):
+        """
+        Search the index using an internal position
+
+        Parameters
+        ----------
+        position: int
+            The item id within index.
+
+        top (optional, default 10): int
+            How many similar items should be returned.
+
+        distances (optional, default 10): bool
+            If should be returned also the distances between
+            items.
+
+        Returns
+        -------
+        if distances is True:
+            list of tuples:
+                Containing pairs of item and distances
+        else:
+            list:
+                Containing similar items.
+        """
+        return self.tree.get_nns_by_item(
+            position,
+            top,
+            include_distances=distances
+        )
+
     def search(self, tensor, results=16):
         """
-        Search for the first most similar image compared to the query.
+        Search for the first most similars image compared to the query.
 
         Parameters
         ----------
         tensor: numpy.ndarray or list
-            A vector to insert into index
+            A vector to search for the most similar images.
 
         results: int
             How many results to return. If similar images are less than
@@ -325,7 +390,7 @@ class Index:
         if top >= 1:
             if isinstance(position, int):
 
-                results = self.tree.get_nns_by_item(position, top + 1)
+                results = self.item(position, top + 1)
 
                 if len(results) > 1:
 
@@ -333,10 +398,10 @@ class Index:
 
             else:
 
-                for item in range(self.tree.get_n_items()):
+                for item in self.items():
 
                     yield {
-                        item: self.tree.get_nns_by_item(
+                        item: self.item(
                             item,
                             top + 1
                         )[1:]
