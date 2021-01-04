@@ -42,17 +42,17 @@ def test_get_image_as_tensor():
     """
     assert isinstance(
         ImageIO.get_image(TEST_LOCAL, as_tensor=True),
-        tensorflow.python.framework.ops.EagerTensor
+        tensorflow.Tensor
     )
 
     assert isinstance(
         ImageIO.get_image(TEST_LOCAL_GRAY, as_tensor=True),
-        tensorflow.python.framework.ops.EagerTensor
+        tensorflow.Tensor
     )
 
     assert isinstance(
         ImageIO.get_image(TEST_LOCAL_RBGA, as_tensor=True),
-        tensorflow.python.framework.ops.EagerTensor
+        tensorflow.Tensor
     )
 
 
