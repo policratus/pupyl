@@ -4,36 +4,32 @@ Exceptions regarding embeddings module operations
 
 
 class Error(Exception):
-    """
-    Base exception class
-    """
+    """Base exception class."""
 
 
 class FileIsNotAnIndex(Error):
-    """
-    Raised when a file is not recognized as a index file.
-    """
+    """Raised when a file is not recognized as a index file."""
 
 
 class IndexNotBuildYet(Error):
-    """
-    Raised when a file is not recognized as a index file.
-    """
+    """Raised when a file is not recognized as a index file."""
 
 
 class NoDataDirForPermanentIndex(Error):
-    """
-    Raised when a data directory isn't defined for a not volatile index.
-    """
+    """Raised when a data directory isn't defined for a not volatile index."""
 
 
 class DataDirDefinedForVolatileIndex(Error):
-    """
-    Raised when a data directory is defined for a volatile index.
-    """
+    """Raised when a data directory is defined for a volatile index."""
 
 
 class NullTensorError(Error):
-    """
-    Raised when trying to insert a null tensor.
-    """
+    """Raised when trying to insert a null tensor."""
+
+
+class TopNegativeOrZero(Error):
+    """Raised when a top results is zero or below."""
+
+
+class EmptyIndexError(Error):
+    """Raised when a loaded index is empty."""

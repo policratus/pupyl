@@ -43,6 +43,9 @@ class PupylImageSearch:
             self._characteristic = Characteristics.by_name(
                 configurations['characteristic']
             )
+
+            if configurations.get('feature_size'):
+                self._feature_size = configurations['feature_size']
         else:
             import_images = kwargs.get('import_images')
             characteristic = kwargs.get('characteristic')
@@ -63,7 +66,7 @@ class PupylImageSearch:
             data_dir=self._data_dir
         )
 
-    def _index_configuration(self, mode):
+    def _index_configuration(self, mode, **kwargs):
         """
         Load or save an index configuration file, if exists.
 
@@ -72,6 +75,9 @@ class PupylImageSearch:
         mode (values: ('r', 'w')): str
             Defines which mode should be used over configuration
             file. 'r' is for file reading, 'w' for writing.
+
+        feature_size(optional): int
+            The size of current feature extraction method.
         """
         try:
             with open(self._index_config_path, mode) as config_file:
@@ -80,11 +86,15 @@ class PupylImageSearch:
                     return json.load(config_file)
 
                 if mode == 'w':
+                    feature_size = kwargs.get('feature_size')
 
                     configurations = {
                         'import_images': self._import_images,
-                        'characteristic': self._characteristic.name
+                        'characteristic': self._characteristic.name,
                     }
+
+                    if feature_size:
+                        configurations['feature_size'] = feature_size
 
                     json.dump(configurations, config_file)
 
@@ -92,7 +102,7 @@ class PupylImageSearch:
         except FileNotFoundError:
             return False
 
-    def index(self, uri):
+    def index(self, uri, **kwargs):
         """
         Performs image indexing.
 
@@ -100,6 +110,10 @@ class PupylImageSearch:
         ----------
         uri: str
             Directory or file, or http(s) location.
+
+        **check_unique (optional): bool
+            If, during the index process, imported images
+            should have their unicity verified (to avoid duplicates).
         """
         with Extractors(
                 characteristics=self._characteristic
@@ -108,7 +122,7 @@ class PupylImageSearch:
             data_dir=self._data_dir
         ) as index:
 
-            self._index_configuration('w')
+            self._index_configuration('w', feature_size=extractor.output_shape)
 
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 futures = {
@@ -117,7 +131,9 @@ class PupylImageSearch:
                         rank,
                         uri_from_file
                     ): rank
-                    for rank, uri_from_file in enumerate(extractor.scan(uri))
+                    for rank, uri_from_file in enumerate(
+                        extractor.scan_images(uri)
+                    )
                 }
 
                 ranks = []
@@ -148,10 +164,16 @@ class PupylImageSearch:
                         features_tensor_name
                     )
 
+                    check_unique = kwargs.get('check_unique')
+
+                    if check_unique is None:
+                        check_unique = False
+
                     index.append(
                         extractor.load_tensor(
                             features_tensor_name
-                        )
+                        ),
+                        check_unique=check_unique
                     )
 
                     os.remove(features_tensor_name)

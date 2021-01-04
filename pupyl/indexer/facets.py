@@ -4,15 +4,18 @@ facets Module.
 Hyperspace indexing and operations.
 """
 import os
-from shutil import move
+from warnings import warn as warning
+from shutil import move, copyfile
 
 from annoy import AnnoyIndex
 
 from pupyl.indexer.exceptions import FileIsNotAnIndex, \
     IndexNotBuildYet, NoDataDirForPermanentIndex, \
-    DataDirDefinedForVolatileIndex, NullTensorError
+    DataDirDefinedForVolatileIndex, NullTensorError, \
+    TopNegativeOrZero, EmptyIndexError
 from pupyl.addendum.operators import intmul
 from pupyl.duplex.file_io import FileIO
+from pupyl.storage.database import ImageDatabase
 
 
 class Index:
@@ -72,6 +75,11 @@ class Index:
             self.tree = AnnoyIndex(size, metric='angular')
             self._is_new_index = True
 
+        self._image_database = ImageDatabase(
+            import_images=True,
+            data_dir=self._data_dir,
+        )
+
     @property
     def size(self):
         """Getter for property size."""
@@ -108,18 +116,18 @@ class Index:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context closing index."""
-        del exc_type, exc_val, exc_tb
+        if not exc_type:
 
-        if self._is_new_index:
-            self.tree.build(self.size << intmul >> self.trees)
+            if self._is_new_index:
+                self.tree.build(self.size << intmul >> self.trees)
 
-            self.tree.save(self.path)
+                self.tree.save(self.path)
 
-        self.tree.unload()
+            self.tree.unload()
 
     def items(self):
         """Return the indexed items."""
-        for item in range(self.tree.get_n_items()):
+        for item in range(len(self)):
             yield item
 
     def values(self):
@@ -138,7 +146,7 @@ class Index:
             return self.tree.get_item_vector(position)
 
         return self.tree.get_item_vector(
-            self.tree.get_n_items() - abs(position)
+            len(self) - abs(position)
         )
 
     def refresh(self):
@@ -146,7 +154,7 @@ class Index:
         self.tree.unload()
         self.tree.load(self.path)
 
-    def append(self, tensor):
+    def append(self, tensor, check_unique=False):
         """
         Insert a new tensor at the end of the index.
         Be advised that this operation is linear on index size ($O(n)$).
@@ -155,18 +163,51 @@ class Index:
         ----------
         tensor: numpy.ndarray or list
             A vector to insert into index.
+
+        check_unique (optional, default: False): bool
+            Defines if append method should verify the existence
+            of a really similar tensor on the current index. In other words,
+            it checks for the unicity of the value. Be advised that this check
+            creates an overhead on the append process.
         """
         if sum(tensor) == 0.:
             raise NullTensorError
 
         if self._is_new_index:
-            self.tree.add_item(len(self), tensor)
+
+            index_it = True
+
+            if check_unique and len(self) > 1:
+
+                self.tree.build(self.size << intmul >> self.trees)
+
+                result = self.item(
+                    self.index(tensor),
+                    top=1,
+                    distances=True
+                )
+
+                if result[1][0] <= .05:
+                    warning(
+                        'Tensor being indexed already exists in '
+                        'the database and the check for duplicates '
+                        'are on. Refusing to store again this tensor.'
+                    )
+
+                    index_it = False
+
+                self.tree.unbuild()
+
+            if index_it:
+                self.tree.add_item(len(self), tensor)
+
         else:
+
             with Index(self.size, volatile=True, trees=self.trees) as tmp_idx:
                 for value in self.values():
-                    tmp_idx.append(value)
+                    tmp_idx.append(value, check_unique)
 
-                tmp_idx.append(tensor)
+                tmp_idx.append(tensor, check_unique)
 
                 _temp_file = tmp_idx.path
 
@@ -241,7 +282,7 @@ class Index:
         Parameters
         ----------
         tensor: numpy.ndarray or list
-            A vector to insert into index.
+            A vector to search for the most similar.
 
         Returns
         ----------
@@ -250,14 +291,45 @@ class Index:
         """
         return self.tree.get_nns_by_vector(tensor, n=1)[0]
 
+    def item(self, position, top=10, distances=False):
+        """
+        Search the index using an internal position
+
+        Parameters
+        ----------
+        position: int
+            The item id within index.
+
+        top (optional, default 10): int
+            How many similar items should be returned.
+
+        distances (optional, default 10): bool
+            If should be returned also the distances between
+            items.
+
+        Returns
+        -------
+        if distances is True:
+            list of tuples:
+                Containing pairs of item and distances
+        else:
+            list:
+                Containing similar items.
+        """
+        return self.tree.get_nns_by_item(
+            position,
+            top,
+            include_distances=distances
+        )
+
     def search(self, tensor, results=16):
         """
-        Search for the first most similar image compared to the query.
+        Search for the first most similars image compared to the query.
 
         Parameters
         ----------
         tensor: numpy.ndarray or list
-            A vector to insert into index
+            A vector to search for the most similar images.
 
         results: int
             How many results to return. If similar images are less than
@@ -285,3 +357,125 @@ class Index:
             return all_values[self._position]
 
         raise StopIteration
+
+    def group_by(self, top=10, **kwargs):
+        """
+        Returns all (or some position) on the index that is similar
+        with other elements inside index.
+
+        Parameters
+        ----------
+        top (optional, default 10): int
+            How many similar internal images should be returned
+
+        position (optional): int
+            Returns the groups based on a specified position.
+
+        Returns
+        -------
+        list:
+            If a position is defined
+
+        or
+
+        dict:
+            Generator with a dictionary containing internal ids
+            as key and a list of similar images as values.
+        """
+        position = kwargs.get('position')
+
+        if len(self) <= 1:
+            raise EmptyIndexError
+
+        if top >= 1:
+            if isinstance(position, int):
+
+                results = self.item(position, top + 1)
+
+                if len(results) > 1:
+
+                    yield results[1:]
+
+            else:
+
+                for item in self.items():
+
+                    yield {
+                        item: self.item(
+                            item,
+                            top + 1
+                        )[1:]
+                    }
+        else:
+
+            raise TopNegativeOrZero
+
+    def export_by_group_by(self, path, top=10, **kwargs):
+        """
+        Saves images, creating directories, based on their groups.
+
+        Parameters
+        ----------
+        path: str
+            Place to create the directories and export images
+
+        top (optional, default 10):
+            How many similar internal images should be returned
+
+        position (optional): int
+            Returns the groups based on a specified position.
+        """
+        for element in FileIO.progress(
+            self.group_by(
+                top=top,
+                position=kwargs.get('position')
+            )
+        ):
+            if isinstance(element, dict):
+                item = [*element.keys()][0]
+                similars = element[item]
+            elif isinstance(element, list):
+                item = kwargs['position']
+                similars = element
+
+            save_path = os.path.join(
+                path,
+                str(item)
+            )
+
+            os.makedirs(
+                save_path,
+                exist_ok=True
+            )
+
+            try:
+                copyfile(
+                    self._image_database.mount_file_name(
+                        item,
+                        'jpg'
+                    ),
+                    os.path.join(
+                        save_path,
+                        'group.jpg'
+                    )
+                )
+            except FileNotFoundError:
+                continue
+
+            for rank, similar in enumerate(similars):
+
+                original_file_path = self._image_database.mount_file_name(
+                    similar,
+                    'jpg'
+                )
+
+                try:
+                    copyfile(
+                        original_file_path,
+                        os.path.join(
+                            save_path,
+                            f'{rank + 1}.jpg'
+                        )
+                    )
+                except FileNotFoundError:
+                    continue

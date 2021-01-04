@@ -19,7 +19,7 @@ clean:
 	@find . -name "*.log" | xargs rm -rf
 	@find . -name "*.egg-info" | xargs rm -rf
 	@find . -name "build" | xargs rm -rf
-	@-pkill -f 8888 || true
+	@-pkill -i 8888 || true
 
 flake8: clean
 	@flake8 --show-source --ignore=E402 .
@@ -30,7 +30,7 @@ test_http_server:
 test: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs
 
-coverage: clean test_http_server
+coverage:
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test --cov-report=xml --cov=.
 
 coverage-html: clean test_http_server
