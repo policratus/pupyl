@@ -8,12 +8,13 @@ from pupyl.web import interface
 
 
 if __name__ == "__main__":
-    cli = PupylCommandLineInterface()
-    args = cli.parser.parse_args()
-    pupyl = PupylImageSearch()
+    CLI = PupylCommandLineInterface()
+    ARGS = CLI.parser.parse_args()
+    PUPYL = PupylImageSearch(data_dir=ARGS.data_dir)
 
-    pupyl.index(
-        args.data_dir
-    )
-
-    interface.serve()
+    if ARGS.command_name == 'index':
+        PUPYL.index(
+            ARGS.input_images
+        )
+    elif ARGS.command_name == 'serve':
+        interface.serve(data_dir=ARGS.data_dir)
