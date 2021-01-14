@@ -20,7 +20,9 @@ class PupylCommandLineInterface:
             fast image search library which you can index your
             own (millions of) images and find similar images in milliseconds.
             """,
-            epilog='👥 Contribute to pupyl on https://github.com/policratus/pupyl'
+            epilog="""
+            👥 Contribute to pupyl on https://github.com/policratus/pupyl'
+            """
         )
 
         parser.add_argument(
