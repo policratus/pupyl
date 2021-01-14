@@ -1,65 +1,74 @@
 """Unit tests for the command line interface."""
+from argparse import Namespace
+from unittest import TestCase
 
 from pupyl.cli import PupylCommandLineInterface
+
 
 CLI = PupylCommandLineInterface()
 
 
-def test_index_parser_with_all_arguments():
+class TestCases(TestCase):
+    """Unit test for special cases."""
+
+    def test_argument_parser_without_parameters(self):
+        """Unit test for method argument_parser, without params. case."""
+
+        with self.assertRaises(SystemExit):
+
+            _ = CLI.argument_parser()
+
+
+def test_parser_index_case():
     """Unit test for the index subcommand with all arguments."""
-    SUBCOMMAND = 'index'
-    INPUT_PATH = 'path/to/images'
-    DATA_DIR = 'path/to/assets'
-    EXPECTED_VARS = {
-        'command_name': SUBCOMMAND,
-        'input_images': INPUT_PATH,
-        'data_dir': DATA_DIR
+    sub_command = 'index'
+    input_path = 'path/to/images'
+    data_dir = 'path/to/assets'
+
+    expected_vars = {
+        'data_dir': data_dir,
+        'input_images': input_path,
+        'sub_parser_name': sub_command,
     }
 
-    args = CLI.parser.parse_args(
-        [SUBCOMMAND, INPUT_PATH, '--data_dir', DATA_DIR]
+    args = CLI.argument_parser(
+        commands=[data_dir, sub_command, input_path]
     )
 
-    assert vars(args) == EXPECTED_VARS
+    assert vars(args) == expected_vars
 
 
-def test_index_parser_with_mandatory_arguments_only():
-    """Unit test for the index subcommand with only mandatory arguments."""
-    SUBCOMMAND = 'index'
-    INPUT_PATH = 'path/to/images'
-    EXPECTED_VARS = {
-        'command_name': SUBCOMMAND,
-        'input_images': INPUT_PATH,
-        'data_dir': None
+def test_parser_serve_case():
+    """Unit test for the serve subcommand with all arguments."""
+    sub_command = 'serve'
+    data_dir = 'path/to/assets'
+
+    expected_vars = {
+        'data_dir': data_dir,
+        'sub_parser_name': sub_command,
     }
 
-    args = CLI.parser.parse_args([SUBCOMMAND, INPUT_PATH])
+    args = CLI.argument_parser(
+        commands=[data_dir, sub_command]
+    )
 
-    assert vars(args) == EXPECTED_VARS
-
-
-def test_serve_parser_with_no_arguments():
-    """Unit test for the serve subcommand with no arguments."""
-    SUBCOMMAND = 'serve'
-    EXPECTED_VARS = {
-        'command_name': SUBCOMMAND,
-        'data_dir': None
-    }
-
-    args = CLI.parser.parse_args([SUBCOMMAND])
-
-    assert vars(args) == EXPECTED_VARS
+    assert vars(args) == expected_vars
 
 
-def test_serve_parser_with_optional_argument():
-    """Unit test for the serve subcommand with optional argument."""
-    SUBCOMMAND = 'serve'
-    DATA_DIR = 'path/to/assets'
-    EXPECTED_VARS = {
-        'command_name': SUBCOMMAND,
-        'data_dir': DATA_DIR
-    }
+def test_argument_parser_parameters():
+    """Unit test for method argument_parser, passing params. case."""
+    sub_command = 'index'
+    input_path = 'path/to/images'
+    data_dir = 'path/to/assets'
 
-    args = CLI.parser.parse_args([SUBCOMMAND, '--data_dir', DATA_DIR])
+    test_namespace = Namespace(
+        data_dir=data_dir,
+        input_images=input_path,
+        sub_parser_name=sub_command
+    )
 
-    assert vars(args) == EXPECTED_VARS
+    test_arguments_parsed = CLI.argument_parser(
+        commands=[data_dir, sub_command, input_path]
+    )
+
+    assert test_namespace == test_arguments_parsed
