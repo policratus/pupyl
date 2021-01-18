@@ -140,14 +140,14 @@ class PupylImageSearch:
 
                 for future in extractor.progress(
                         concurrent.futures.as_completed(futures),
-                        message='Importing images.'
+                        message='Importing images:'
                 ):
                     ranks.append(futures[future])
 
                 for rank in extractor.progress(
                     sorted(ranks),
                     precise=True,
-                    message='Indexing images.'
+                    message='Indexing images:'
                 ):
                     features_tensor_name = self.image_database.\
                         mount_file_name(
