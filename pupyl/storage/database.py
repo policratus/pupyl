@@ -160,7 +160,7 @@ class ImageDatabase(ImageIO):
                 return metadata
 
         except FileNotFoundError:
-            raise IndexError
+            raise IndexError from FileNotFoundError
 
     def save_image_metadata(self, index, uri):
         """

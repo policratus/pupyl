@@ -489,7 +489,17 @@ class FileIO(FileType):
                 yield os.path.join(root, ffile)
 
     @staticmethod
-    def progress(iterable, precise=False, message=None):
+    def _get_terminal_size():
+        """Returns the number of columns of current terminal."""
+        try:
+            terminal_half_columns = os.get_terminal_size().columns
+        except OSError:
+            terminal_half_columns = 128
+
+        return terminal_half_columns
+
+    @classmethod
+    def progress(cls, iterable, precise=False, message=None):
         """
         Utility method to interface process progress bar with users.
         It supports two way of unpacking the iterable, throughout `precise`
@@ -514,8 +524,10 @@ class FileIO(FileType):
         message: (optional)(default: None): str
             A custom message when reporting progress.
         """
+        clean_size = 0
+
         if not message:
-            message = 'Processing, please wait.'
+            message = 'Processing, please wait:'
 
         if precise:
             try:
@@ -533,20 +545,22 @@ class FileIO(FileType):
             )
 
             for index, value in enumerate(iterable):
-                try:
-                    terminal_half_columns = os.get_terminal_size().columns // 4
-                except OSError:
-                    terminal_half_columns = 64
 
                 percentage = (index + 1) / count
 
-                columns_to_draw = percentage << intmul >> terminal_half_columns
+                current_terminal_size = cls._get_terminal_size()
 
-                print(
-                    ' ' + ('🟦' * columns_to_draw),
-                    f'{percentage << intmul >> 100}%',
-                    end='\r'
-                )
+                if current_terminal_size >= clean_size:
+                    clean_size = current_terminal_size
+
+                columns_to_draw = percentage << intmul >> \
+                    current_terminal_size // 4
+
+                bar_to_draw = '🟦' * columns_to_draw
+                percent_message = f'{percentage << intmul >> 100}%'
+
+                print(f"\033[A{' ' * clean_size}\033[A")
+                print(message, bar_to_draw, percent_message)
 
                 yield value
         else:
@@ -555,11 +569,13 @@ class FileIO(FileType):
             for index, value_clock in enumerate(
                     zip(iterable, cycle(clocks))
             ):
-                print(
-                    ' ' + value_clock[1],
-                    ' '.join((message, f'{index + 1} items.')),
-                    end='\r'
-                )
+                item_message = message + f' {index + 1} items.'
+
+                if cls._get_terminal_size() >= clean_size:
+                    clean_size = cls._get_terminal_size()
+
+                print(f"\033[A{' ' * clean_size}\033[A")
+                print(value_clock[1], item_message)
 
                 yield value_clock[0]
 
