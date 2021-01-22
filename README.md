@@ -48,8 +48,8 @@ Alternatively, you can interact with pupyl via command line. The same example ab
 terms:
 
 ```sh
-pupyl index /path/to/your/data/dir 'https://github.com/policratus/pupyl/raw/master/samples/images.tar.xz'
-pupyl serve /path/to/your/data/dir
+pupyl-cli index /path/to/your/data/dir 'https://github.com/policratus/pupyl/raw/master/samples/images.tar.xz'
+pupyl-cli serve /path/to/your/data/dir
 ```
 
 > 💡 Type `pupyl --help` to discover all the CLI's capabilities.
