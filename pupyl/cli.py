@@ -1,9 +1,14 @@
 """ Manage cli arguments"""
 
+import os
 import argparse
+from pathlib import Path
 
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
+
+
+PUPYL_HOME_FOLDER = os.path.join(Path.home(), 'pupyl')
 
 
 class PupylCommandLineInterface:
@@ -25,10 +30,6 @@ class PupylCommandLineInterface:
             """
         )
 
-        parser.add_argument(
-            'data_dir', help='data directory for database assets'
-        )
-
         sub_parsers = parser.add_subparsers(dest='sub_parser_name')
 
         index_parser = sub_parsers.add_parser(
@@ -41,6 +42,13 @@ class PupylCommandLineInterface:
 
         sub_parsers.add_parser(
             'serve', help='creates a web service to interact with database'
+        )
+
+        parser.add_argument(
+            '--data_dir',
+            type=str,
+            default=PUPYL_HOME_FOLDER,
+            help='data directory for database assets'
         )
 
         return parser
@@ -67,6 +75,12 @@ class PupylCommandLineInterface:
 if __name__ == '__main__':
     CLI = PupylCommandLineInterface()
     ARGS = CLI.argument_parser()
+
+    if ARGS.data_dir == PUPYL_HOME_FOLDER and ARGS.sub_parser_name:
+        print(
+            "Since the argument --data_dir wasn't filled, "
+            f'creating pupyl assets on {ARGS.data_dir}'
+        )
 
     PUPYL = PupylImageSearch(data_dir=ARGS.data_dir)
 
