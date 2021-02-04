@@ -47,9 +47,13 @@ _Disclaimer: the example above creates `pupyl` assets on your temporary director
 Alternatively, you can interact with pupyl via command line. The same example above in CLI
 terms:
 
-```sh
-pupyl-cli index /path/to/your/data/dir 'https://github.com/policratus/pupyl/raw/master/samples/images.tar.xz'
-pupyl-cli serve /path/to/your/data/dir
+### 🐚 Command line interface
+```shell
+# Indexing images
+pupyl --data_dir path/to/your/data/dir index /path/to/images/
+
+# Opening web interface
+pupyl --data_dir /path/to/your/data/dir serve
 ```
 
 > 💡 Type `pupyl --help` to discover all the CLI's capabilities.
