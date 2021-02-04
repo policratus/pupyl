@@ -32,7 +32,7 @@ def test_parser_index_case():
     }
 
     args = CLI.argument_parser(
-        commands=[data_dir, sub_command, input_path]
+        commands=['--data_dir', data_dir, sub_command, input_path]
     )
 
     assert vars(args) == expected_vars
@@ -49,7 +49,7 @@ def test_parser_serve_case():
     }
 
     args = CLI.argument_parser(
-        commands=[data_dir, sub_command]
+        commands=['--data_dir', data_dir, sub_command]
     )
 
     assert vars(args) == expected_vars
@@ -68,7 +68,7 @@ def test_argument_parser_parameters():
     )
 
     test_arguments_parsed = CLI.argument_parser(
-        commands=[data_dir, sub_command, input_path]
+        commands=['--data_dir', data_dir, sub_command, input_path]
     )
 
     assert test_namespace == test_arguments_parsed
