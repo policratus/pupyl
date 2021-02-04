@@ -72,23 +72,24 @@ class PupylCommandLineInterface:
         return cls.parsers().parse_args()
 
 
-if __name__ == '__main__':
-    CLI = PupylCommandLineInterface()
-    ARGS = CLI.argument_parser()
+def pupyl():
+    """CLI entry point."""
+    cli = PupylCommandLineInterface()
+    args = cli.argument_parser()
 
-    if ARGS.data_dir == PUPYL_HOME_FOLDER and ARGS.sub_parser_name:
+    if args.data_dir == PUPYL_HOME_FOLDER and args.sub_parser_name:
         print(
             "Since the argument --data_dir wasn't filled, "
-            f'creating pupyl assets on {ARGS.data_dir}'
+            f'creating pupyl assets on {args.data_dir}'
         )
 
-    PUPYL = PupylImageSearch(data_dir=ARGS.data_dir)
+    pupyl_search = PupylImageSearch(data_dir=args.data_dir)
 
-    if ARGS.sub_parser_name == 'index':
-        PUPYL.index(
-            ARGS.input_images
+    if args.sub_parser_name == 'index':
+        pupyl_search.index(
+            args.input_images
         )
-    elif ARGS.sub_parser_name == 'serve':
-        interface.serve(data_dir=ARGS.data_dir)
+    elif args.sub_parser_name == 'serve':
+        interface.serve(data_dir=args.data_dir)
     else:
-        CLI.parsers().print_help()
+        cli.parsers().print_help()

@@ -1,3 +1,0 @@
-#!/bin/bash
-PYTHON_BINARY=`which python`
-PYTHONPATH=$($PYTHONPATH):$(pwd) eval $PYTHON_BINARY pupyl/cli.py $1 $2 $3
