@@ -50,7 +50,7 @@ terms:
 ### 🐚 Command line interface
 ```shell
 # Indexing images
-pupyl --data_dir path/to/your/data/dir index /path/to/images/
+pupyl --data_dir /path/to/your/data/dir index /path/to/images/
 
 # Opening web interface
 pupyl --data_dir /path/to/your/data/dir serve
