@@ -24,7 +24,11 @@ or
 conda install -c policratus pupyl
 ```
 _For installation troubleshooting, visit [troubleshooting](TROUBLESHOOTING.md)._
+
 ## 🚸 Usage
+
+You can call pupyl's objects directly from your application code:
+
 ```python
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
@@ -39,6 +43,20 @@ SEARCH.index(
 interface.serve()
 ```
 _Disclaimer: the example above creates `pupyl` assets on your temporary directory. To define a non-volatile database, you should define `data_dir` parameter._
+
+Alternatively, you can interact with pupyl via command line. The same example above in CLI
+terms:
+
+### 🐚 Command line interface
+```shell
+# Indexing images
+pupyl --data_dir /path/to/your/data/dir index /path/to/images/
+
+# Opening web interface
+pupyl --data_dir /path/to/your/data/dir serve
+```
+
+> 💡 Type `pupyl --help` to discover all the CLI's capabilities.
 
 ## 📌 Dependencies
 See all dependencies here: [dependencies](https://github.com/policratus/pupyl/network/dependencies).
