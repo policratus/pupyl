@@ -14,12 +14,12 @@ The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform i
 ## 🎉 Getting started
 ### 📦 Installation
 Installing `pupyl` on your environment is pretty easy:
-```shell
+```Shell
 # pypi
 pip install pupyl
 ```
 or
-```shell
+```Shell
 # anaconda
 conda install -c policratus pupyl
 ```
@@ -29,7 +29,7 @@ _For installation troubleshooting, visit [troubleshooting](TROUBLESHOOTING.md)._
 
 You can call pupyl's objects directly from your application code:
 
-```python
+```Python
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
 
@@ -48,7 +48,7 @@ Alternatively, you can interact with pupyl via command line. The same example ab
 terms:
 
 ### 🐚 Command line interface
-```shell
+```Shell
 # Indexing images
 pupyl --data_dir /path/to/your/data/dir index /path/to/images/
 
@@ -63,3 +63,15 @@ See all dependencies here: [dependencies](https://github.com/policratus/pupyl/ne
 
 ## 📝 Documentation
 See a quick reference guide on the repository [wiki](https://github.com/policratus/pupyl/wiki). Complete API reference coming soon.
+
+## 🖊️ Citation
+If you use `pupyl` on your publications or projects, please cite:
+
+```BibTeX
+@misc{pupyl,
+    author = {Nelson Forte de Souza Junior},
+    title = {pupyl},
+    howpublished = {\url{https://github.com/policratus/pupyl}},
+    year = {2021}
+}
+```
