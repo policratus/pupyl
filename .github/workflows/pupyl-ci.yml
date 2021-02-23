@@ -23,6 +23,9 @@ jobs:
       run: |
         pip install flake8
         make flake8
+    - name: Static type checking
+        pip install mypy
+        make static-check
     - name: Tests
       run: |
         pip install pytest pytest-cov

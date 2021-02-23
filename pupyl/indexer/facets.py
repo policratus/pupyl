@@ -96,14 +96,14 @@ class Index:
         return 'pupyl.index'
 
     @property
-    def trees(self):
-        """Getter for property trees."""
-        return self._trees
-
-    @property
     def volatile(self):
         """Getter for property volatile."""
         return self._volatile
+
+    @property
+    def trees(self):
+        """Getter for property trees."""
+        return self._trees
 
     @trees.setter
     def trees(self, trees):

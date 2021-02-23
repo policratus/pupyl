@@ -4,20 +4,20 @@ file_io Module.
 Operations over files, introspection and more.
 """
 import os
-from urllib.request import urlopen, urlparse
-from enum import Enum, auto
-import mimetypes
-import tempfile
-import uuid
 import csv
-import gzip
-import zipfile
 import bz2
 import lzma
+import gzip
+import uuid
 import tarfile
-from datetime import datetime
-from itertools import cycle
+import zipfile
+import tempfile
+import mimetypes
 from io import BytesIO
+from itertools import cycle
+from enum import Enum, auto
+from datetime import datetime
+import urllib.request as request
 
 import termcolor
 
@@ -61,7 +61,7 @@ class FileIO(FileType):
         bytes:
             With image binary information
         """
-        with urlopen(url) as ffile:
+        with request.urlopen(url) as ffile:
             return ffile.read()
 
     @staticmethod
@@ -131,9 +131,9 @@ class FileIO(FileType):
             )
 
         if cls._infer_protocol(uri) is Protocols.HTTP:
-            parsed_url = urlparse(uri)
+            parsed_url = request.urlparse(uri)
 
-            with urlopen(uri) as ffile:
+            with request.urlopen(uri) as ffile:
                 file_statistics = ffile.info()
 
             original_path, original_file_name = os.path.split(
@@ -147,7 +147,7 @@ class FileIO(FileType):
                     )[0]
                 )
             except TypeError:
-                with urlopen(uri) as ffile:
+                with request.urlopen(uri) as ffile:
                     measured_size = len(ffile.read())
 
             original_file_size = measured_size // (2 ** 10)
@@ -193,7 +193,7 @@ class FileIO(FileType):
         Enum:
             Referencing the discovered protocol
         """
-        if urlparse(uri).scheme.startswith('http'):
+        if request.urlparse(uri).scheme.startswith('http'):
             return Protocols.HTTP
 
         if uri.startswith('file') or os.path.exists(uri):
@@ -476,7 +476,7 @@ class FileIO(FileType):
 
         elif inferred_protocol is Protocols.HTTP:
 
-            with urlopen(uri) as opened_url, \
+            with request.urlopen(uri) as opened_url, \
                 tarfile.open(
                     fileobj=opened_url,
                     mode=file_reader.format(stream_type='|')

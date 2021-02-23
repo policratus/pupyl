@@ -24,6 +24,9 @@ clean:
 flake8: clean
 	@flake8 --show-source --ignore=E402 .
 
+static-check: clean
+	@mypy pupyl/
+
 test_http_server:
 	@python -c "import http.server;import socketserver;import os;os.chdir(os.path.join('tests', 'tar_files'));httpd = socketserver.TCPServer(('', 8888), http.server.SimpleHTTPRequestHandler);httpd.serve_forever()" &
 
