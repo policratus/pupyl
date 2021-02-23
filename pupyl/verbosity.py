@@ -1,10 +1,11 @@
-"""Controls verbosity of some modules"""
+"""Controls verbosity of some modules."""
+
 import os
 import logging
 
 
 def quiet_tf():
-    """Suppress some messages from tensorflow"""
+    """Suppress some messages from ``tensorflow``."""
     logging.getLogger('tensorflow').setLevel(
         logging.ERROR
     )

@@ -80,11 +80,13 @@ elif ARGUMENTS.major:
 if VERSION == COMPARISON_VERSION:
     with open(join('pupyl', 'search.py')) as MAIN_MODULE, \
             open('setup.py') as SETUP_MODULE, \
-            open(join('conda', 'meta.yaml')) as CONDA_META:
+            open(join('conda', 'meta.yaml')) as CONDA_META, \
+            open(join('docs', 'source', 'conf.py')) as DOCS:
 
         FILE_MODULE = MAIN_MODULE.read()
         SETUP_FILE = SETUP_MODULE.read()
         CONDA_FILE = CONDA_META.read()
+        DOCS_CONF_FILE = DOCS.read()
 
         NEW_VERSION = f"__version__ = 'v{VERSION}'"
 
@@ -109,18 +111,26 @@ if VERSION == COMPARISON_VERSION:
             flags=re.MULTILINE
         )
 
+        DOCS_CONF_FILE_MODIFIED = re.sub(
+            r'^.*\b(\w*release\w*)\b.*',
+            f"release = '{VERSION}'",
+            DOCS_CONF_FILE,
+            flags=re.MULTILINE
+        )
 
     with open(join('pupyl', 'search.py'), 'w') as MAIN_MODULE, \
             open('setup.py', 'w') as SETUP_MODULE, \
-            open(join('conda', 'meta.yaml'), 'w') as CONDA_META:
+            open(join('conda', 'meta.yaml'), 'w') as CONDA_META, \
+            open(join('docs', 'source', 'conf.py'), 'w') as DOCS:
         MAIN_MODULE.write(MAIN_MODULE_MODIFIED)
         SETUP_MODULE.write(SETUP_MODULE_MODIFIED)
         CONDA_META.write(CONDA_META_MODIFIED)
+        DOCS.write(DOCS_CONF_FILE_MODIFIED)
 
     cprint(f'Version updated to {VERSION}', 'blue')
 else:
     cprint(
-        f'Version {VERSION} is not valid with ' + \
+        f"Version {VERSION} is not valid with "
         f'next version {COMPARISON_VERSION}',
         'red'
     )

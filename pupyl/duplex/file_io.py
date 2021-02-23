@@ -1,23 +1,20 @@
-"""
-file_io Module.
+"""Operations over files, introspection and more."""
 
-Operations over files, introspection and more.
-"""
 import os
-from urllib.request import urlopen, urlparse
-from enum import Enum, auto
-import mimetypes
-import tempfile
-import uuid
 import csv
-import gzip
-import zipfile
 import bz2
 import lzma
+import gzip
+import uuid
 import tarfile
-from datetime import datetime
-from itertools import cycle
+import zipfile
+import tempfile
+import mimetypes
 from io import BytesIO
+from itertools import cycle
+from enum import Enum, auto
+from datetime import datetime
+import urllib.request as request
 
 import termcolor
 
@@ -28,7 +25,14 @@ from pupyl.addendum.operators import intmul
 
 
 class Protocols(Enum):
-    """Defines several possible protocols to be discovered."""
+    """Defines several possible protocol enumerators to be discovered.
+
+    The current supported protocols are:
+
+    UNKNOWN: Unknown protocol
+    HTTP: Hypertext Transfer Protocol (also Secure supported)
+    FILE: Local storage file.
+    """
 
     UNKNOWN = auto()
     HTTP = auto()
@@ -36,7 +40,11 @@ class Protocols(Enum):
 
 
 class FileIO(FileType):
-    """Operations over files."""
+    """Operations over files.
+
+    Handling operations like temporary directories and files, retrieval of
+    remote or local files, progress bars, file metadata, among others.
+    """
 
     @staticmethod
     def pupyl_temp_data_dir():
@@ -48,44 +56,41 @@ class FileIO(FileType):
 
     @staticmethod
     def _get_url(url):
-        """
-        Load a file from a remote (http(s)) location.
+        """Loads a file from a remote (http(s)) location.
 
         Parameters
         ----------
         url: str
-            The URL where the image are stored
+            The URL where the image are stored.
 
         Returns
         -------
         bytes:
-            With image binary information
+            With image binary information.
         """
-        with urlopen(url) as ffile:
+        with request.urlopen(url) as ffile:
             return ffile.read()
 
     @staticmethod
     def _get_local(path):
-        """
-        Load a local file.
+        """Loads a local file returning its bytes.
 
         Parameters
         ----------
         path: str
-            Local which the file is saved
+            Location which the file is saved.
 
         Returns
         -------
         bytes:
-            With file binary information
+            With file binary information contained on the file.
         """
         with open(path, 'rb') as ffile:
             return ffile.read()
 
     @classmethod
     def get(cls, uri):
-        """
-        Load a file from specified location.
+        """Loads a file from specified location, remote or local.
 
         Parameters
         ----------
@@ -95,8 +100,8 @@ class FileIO(FileType):
         Returns
         -------
         bytes or Enum:
-            If successful, returns the image bytes,
-            or an Enum describing format was not recognized
+            If successful, returns the file bytes,
+            or an Enum describing that the format wasn't recognized.
         """
         if cls._infer_protocol(uri) is Protocols.FILE:
             return cls._get_local(uri)
@@ -108,8 +113,7 @@ class FileIO(FileType):
 
     @classmethod
     def get_metadata(cls, uri):
-        """
-        Return underlying file metadata
+        """Returns underlying file metadata.
 
         Parameters
         ----------
@@ -131,9 +135,9 @@ class FileIO(FileType):
             )
 
         if cls._infer_protocol(uri) is Protocols.HTTP:
-            parsed_url = urlparse(uri)
+            parsed_url = request.urlparse(uri)
 
-            with urlopen(uri) as ffile:
+            with request.urlopen(uri) as ffile:
                 file_statistics = ffile.info()
 
             original_path, original_file_name = os.path.split(
@@ -147,7 +151,7 @@ class FileIO(FileType):
                     )[0]
                 )
             except TypeError:
-                with urlopen(uri) as ffile:
+                with request.urlopen(uri) as ffile:
                     measured_size = len(ffile.read())
 
             original_file_size = measured_size // (2 ** 10)
@@ -166,34 +170,37 @@ class FileIO(FileType):
 
     @staticmethod
     def timestamp_to_iso8601(timestamp):
-        """
-        Convert a Unix epoch integer formatted date to ISO8601 format.
+        """Converts an Unix epoch integer to ISO8601 format.
         The converted date is in UTC (GMT-0).
 
         Parameters
         ----------
         timestamp: int
-            With a integer timestamp (seconds after zero hour of 1970)
+            With a integer timestamp (seconds after the zero hour of 1970).
+
+        Returns
+        -------
+        str:
+            A string with formatted date using the mask %Y-%m-%dT%H:%M:%S
         """
         return datetime.utcfromtimestamp(timestamp).\
             strftime('%Y-%m-%dT%H:%M:%S')
 
     @staticmethod
     def _infer_protocol(uri):
-        """
-        Discover the protocol which the passed uri may pertain.
+        """Discovers the protocol which the passed uri may pertain.
 
         Parameters
         ----------
         uri: str
-            URI that describes the image location
+            URI that describes the file location.
 
         Returns
         -------
         Enum:
             Referencing the discovered protocol
         """
-        if urlparse(uri).scheme.startswith('http'):
+        if request.urlparse(uri).scheme.startswith('http'):
             return Protocols.HTTP
 
         if uri.startswith('file') or os.path.exists(uri):
@@ -202,21 +209,33 @@ class FileIO(FileType):
         return Protocols.UNKNOWN
 
     def infer_file_type_from_uri(self, uri, mimetype=False):
-        """
-        Infer the file type from an uri.
+        """Infers the file type from an uri, with optional mime type discovery.
 
         Parameters
         ----------
         uri: str
-            With file to be analyzed
+            With the file location to be analyzed.
 
         mimetype (optional): bool
-            If must be returns as mime type or not
+            If should be returned also the discovered mime type.
 
         Returns
         -------
-        str:
-            If described file type
+        str or tuple:
+            str if mimetype is False, this case describing the format
+            or tuple if mimetype is True, adding the mimetype to the return.
+
+        Raises
+        ------
+        FileTypeNotSupportedYet
+            For a not supported file type.
+
+        Example
+        -------
+        .. code-block:: python
+            infer_file_type_from_uri('image.jpg') # Returns 'JPG'
+            infer_file_type_from_uri('image.jpg, mimetype=True')
+            # Returns ('JPG', 'image/jpeg')
         """
         guessed_init_type = mimetypes.guess_type(uri)
 
@@ -244,18 +263,22 @@ class FileIO(FileType):
 
     @classmethod
     def scan_csv(cls, uri):
-        """
-        Scanner for CSV formatted text files.
+        """Scanner for CSV text files.
 
         Parameters
         ----------
         uri: str
-            Where csv file resides
+            Where CSV file resides
 
-        Returns
-        -------
-        generator of str:
+        Yields
+        ------
+        str:
             With the discovery file paths
+
+        Raises
+        ------
+        FileTypeNotSupportedYet
+            For a not supported file type.
         """
         csv_string = cls.get(uri)
 
@@ -271,17 +294,17 @@ class FileIO(FileType):
 
     @classmethod
     def scan_csv_gzip(cls, uri):
-        """
-        Scanner for CSV formatted text files, compressed with Gzip algorithm.
+        """Scanner for CSV formatted text files, compressed with
+        gzip algorithm.
 
         Parameters
         ----------
         uri: str
             Where csv file resides
 
-        Returns
+        Yields
         -------
-        generator of str:
+        str:
             With the discovery file paths
         """
         file_bytes = cls.get(uri)
@@ -295,17 +318,21 @@ class FileIO(FileType):
 
     @staticmethod
     def safe_temp_file(**kwargs):
-        """
-        Create a secure temporary file name,
-        which means a file with an unique name.
+        """Creates a secure temporary file name, which means a file with an
+        unique name.
 
-        If a file with the same name is found,
-        it's deleted a before generating a new unique name.
+        If a file with the same name is found, it's deleted before generating
+        a new unique name.
 
         Parameters
         ----------
-        file_name (optional) (keyword argument): str
+        **file_name (optional) (keyword argument): str
             Defining a temporary file to assert.
+
+        Returns
+        -------
+        str:
+            With the complete path of the new temporary file created.
         """
         temp_dir = tempfile.gettempdir()
 
@@ -321,18 +348,17 @@ class FileIO(FileType):
 
     @classmethod
     def scan_csv_bzip2(cls, uri):
-        """
-        Scanner for CSV formatted text files, compressed with Bzip2 algorithm.
+        """Scanner for CSV text files, compressed with Bzip2 algorithm.
 
         Parameters
         ----------
         uri: str
-            Where csv file resides
+            Where the bzip2 csv file resides.
 
-        Returns
+        Yields
         -------
-        generator of str:
-            With the discovery file paths
+        str:
+            With the discovered file paths.
         """
         file_bytes = cls.get(uri)
 
@@ -345,18 +371,17 @@ class FileIO(FileType):
 
     @classmethod
     def scan_csv_zip(cls, uri):
-        """
-        Scanner for CSV formatted text files, compressed with Zip algorithm.
+        """Scanner for CSV text files, compressed with Zip algorithm.
 
         Parameters
         ----------
         uri: str
-            Where csv file resides
+            Where zipped csv file resides.
 
-        Returns
+        Yields
         -------
-        generator of str:
-            With the discovery file paths
+        str:
+            With the discovered file paths.
         """
         file_bytes = BytesIO(cls.get(uri))
 
@@ -367,18 +392,17 @@ class FileIO(FileType):
 
     @classmethod
     def scan_csv_xz(cls, uri):
-        """
-        Scanner for CSV formatted text files, compressed with Lzma algorithm.
+        """Scanner for CSV text files, compressed with Lzma algorithm.
 
         Parameters
         ----------
         uri: str
-            Where csv file resides
+            Where csv xz file resides.
 
-        Returns
+        Yields
         -------
-        generator of str:
-            With the discovery file paths
+        str:
+            With the discovered file paths.
         """
         file_bytes = cls.get(uri)
 
@@ -390,20 +414,20 @@ class FileIO(FileType):
             yield row.replace('\n', '')
 
     def scan(self, uri):
-        """
-        Return a validated uri, resolving several cases.
-
-        It also choose the best discovery method.
+        """Returns a validated uri, resolving several cases related
+        to file types and methods for reading it. It also choose the best
+        discovery method.
 
         Parameters
         ----------
         uri: str
-            A file or directory to scan
+            A file or directory to scan.
 
-        Returns
+        Yields
         -------
-        generator of str:
-            With the discovery file paths
+        str:
+            With actual underlying data like bytes internally on the compressed
+            file container.
         """
         tar_compressed_file_readers = {
             'TZ2': 'r{stream_type}bz2',
@@ -450,16 +474,20 @@ class FileIO(FileType):
 
     @classmethod
     def scan_compressed_tar_file(cls, uri, file_reader):
-        """
-        Scan a compressed tar file
+        """Scans a compressed tar file.
 
         Parameters
         ----------
         uri: str
-            Location where the tar file is stored
+            Location where the tar file is stored.
 
         file_reader: str
             Suitable file reader type.
+
+        Yields
+        ------
+        str:
+            Paths of the already untarred files on the temporary directory.
         """
         # Waiting to explicitly remove the temporary directory
         temp_directory = tempfile.TemporaryDirectory().name
@@ -476,7 +504,7 @@ class FileIO(FileType):
 
         elif inferred_protocol is Protocols.HTTP:
 
-            with urlopen(uri) as opened_url, \
+            with request.urlopen(uri) as opened_url, \
                 tarfile.open(
                     fileobj=opened_url,
                     mode=file_reader.format(stream_type='|')
@@ -490,7 +518,13 @@ class FileIO(FileType):
 
     @staticmethod
     def _get_terminal_size():
-        """Returns the number of columns of current terminal."""
+        """Returns the number of columns of current terminal.
+
+        Returns
+        -------
+        int:
+            Cointaning the number of columns on the current terminal emulator.
+        """
         try:
             terminal_half_columns = os.get_terminal_size().columns
         except OSError:
@@ -502,14 +536,14 @@ class FileIO(FileType):
     def progress(cls, iterable, precise=False, message=None):
         """
         Utility method to interface process progress bar with users.
-        It supports two way of unpacking the iterable, throughout `precise`
-        parameters. If `precise` is set to `False` (which is the default),
-        the parameter `iterable` will be unpacked as is. This leads to an
+        It supports two way of unpacking the iterable, throughout ``precise``
+        parameters. If ``precise`` is set to ``False`` (which is the default),
+        the parameter ``iterable`` will be unpacked as is. This leads to an
         imprecise rolling of items (in other words, the method doesn't know
-        apriori the total number of elements in `iterable`). Otherwise, if
-        `precise` is set to `True`, an `iterable` which is not unpacked (like
-        and `generator`) will be first unrolled, which is much slower in some
-        cases, but leads to a precise progress bar.
+        apriori the total number of elements in ``iterable``). Otherwise, if
+        ``precise`` is set to ``True``, an ``iterable`` which is not unpacked
+        (like a ``generator``) will be first unrolled, which is much slower in
+        some cases, but leads to a precise progress bar.
 
         Parameters
         ----------
@@ -523,6 +557,12 @@ class FileIO(FileType):
 
         message: (optional)(default: None): str
             A custom message when reporting progress.
+
+        Yields
+        ------
+        type:
+            It returns any type on the iterable passed through the ``iterable``
+            parameter.
         """
         clean_size = 0
 
@@ -581,14 +621,18 @@ class FileIO(FileType):
 
     @staticmethod
     def resolve_path_end(path):
-        """
-        Removes directory separators from the end of
-        some path (if exists).
+        """Removes directory separators from the end of
+        some path (if it exists).
 
         Parameters
         ----------
         path: str
             Complete path to be analyzed.
+
+        Returns
+        -------
+        str:
+            A path without an ending character.
         """
         if path[-1] == os.path.sep:
             path = list(path)
@@ -599,8 +643,7 @@ class FileIO(FileType):
         return path
 
     def dump(self, data_dir, output_dir):
-        """
-        Read an entire database tree, compress and export it.
+        """Reads an entire database tree, compress and export it.
 
         Parameters
         ----------
@@ -608,7 +651,7 @@ class FileIO(FileType):
             The directory containing all database assets.
 
         output_dir: str
-            Location where to save the export file.
+            Location where to save the exported dump file.
         """
         data_dir = self.resolve_path_end(data_dir)
         base_name = os.path.basename(data_dir)
@@ -626,8 +669,7 @@ class FileIO(FileType):
 
     @staticmethod
     def bind(dump_file, output_dir):
-        """
-        Read a packaged database and import it.
+        """Reads a packaged database and import it.
 
         Parameters
         ----------

@@ -1,8 +1,5 @@
-"""
-facets Module.
+"""Hyperspace indexing and operations."""
 
-Hyperspace indexing and operations.
-"""
 import os
 from warnings import warn as warning
 from shutil import move, copyfile
@@ -22,23 +19,34 @@ class Index:
     """Procedures over multidimensional spaces."""
 
     def __init__(self, size, data_dir=None, trees=.001, volatile=False):
-        """
-        Indexing tensors operations and nearest neighbours search.
+        """Indexing tensors operations and approximate nearest neighbours
+        search.
 
         Parameters
         ----------
         size: int
             Shape of unidimensional vectors which will be indexed
 
-        data_dir: str
+        data_dir (optional): str
             Location where to load or save the index
 
-        trees (optional): float
-            Defines the number of trees to create based on the dataset
-            size. Should be a number between 0 and 1.
+        trees (optional) (default=.001): float
+            Defines the factor over the number of trees to be created based on
+            the dataset size. Should be a number between 0 and 1.
 
-        volatile (optional): bool
+        volatile (optional) (default=False): bool
             If the index will be temporary or not.
+
+        Raises
+        ------
+        OSError:
+            When the ``data_dir`` parameter is not a directory.
+        NoDataDirForPermanentIndex:
+            When no ``data_dir`` was passed for a permament index.
+        DataDirDefinedForVolatileIndex:
+            If a ``data_dir`` was defined for a volatile index.
+        FileIsNotAnIndex:
+            When an index was tried to be loaded but it wasn't a valid file.
         """
         self._position = -1
         self._size = size
@@ -82,41 +90,85 @@ class Index:
 
     @property
     def size(self):
-        """Getter for property size."""
+        """Getter for property size.
+
+        Returns
+        -------
+        int:
+            Describing the size of a ANN tree.
+        """
         return self._size
 
     @property
     def path(self):
-        """Getter for property path."""
+        """Getter for property path.
+
+        Returns
+        -------
+        str:
+            With the path set.
+        """
         return self._path
 
     @property
     def index_name(self):
-        """Getter for property index_name."""
+        """Getter for property index_name.
+
+        Returns
+        -------
+        str:
+            With current index name.
+        """
         return 'pupyl.index'
 
     @property
-    def trees(self):
-        """Getter for property trees."""
-        return self._trees
+    def volatile(self):
+        """Getter for property volatile.
+
+        Returns
+        -------
+        bool:
+            If the index is volatile or not.
+        """
+        return self._volatile
 
     @property
-    def volatile(self):
-        """Getter for property volatile."""
-        return self._volatile
+    def trees(self):
+        """Getter for property trees.
+
+        Returns
+        -------
+        float:
+            With the factor over the index size to make trees.
+        """
+        return self._trees
 
     @trees.setter
     def trees(self, trees):
-        """Setter for property trees."""
+        """Setter for property trees.
+
+        Parameters
+        ----------
+        trees: float
+            The factor over index size to make trees.
+        """
         self._trees = trees
 
     def __enter__(self):
-        """Context opening index."""
+        """Context opening for an index.
+
+        Returns
+        -------
+        self:
+            Context initialization.
+        """
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context closing index."""
+        """Context closing for an index."""
         if not exc_type:
+
+            del exc_type, exc_val, exc_tb
 
             if self._is_new_index:
                 self.tree.build(self.size << intmul >> self.trees)
@@ -126,22 +178,57 @@ class Index:
             self.tree.unload()
 
     def items(self):
-        """Return the indexed items."""
+        """Returns indexed items.
+
+        Yields
+        ------
+        int:
+            With item identification.
+        """
         for item in range(len(self)):
             yield item
 
     def values(self):
-        """Return the indexed values."""
+        """Returns indexed values.
+
+        Yields
+        ------
+        list:
+            With indexed tensors.
+        """
         for item in self.items():
             yield self.tree.get_item_vector(item)
 
     def items_values(self):
-        """Return tuples with all items and values."""
+        """Returns all items and values.
+
+        Yields
+        ------
+        tuple:
+            With an ``int`` representing its id and a ``list`` with the actual
+            tensor.
+        """
         for item, value in zip(self.items(), self.values()):
             yield item, value
 
     def __getitem__(self, position):
-        """Return item at index. Supports negative slicing."""
+        """Return item at index, supporting negative slicing.
+
+        Parameters
+        ----------
+        position: int
+            The id of desired item to be returned.
+
+        Returns
+        -------
+        list:
+            With indexed tensors.
+
+        Example
+        -------
+        ``index[10] # Returns the 10th item.``
+        ``index[-1] # Returns the last item.``
+        """
         if position >= 0:
             return self.tree.get_item_vector(position)
 
@@ -150,25 +237,40 @@ class Index:
         )
 
     def refresh(self):
-        """Update all information regarding index file."""
+        """Updates all information regarding the index file, first unloading
+        it, followed by reloading back the index.
+        """
         self.tree.unload()
         self.tree.load(self.path)
 
     def append(self, tensor, check_unique=False):
         """
-        Insert a new tensor at the end of the index.
-        Be advised that this operation is linear on index size ($O(n)$).
+        Inserts a new tensor at the end of the index.
+
+        Attention
+        ---------
+        Be advised that this operation is linear on the index size
+        (:math:`O(n)`).
 
         Parameters
         ----------
         tensor: numpy.ndarray or list
-            A vector to insert into index.
+            The tensor to insert into the index.
 
-        check_unique (optional, default: False): bool
-            Defines if append method should verify the existence
+        check_unique (optional) (default=False): bool
+            Defines if the append method should verify the existence
             of a really similar tensor on the current index. In other words,
-            it checks for the unicity of the value. Be advised that this check
-            creates an overhead on the append process.
+            it checks for the unicity of the value.
+
+        Warning
+        -------
+        Be advised that the unicity check (``check_unique=True``) creates an
+        overhead on the append process.
+
+        Raises
+        ------
+        NullTensorError:
+            If a null (empty) tensor is passed through.
         """
         if sum(tensor) == 0.:
             raise NullTensorError
@@ -191,7 +293,7 @@ class Index:
                     warning(
                         'Tensor being indexed already exists in '
                         'the database and the check for duplicates '
-                        'are on. Refusing to store again this tensor.'
+                        'are on. Refusing to store this tensor again.'
                     )
 
                     index_it = False
@@ -216,14 +318,24 @@ class Index:
             self.refresh()
 
     def remove(self, position):
-        """
-        Remove the tensor at index from the database.
-        Be advised that this operation is linear on index size ($O(n)$).
+        """Removes the tensor at ``position`` from the database.
+
+        Attention
+        ---------
+        Be advised that this operation is linear on the index size
+        (:math:`O(n)`).
 
         Parameters
         ----------
         position: int
-            The index which must be removed
+            The index that must be removed.
+
+        Raises
+        ------
+        IndexNotBuildYet:
+            If was tried to remove a tensor from a not built yet index file.
+        IndexError:
+            If ``position`` is bigger than the index current size.
         """
         if self._is_new_index:
             raise IndexNotBuildYet
@@ -250,19 +362,22 @@ class Index:
         self.refresh()
 
     def pop(self, position=None):
-        """
-        Pop-out the index at position, returning it.
-        Be advised that this operation is linear on index size ($O(n)$).
+        """Pops-out the index at position, returning it.
+
+        Attention
+        ---------
+        Be advised that this operation is linear on the index size
+        (:math:`O(n)`).
 
         Parameters
         ----------
-        position (optional) (default: last position): int
-            Removes and returns the value at position.
+        position (optional) (default=last position): int
+            Removes and returns the value at ``position``.
 
         Returns
         ----------
         int:
-            With the popped item.
+            With the popped-out item.
         """
         if position:
             value = self[position]
@@ -276,8 +391,8 @@ class Index:
         return value
 
     def index(self, tensor):
-        """
-        Search for the first most similar image compared to the query.
+        """Searchs for the first and most similar image compared to the query
+        image.
 
         Parameters
         ----------
@@ -285,36 +400,33 @@ class Index:
             A vector to search for the most similar.
 
         Returns
-        ----------
+        -------
         int:
             Describing the most similar resulting index.
         """
         return self.tree.get_nns_by_vector(tensor, n=1)[0]
 
     def item(self, position, top=10, distances=False):
-        """
-        Search the index using an internal position
+        """Searchs the index using an internal position
 
         Parameters
         ----------
         position: int
             The item id within index.
 
-        top (optional, default 10): int
+        top (optional) (default=10): int
             How many similar items should be returned.
 
-        distances (optional, default 10): bool
-            If should be returned also the distances between
-            items.
+        distances (optional) (default=False): bool
+            If should be returned also the distances between items.
 
         Returns
         -------
-        if distances is True:
-            list of tuples:
-                Containing pairs of item and distances
-        else:
-            list:
-                Containing similar items.
+        list of tuples:
+            if distances is ``True``, this ``list`` containing pairs of items
+            and distances.
+        list:
+            if distances is ``False``, this ``list`` containing similar items.
         """
         return self.tree.get_nns_by_item(
             position,
@@ -323,32 +435,66 @@ class Index:
         )
 
     def search(self, tensor, results=16):
-        """
-        Search for the first most similars image compared to the query.
+        """Searchs for the most similar images compared to the query image (or
+        with increasing distances).
 
         Parameters
         ----------
         tensor: numpy.ndarray or list
-            A vector to search for the most similar images.
+            A vector to search for the most similar ones.
 
         results: int
             How many results to return. If similar images are less than
-            results, it exhausts and will be returned actual total.
+            ``results``, it exhausts and will be returned current total
+            results.
+
+        Yields
+        ------
+        int:
+            Representing the index of the most similar, the second one and so
+            on.
         """
         for result in self.tree.get_nns_by_vector(tensor, n=results):
             yield result
 
     def __len__(self):
-        """Return how many items are indexed."""
+        """Returns how many items are indexed.
+
+        Returns
+        -------
+        int:
+            Describing how many items are indexed.
+
+        Example
+        -------
+        ``len(index) # Will return 10 for an index with 10 elements indexed``
+        """
         return self.tree.get_n_items()
 
     def __iter__(self):
-        """Return an iterable."""
+        """Returns an iterable for the index.
+
+        Yields
+        ------
+        list:
+            With indexed tensors.
+        """
         for value in self.values():
             yield value
 
     def __next__(self):
-        """Iterate over the iterable."""
+        """Iterates over the iterable.
+
+        Returns
+        -------
+        list:
+            With an indexed tensor.
+
+        Raises
+        ------
+        StopIteration:
+            When the iterable is exhausted.
+        """
         self._position += 1
 
         all_values = list(self.values())
@@ -359,28 +505,31 @@ class Index:
         raise StopIteration
 
     def group_by(self, top=10, **kwargs):
-        """
-        Returns all (or some position) on the index that is similar
-        with other elements inside index.
+        """Returns all (or some position) on the index which is similar
+        with each other inside index.
 
         Parameters
         ----------
-        top (optional, default 10): int
-            How many similar internal images should be returned
+        top (optional) (default=10): int
+            How many similar internal images should be returned.
 
-        position (optional): int
+        **position (optional): int
             Returns the groups based on a specified position.
 
-        Returns
-        -------
+        Yields
+        ------
         list:
-            If a position is defined
-
-        or
-
+            If ``position`` is defined.
         dict:
             Generator with a dictionary containing internal ids
             as key and a list of similar images as values.
+
+        Raises
+        ------
+        EmptyIndexError:
+            If the underlying index is null.
+        TopNegativeOrZero:
+            If ``top`` parameter is zero or below.
         """
         position = kwargs.get('position')
 
@@ -411,16 +560,15 @@ class Index:
             raise TopNegativeOrZero
 
     def export_by_group_by(self, path, top=10, **kwargs):
-        """
-        Saves images, creating directories, based on their groups.
+        """Export images, creating directories based on their groups.
 
         Parameters
         ----------
         path: str
-            Place to create the directories and export images
+            Place to create the directories and export the images.
 
-        top (optional, default 10):
-            How many similar internal images should be returned
+        top (optional) (default=10):
+            How many similar internal images should be filtered.
 
         position (optional): int
             Returns the groups based on a specified position.

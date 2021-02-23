@@ -1,15 +1,16 @@
-"""
-file_types Module.
+"""Operations of file and mime type discovery, based on file content."""
 
-Operations of file and mime type discovery, based on file content.
-"""
 from enum import Enum
 
 from pupyl.duplex import exceptions
 
 
 class FileHeaderHex(Enum):
-    """Describes header hexadecimals for every supported file types."""
+    """Describes header hexadecimals for every supported file types.
+
+    The current ones supported are:
+
+    ``JPG, GIF, PNG, TIF, GZP, BZ2, ZIP, LXZ,``"""
 
     JPG = 'ffd8ff'
     GIF = '474946'
@@ -22,7 +23,11 @@ class FileHeaderHex(Enum):
 
 
 class FileMimeTypes(Enum):
-    """Describes the mime types associated with underlying files."""
+    """Describes the mime types associated with underlying files.
+
+    The current ones supported are:
+
+    ``JPG, GIF, PNG, TIF, GZP, BZ2, ZIP, LXZ,``"""
 
     JPG = 'image/jpeg'
     GIF = 'image/gif'
@@ -38,7 +43,11 @@ class FileMimeTypes(Enum):
 
 
 class TarCompressedTypes:
-    """Describes all supported tar compressed types."""
+    """Describes all supported tar compressed types.
+
+    The current ones supported are:
+
+    ``GZIP, LZMA, BZIP2``"""
     _types = {
         'gzip': {
             'mimetype': FileMimeTypes.TGZ.value,
@@ -56,12 +65,42 @@ class TarCompressedTypes:
 
     @classmethod
     def name(cls, sub_type):
-        """Return the name of some sub type"""
+        """Returns the name of some sub (file) type.
+
+        Parameters
+        ----------
+        sub_type: str
+            The name of one subtype.
+
+        Returns
+        -------
+        str:
+            With the found subtype.
+
+        Example
+        -------
+        ``TarCompressedTypes.name('xz') # Returns 'TXZ'``
+        """
         return cls._types[sub_type]['name']
 
     @classmethod
     def mime(cls, sub_type):
-        """Return the mime type of some sub type"""
+        """Return the mime type of some sub type.
+
+        Parameters
+        ----------
+        sub_type: str
+            The name of one subtype.
+
+        Returns
+        -------
+        str:
+            With the found subtype mimetype.
+
+        Example
+        -------
+        ``TarCompressedTypes.name('xz') # Returns 'application/tar-xz'``
+        """
         return cls._types[sub_type]['mimetype']
 
 
@@ -71,7 +110,7 @@ class FileType:
     @staticmethod
     def to_hex(bytess):
         """
-        Convert a byte string to its hexadecimal representation.
+        Converts a byte string to its hexadecimal representation.
 
         Parameters
         ----------
@@ -93,32 +132,36 @@ class FileType:
         Parameters
         ----------
         bytess: bytes
-            Bytes of some file
+            Bytes of some file.
 
         Returns
         -------
         str:
-            With the header hexadecimal representation
+            With the header hexadecimal representation.
         """
         return cls.to_hex(bytess[:3])
 
     @classmethod
     def guess_file_type(cls, bytess, mimetype=False):
-        """
-        Heuristically discover the file type for the underlying path.
+        """Heuristically discover the file type for the underlying path.
 
         Parameters
         ----------
         bytess: bytes
-            Bytes of some file
+            Bytes of some file.
 
         mimetype (optional): bool
-            If the mimetype should be returned or not
+            If the mimetype should be returned or not.
+
+        Raises
+        ------
+        FileTypeNotSupportedYet:
+            For an unsupported file.
 
         Returns
         -------
         str:
-            With inferred type
+            With inferred type.
         """
         try:
             header = cls.header(bytess)
@@ -137,13 +180,12 @@ class FileType:
 
     @staticmethod
     def tar_compressed_types_resolve(sub_type, mimetype=False):
-        """
-        Resolve tar file compression type (if any)
+        """Resolves a tar file compression type (if any).
 
         Parameters
         ----------
         sub_type: str
-            The sub type of the tar compressed type
+            The sub type of the tar compressed type.
 
         mimetype (optional: default False): bool
             If should be returned the MIME type instead of internal
@@ -159,13 +201,17 @@ class FileType:
 
     @classmethod
     def is_image(cls, bytess):
-        """
-        Return if the read file is an image or not.
+        """Return if the read file is an image or not.
 
         Parameters
         ----------
         bytess: bytes
             Bytes of some file
+
+        Raises
+        ------
+        FileTypeNotSupportedYet:
+            For an unsupported file.
 
         Returns
         -------

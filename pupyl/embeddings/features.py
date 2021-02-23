@@ -1,4 +1,5 @@
 """Factory for image feature extraction."""
+
 from enum import Enum, auto
 import warnings
 import os
@@ -17,8 +18,15 @@ from pupyl.embeddings import exceptions
 
 
 class Characteristics(Enum):
-    """Describes high level characteristics of complex feature extractors."""
+    """Describes high level characteristics of complex feature extractors.
 
+    The actual supported characteristics are:
+
+    .. code-block:: python
+        LIGHTWEIGHT_REGULAR_PRECISION # MobileNetV2
+        MEDIUMWEIGHT_GOOD_PRECISION # DenseNet169
+        HEAVYWEIGHT_HUGE_PRECISION # EfficientNetB7
+    """
     # MobileNetV2
     LIGHTWEIGHT_REGULAR_PRECISION = auto()
     # DenseNet169
@@ -29,28 +37,38 @@ class Characteristics(Enum):
     @staticmethod
     def by_name(name):
         """
-        Return a characteristic by name.
+        Returns a characteristic by its name.
 
         Parameters
         ----------
         name: str
             String representation of enumerator
+
+        Raises
+        ------
+        KeyError:
+            If ``name`` is unknown.
+
+        Returns
+        -------
+        enum:
+            The corresponding characteristic.
         """
         return Characteristics[name]
 
 
 class Extractors(ImageIO):
-    """Pretrained CNNs for embeddings generation."""
+    """Pretrained CNNs for embedding generation."""
 
     def __init__(self, characteristics):
         """
-        Create embedding extractors.
+        Creates embedding extractors.
 
         Parameters
         ----------
         characteristics: Enum
             Describing the intended characteristics to transform images
-            into embeddings
+            into its underlying embeddings.
         """
         self.acceleration_discovery()
 
@@ -61,7 +79,7 @@ class Extractors(ImageIO):
         self._features_output_shape = self.network.output_shape[1]
 
     def __enter__(self):
-        """Open Extractors context."""
+        """Opens Extractors context."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -72,23 +90,27 @@ class Extractors(ImageIO):
 
     @property
     def output_shape(self):
-        """
-        Getter for property output_shape.
+        """Getter for property output_shape.
 
         Describes the output shape of extracted features.
+
+        Returns
+        -------
+        int:
+            The output shape for the picked characteristics.
         """
         return self._features_output_shape
 
     @staticmethod
     def acceleration_discovery():
         """
-        Perform a hardware processing acceleration discovery.
+        Performs a hardware processing acceleration discovery.
 
-        Most GPUs supported (through CUDA), which results on
+        Most NVIDIA® GPUs supported (through ``CUDA``), which results on
         faster embeddings extraction.
         """
         # If GPU(s) device(s) are found, avoid excessive VRAM consumption
-        for gpu in tensorflow.config.experimental.list_physical_devices('GPU'):
+        for gpu in tensorflow.config.list_physical_devices('GPU'):
             print(
                 termcolor.colored(
                     'GPU found! Using it for embeddings '
@@ -112,7 +134,18 @@ class Extractors(ImageIO):
                 )
 
     def _infer_network(self):
-        """Translate a characteristic to a network architecture."""
+        """Translates a characteristic to a network architecture.
+
+        Raises
+        ------
+        UnknownCharacteristics:
+            If the characteristics passed through are unknown.
+
+        Returns
+        -------
+        tuple:
+            With preprocessors and complete CNN architecture.
+        """
         # Networks general configurations
         weights = 'imagenet'
         pooling = 'max'
@@ -152,13 +185,13 @@ class Extractors(ImageIO):
         raise exceptions.UnknownCharacteristics
 
     def preprocessor(self, uri):
-        """
-        Image preprocessing methods, suitable for posterior network ingestion.
+        """Image preprocessing methods, suitable for posterior network
+        ingestion. It may include image resizing, normalization, among others.
 
         Parameters
         ----------
-        image: numpy.ndarray
-            Tensor which represents an image
+        uri: str
+            Location of the image to be preprocessed.
 
         Returns
         -------
@@ -171,18 +204,17 @@ class Extractors(ImageIO):
         )
 
     def extract(self, uri):
-        """
-        Convert image uri to its embeddings.
+        """Converts image uri to its embeddings.
 
         Parameters
         ----------
         uri: str
-            Tensor which represents an image
+            Location of the image to be converted to a embedding.
 
         Returns
         -------
         numpy.ndarray
-            1D tensor with extracted features
+            1D tensor with extracted features.
         """
         return self.network.predict(
             self.preprocessor(uri)
@@ -190,19 +222,19 @@ class Extractors(ImageIO):
 
     @staticmethod
     def save_tensor(func_gen, uri, file_name):
-        """
-        Saves an arbitrary tensor to file.
+        """Saves an arbitrary tensor to file.
 
         Parameters
         ----------
         func_gen: function
-            The generator function of the tensor.
+            The generator function of the tensor, for example, one that
+            reduces its dimensionality.
 
         uri: str
             Location of image to generate tensor.
 
         file_name: str
-            Path with file name.
+            Path with file name to be saved.
         """
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
 
@@ -215,13 +247,17 @@ class Extractors(ImageIO):
 
     @staticmethod
     def load_tensor(file_name):
-        """
-        Saves an arbitrary tensor to file.
+        """Loads an arbitrary tensor from a file.
 
         Parameters
         ----------
         file_name: str
             The file name inside features database.
+
+        Returns
+        -------
+        numpy.ndarray:
+            With underlying tensor stored on ``file_name``.
         """
         return numpy.load(
             file_name,

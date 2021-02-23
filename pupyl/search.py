@@ -19,9 +19,8 @@ from pupyl.indexer.facets import Index
 
 
 class PupylImageSearch:
-    """
-    Encapsulates every aspect of pupyl, from feature extraction
-    to indexing and image database.
+    """Encapsulates every aspects of ``pupyl``, from feature extraction
+    to indexing and image storaging.
     """
 
     def __init__(
@@ -29,6 +28,21 @@ class PupylImageSearch:
             data_dir=None,
             **kwargs
     ):
+        """Pupyl image search factory.
+
+        Parameters
+        ----------
+        data_dir (optional): str
+            The directory where all assets are stored.
+
+        **import_images (optional): bool
+            If images should (or was) imported into the database.
+
+        **characteristic (optional): Characteristics
+            The characteristic for feature extraction that must be used. If
+            reading from an already created database, retrieves it from the
+            (internal) configuration files.
+        """
         if data_dir:
             self._data_dir = data_dir
         else:
@@ -67,8 +81,7 @@ class PupylImageSearch:
         )
 
     def _index_configuration(self, mode, **kwargs):
-        """
-        Load or save an index configuration file, if exists.
+        """Loads or saves an index configuration file, if exists.
 
         Parameters
         ----------
@@ -76,8 +89,16 @@ class PupylImageSearch:
             Defines which mode should be used over configuration
             file. 'r' is for file reading, 'w' for writing.
 
-        feature_size(optional): int
-            The size of current feature extraction method.
+        feature_size (optional): int
+            The size of the current feature extraction method.
+
+        Returns
+        -------
+        dict or bool:
+            Returns a ``dict`` if an already saved database are found,
+            containing several database configurations or ``bool`` ``True``
+            if a new configuration file was created, or ``bool`` ``False`` if
+            either a configuration couldn't be created or loaded.
         """
         try:
             with open(self._index_config_path, mode) as config_file:
@@ -103,8 +124,7 @@ class PupylImageSearch:
             return False
 
     def index(self, uri, **kwargs):
-        """
-        Performs image indexing.
+        """Performs parallel image indexing.
 
         Parameters
         ----------
@@ -114,6 +134,12 @@ class PupylImageSearch:
         **check_unique (optional): bool
             If, during the index process, imported images
             should have their unicity verified (to avoid duplicates).
+
+        Attention
+        ---------
+        If ``check_unique`` is ``True``, consequentely unicity checks will be
+        performed, which creates some overheads on the index process, making
+        it slower.
         """
         with Extractors(
                 characteristics=self._characteristic
@@ -178,17 +204,28 @@ class PupylImageSearch:
 
                     os.remove(features_tensor_name)
 
-    def search(self, query, top=4):
-        """
-        Executes the search for a created database
+    def search(self, query, top=4, return_metadata=False):
+        """Executes the search for a similar image throughout the database
+        based on the ``query`` image.
 
         Parameters
         ----------
         query: str
-            URI of a image to query
+            URI of a image to be used as query.
 
-        top (optional)(default: 4): int
-            How many results should be returned.
+        top (optional) (default=4): int
+            How many results should be returned from the search process.
+
+        return_metadata (optional) (default=False):
+            If the image results metadata should also be returned.
+
+        Yields
+        ------
+        int or dict:
+            Respectively describing the image index identification that is
+            decresingly (ordered) similar from the query image or a ``dict``
+            with metadata information about this images (case when
+            ``return_metadata=True``).
         """
         with Extractors(characteristics=self._characteristic) as extractor:
             with Index(
@@ -199,4 +236,7 @@ class PupylImageSearch:
                         extractor.extract(query),
                         results=top
                 ):
-                    yield result
+                    if return_metadata:
+                        yield self.image_database.load_image_metadata(result)
+                    else:
+                        yield result
