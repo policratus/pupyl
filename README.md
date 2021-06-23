@@ -63,7 +63,7 @@ pupyl --data_dir /path/to/your/data/dir serve
 See all dependencies here: [dependencies](https://github.com/policratus/pupyl/network/dependencies).
 
 ## 📝 Documentation
-See a quick reference guide on the repository [wiki](https://github.com/policratus/pupyl/wiki). Complete API reference coming soon.
+See a getting start guide and the API reference on [https://pupyl.readthedocs.io/](http://pupyl.rtfd.io/).
 
 ## 🖊️ Citation
 If you use `pupyl` on your publications or projects, please cite:
