@@ -12,11 +12,17 @@ PUPYL_HOME_FOLDER = os.path.join(Path.home(), 'pupyl')
 
 
 class PupylCommandLineInterface:
-    """Implements the CLI for pupyl"""
+    """Implements the command line interface for pupyl."""
 
     @staticmethod
     def parsers():
-        """Create parsers and subparsers for CLI"""
+        """Creates parsers and subparsers for pupyl's CLI.
+
+        Returns
+        -------
+        argparse.ArgumentParser:
+            Parsed arguments from command line.
+        """
 
         parser = argparse.ArgumentParser(
             prog='pupyl',
@@ -55,13 +61,17 @@ class PupylCommandLineInterface:
 
     @classmethod
     def argument_parser(cls, **kwargs):
-        """
-        Render the parsers.
+        """Renders the command line parsers.
 
         Parameters
         ----------
         **commands (optional): list
             The optional list of parameters to parse.
+
+        Returns
+        -------
+        argparse.Namespace:
+            A namespace with parsed command line arguments whithin.
         """
 
         commands = kwargs.get('commands')
@@ -74,6 +84,7 @@ class PupylCommandLineInterface:
 
 def pupyl():
     """CLI entry point."""
+
     cli = PupylCommandLineInterface()
     args = cli.argument_parser()
 

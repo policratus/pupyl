@@ -24,6 +24,9 @@ clean:
 flake8: clean
 	@flake8 --show-source --ignore=E402 .
 
+static-check: clean
+	@mypy pupyl/
+
 test_http_server:
 	@python -c "import http.server;import socketserver;import os;os.chdir(os.path.join('tests', 'tar_files'));httpd = socketserver.TCPServer(('', 8888), http.server.SimpleHTTPRequestHandler);httpd.serve_forever()" &
 
@@ -36,3 +39,6 @@ coverage:
 coverage-html: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=html --cov=.
 	$(OPEN_EXECUTABLE) htmlcov/index.html
+
+docs: clean
+	@pyreverse --ignore=exceptions.py -o png -p pupyl -d docs/source/_static/ pupyl

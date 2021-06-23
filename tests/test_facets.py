@@ -114,9 +114,9 @@ def test_append_check_unique():
         assert issubclass(caught_warnings[-1].category, UserWarning)
         assert str(
             caught_warnings[-1].message
-        ) == 'Tensor being indexed already exists in the database ' + \
-            'and the check for duplicates are on. Refusing to store ' + \
-            'again this tensor.'
+        ) == 'Tensor being indexed already exists in ' + \
+            'the database and the check for duplicates ' + \
+            'are on. Refusing to store this tensor again.'
 
 
 def test_open_index():
@@ -243,7 +243,7 @@ def test_append_new_created_file():
     assert test_size_after == test_size_before + 1
 
     numpy.testing.assert_array_almost_equal(
-        INDEX[-1], new_tensor, decimal=7
+        INDEX[-1], new_tensor, decimal=3
     )
 
 

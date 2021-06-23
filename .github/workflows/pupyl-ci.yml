@@ -23,6 +23,10 @@ jobs:
       run: |
         pip install flake8
         make flake8
+    - name: Static type checking
+      run: |
+        pip install mypy types-termcolor
+        make static-check
     - name: Tests
       run: |
         pip install pytest pytest-cov

@@ -1,6 +1,4 @@
-"""
-Exceptions regarding embeddings module operations
-"""
+"""Exceptions regarding embeddings module operations."""
 
 
 class Error(Exception):
@@ -8,11 +6,11 @@ class Error(Exception):
 
 
 class FileIsNotAnIndex(Error):
-    """Raised when a file is not recognized as a index file."""
+    """Raised when a file is not recognized as an index file."""
 
 
 class IndexNotBuildYet(Error):
-    """Raised when a file is not recognized as a index file."""
+    """Raised when an index is not built yet."""
 
 
 class NoDataDirForPermanentIndex(Error):
@@ -24,11 +22,11 @@ class DataDirDefinedForVolatileIndex(Error):
 
 
 class NullTensorError(Error):
-    """Raised when trying to insert a null tensor."""
+    """Raised when trying to insert a null (empty) tensor."""
 
 
 class TopNegativeOrZero(Error):
-    """Raised when a top results is zero or below."""
+    """Raised when the top results filter is zero or below."""
 
 
 class EmptyIndexError(Error):

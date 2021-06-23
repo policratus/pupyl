@@ -99,3 +99,20 @@ def test_search():
     )
 
     assert len([*test_results]) == expected_length_results
+
+
+def test_search_returning_metadata():
+    """Unit test for method search, returning image metadata case."""
+    test_results = [*PUPYL.search(
+        TEST_QUERY_IMAGE,
+        top=1,
+        return_metadata=True
+    )][0]
+
+    del test_results['original_access_time']
+
+    assert test_results == {
+        'id': 0,
+        'original_file_name': '500863916_bdd4b8cc5a.jpg',
+        'original_file_size': '25K',
+        'original_path': 'https://static.flickr.com/210'}

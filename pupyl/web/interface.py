@@ -60,14 +60,16 @@ Image's URL to use as query.</small>
 
 
 def serve(data_dir=None, port=8080):
-    """
-    Start the web server.
+    """Starts the web server.
 
     Parameters
     ----------
-    port (optional)(default: 8080): int
-        Defines the network port which the web server
-        will start listening.
+    data_dir (optional): str
+        The path to the data directory. If not set, will try to find inside
+        the default temporary file.
+
+    port (optional) (default=8080): int
+        Defines the network port which the web server will start listening.
     """
     if not data_dir:
         data_dir = FileIO.pupyl_temp_data_dir()
@@ -116,8 +118,7 @@ def serve(data_dir=None, port=8080):
 
         @staticmethod
         def filter_metadata(index):
-            """
-            Return a filtered metadata information.
+            """Returns a filtered metadata information.
 
             Parameters
             ----------
@@ -140,16 +141,27 @@ def serve(data_dir=None, port=8080):
             return ', '.join(map(str, metadata.values()))
 
         def images(self, query_uri=None, top=None):
-            """
-            Return image tags from database.
+            """Returns image tags from database.
 
             Parameters
             ----------
             query_uri (optional): str
                 Location where the query image is stored.
 
-            top (optional)(default: 24): int
+            top (optional) (default=24): int
                 How many results should be returned from some search request.
+
+            Returns
+            -------
+            str:
+                With base64 strings related to images inside database.
+
+            Raises
+            ------
+            OSError:
+                If some problem happened when starting the server.
+            KeyboardInterrupt:
+                If a command to stop the server is issued (like CTRL+c).
             """
 
             image_tags = ''
