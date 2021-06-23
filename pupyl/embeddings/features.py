@@ -22,10 +22,9 @@ class Characteristics(Enum):
 
     The actual supported characteristics are:
 
-    .. code-block:: python
-        LIGHTWEIGHT_REGULAR_PRECISION # MobileNetV2
-        MEDIUMWEIGHT_GOOD_PRECISION # DenseNet169
-        HEAVYWEIGHT_HUGE_PRECISION # EfficientNetB7
+    ``LIGHTWEIGHT_REGULAR_PRECISION # MobileNetV2``
+    ``MEDIUMWEIGHT_GOOD_PRECISION # DenseNet169``
+    ``HEAVYWEIGHT_HUGE_PRECISION # EfficientNetB7``
     """
     # MobileNetV2
     LIGHTWEIGHT_REGULAR_PRECISION = auto()

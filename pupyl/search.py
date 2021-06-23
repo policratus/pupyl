@@ -32,13 +32,13 @@ class PupylImageSearch:
 
         Parameters
         ----------
-        data_dir (optional): str
+        data_dir: str
             The directory where all assets are stored.
 
-        **import_images (optional): bool
+        import_images: bool
             If images should (or was) imported into the database.
 
-        **characteristic (optional): Characteristics
+        characteristic: Characteristics
             The characteristic for feature extraction that must be used. If
             reading from an already created database, retrieves it from the
             (internal) configuration files.
@@ -89,7 +89,7 @@ class PupylImageSearch:
             Defines which mode should be used over configuration
             file. 'r' is for file reading, 'w' for writing.
 
-        feature_size (optional): int
+        feature_size: int
             The size of the current feature extraction method.
 
         Returns
@@ -131,7 +131,7 @@ class PupylImageSearch:
         uri: str
             Directory or file, or http(s) location.
 
-        **check_unique (optional): bool
+        check_unique: bool
             If, during the index process, imported images
             should have their unicity verified (to avoid duplicates).
 
@@ -213,10 +213,10 @@ class PupylImageSearch:
         query: str
             URI of a image to be used as query.
 
-        top (optional) (default=4): int
+        top: int
             How many results should be returned from the search process.
 
-        return_metadata (optional) (default=False):
+        return_metadata: bool
             If the image results metadata should also be returned.
 
         Yields

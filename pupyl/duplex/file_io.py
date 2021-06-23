@@ -216,7 +216,7 @@ class FileIO(FileType):
         uri: str
             With the file location to be analyzed.
 
-        mimetype (optional): bool
+        mimetype: bool
             If should be returned also the discovered mime type.
 
         Returns
@@ -232,10 +232,9 @@ class FileIO(FileType):
 
         Example
         -------
-        .. code-block:: python
-            infer_file_type_from_uri('image.jpg') # Returns 'JPG'
-            infer_file_type_from_uri('image.jpg, mimetype=True')
-            # Returns ('JPG', 'image/jpeg')
+        ``infer_file_type_from_uri('image.jpg, mimetype=True')``
+        ``infer_file_type_from_uri('image.jpg') # Returns 'JPG'``
+        ``# Returns ('JPG', 'image/jpeg')``
         """
         guessed_init_type = mimetypes.guess_type(uri)
 
@@ -326,7 +325,7 @@ class FileIO(FileType):
 
         Parameters
         ----------
-        **file_name (optional) (keyword argument): str
+        file_name: str
             Defining a temporary file to assert.
 
         Returns
@@ -534,8 +533,7 @@ class FileIO(FileType):
 
     @classmethod
     def progress(cls, iterable, precise=False, message=None):
-        """
-        Utility method to interface process progress bar with users.
+        """Utility method to interface process progress bar with users.
         It supports two way of unpacking the iterable, throughout ``precise``
         parameters. If ``precise`` is set to ``False`` (which is the default),
         the parameter ``iterable`` will be unpacked as is. This leads to an
@@ -550,12 +548,12 @@ class FileIO(FileType):
         iterable: iter
             Objects which supports iteration.
 
-        precise (optional)(default: False): bool
+        precise: bool
             If the progress should be precise
             (with actual percentage of completion) or just an
             interface during process running.
 
-        message: (optional)(default: None): str
+        message: str
             A custom message when reporting progress.
 
         Yields

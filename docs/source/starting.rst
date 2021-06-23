@@ -176,7 +176,7 @@ for other similar images). For this example, consider this beautiful image by
 `Unsplash <https://unsplash.com/>`_):
 
 .. image::
-    https://images.unsplash.com/photo-1520763185298-1b434c919102?w=1189&q=80
+    https://images.unsplash.com/photo-1520763185298-1b434c919102?w=840&q=80
     :alt: Copyright @dlanor_s
 
 Hence, to search the image above on the already indexed sample database, just
@@ -269,7 +269,7 @@ interface, allowing you to interact with a created image database. This
 interface looks like this:
 
 .. image:: _static/pupylwebinterface.png
-    :width: 1189
+    :width: 840
     :alt: pupyl web interface
 
 Hence, to use the web interface (and using the library directly):
@@ -297,7 +297,7 @@ section and the database created on the section :ref:`indexing <indexing>`,
 let's search and check the results:
 
 .. image:: _static/pupylresults.png
-    :width: 1189
+    :width: 840
     :alt: pupyl web interface result
 
 That's it! For further information about ``pupyl``, please check the
@@ -309,4 +309,4 @@ That's it! For further information about ``pupyl``, please check the
 If you had some idea for the library, please let us know on
 `<https://github.com/policratus/pupyl/discussions>`_.
 
-Please enjoy 🧿 ``pupyl``.
+Please, enjoy 🧿 ``pupyl``.

@@ -27,14 +27,14 @@ class Index:
         size: int
             Shape of unidimensional vectors which will be indexed
 
-        data_dir (optional): str
+        data_dir: str
             Location where to load or save the index
 
-        trees (optional) (default=.001): float
+        trees: float
             Defines the factor over the number of trees to be created based on
             the dataset size. Should be a number between 0 and 1.
 
-        volatile (optional) (default=False): bool
+        volatile: bool
             If the index will be temporary or not.
 
         Raises
@@ -257,7 +257,7 @@ class Index:
         tensor: numpy.ndarray or list
             The tensor to insert into the index.
 
-        check_unique (optional) (default=False): bool
+        check_unique: bool
             Defines if the append method should verify the existence
             of a really similar tensor on the current index. In other words,
             it checks for the unicity of the value.
@@ -371,7 +371,7 @@ class Index:
 
         Parameters
         ----------
-        position (optional) (default=last position): int
+        position: int
             Removes and returns the value at ``position``.
 
         Returns
@@ -414,10 +414,10 @@ class Index:
         position: int
             The item id within index.
 
-        top (optional) (default=10): int
+        top: int
             How many similar items should be returned.
 
-        distances (optional) (default=False): bool
+        distances: bool
             If should be returned also the distances between items.
 
         Returns
@@ -510,10 +510,10 @@ class Index:
 
         Parameters
         ----------
-        top (optional) (default=10): int
+        top: int
             How many similar internal images should be returned.
 
-        **position (optional): int
+        position: int
             Returns the groups based on a specified position.
 
         Yields
@@ -567,10 +567,10 @@ class Index:
         path: str
             Place to create the directories and export the images.
 
-        top (optional) (default=10):
+        top: int
             How many similar internal images should be filtered.
 
-        position (optional): int
+        position: int
             Returns the groups based on a specified position.
         """
         for element in FileIO.progress(

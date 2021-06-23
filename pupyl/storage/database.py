@@ -18,12 +18,12 @@ class ImageDatabase(ImageIO):
             If images must be imported (copied) to the internal database or
             not.
 
-        data_dir (optional) (default=self.safe_temp_file()): str
+        data_dir: str
             Location to save the image storage files and assets. If a value is
             ommited for this parameter, will be created a new temporary folder
             in the underlying (operating system) default temporary directory.
 
-        **bucket_size (optional) (default=1000): int
+        bucket_size: int
             Defines the number of files per bucket inside the database. Since
             each file and associated assets are saved together, splitting up
             the directories will help avoid issues like ``Too many files``,
@@ -32,7 +32,7 @@ class ImageDatabase(ImageIO):
             be saved on an internal database directory before starting to save
             to another new one.
 
-        **image_size (optional) (default=(800, 600)): tuple
+        image_size: tuple
             Defines the dimensions (in pixels, width x height)
             of saved images on the database. Only has some effect if
             ``import_images`` is True. Case a resize happens, the aspect ratio
@@ -84,15 +84,14 @@ class ImageDatabase(ImageIO):
 
         Example
         -------
-        ..code-block:: python
-            img_db = ImageDatabase(import_images=True, data_dir='pupyl')
-            img_db[10]
-            # May return:
-            # {'original_file_name': '2610447919_1b91946bd1.jpg',
-            # 'original_path': '/tmp/tmpekd0cuie',
-            # 'original_file_size': '52K',
-            # 'original_access_time': '2021-06-14T19:07:27',
-            # 'id': 10}
+        ``img_db = ImageDatabase(import_images=True, data_dir='pupyl')``
+        ``img_db[10]``
+        ``# May return:``
+        ``# {'original_file_name': '2610447919_1b91946bd1.jpg',``
+        ``# 'original_path': '/tmp/tmpekd0cuie',``
+        ``# 'original_file_size': '52K',``
+        ``# 'original_access_time': '2021-06-14T19:07:27',``
+        ``# 'id': 10}``
         """
         return self.load_image_metadata(position)
 
@@ -106,9 +105,8 @@ class ImageDatabase(ImageIO):
 
         Example
         -------
-        ..code-block:: python
-            img_db = ImageDatabase(import_images=True, data_dir='pupyl')
-            len(img_db) # May return 709
+        ``img_db = ImageDatabase(import_images=True, data_dir='pupyl')``
+        ``len(img_db) # May return 709``
         """
         return len([*self.list_images()])
 
@@ -229,7 +227,7 @@ class ImageDatabase(ImageIO):
         index: int
             Regarding the position of some image inside database.
 
-        **filtered (optional): iterable
+        filtered: iterable
             Describing which fields to filter (or select) for return.
 
         Returns
@@ -309,10 +307,10 @@ class ImageDatabase(ImageIO):
 
         Parameters
         ----------
-        return_index (optional) (default=False): bool
+        return_index: bool
             If the method should also return the file index inside database.
 
-        top (optional): int
+        top: int
             How many pictures from image database should be listed. Not setting
             this parameter (which means not referencing it or setting it
             to zero or below) will return all images in the database.

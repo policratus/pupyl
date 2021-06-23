@@ -65,7 +65,7 @@ class PupylCommandLineInterface:
 
         Parameters
         ----------
-        **commands (optional): list
+        commands: list
             The optional list of parameters to parse.
 
         Returns

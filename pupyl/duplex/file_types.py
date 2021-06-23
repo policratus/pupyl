@@ -150,7 +150,7 @@ class FileType:
         bytess: bytes
             Bytes of some file.
 
-        mimetype (optional): bool
+        mimetype: bool
             If the mimetype should be returned or not.
 
         Raises
@@ -187,7 +187,7 @@ class FileType:
         sub_type: str
             The sub type of the tar compressed type.
 
-        mimetype (optional: default False): bool
+        mimetype: bool
             If should be returned the MIME type instead of internal
             file type name.
 

@@ -20,7 +20,7 @@ extensions = ['sphinx.ext.napoleon', 'sphinx.ext.autodoc']
 
 # -- Options for HTML output -------------------------------------------------
 
-html_theme = 'groundwork'
+html_theme = 'press'
 
 html_static_path = ['_static']
 

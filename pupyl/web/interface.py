@@ -64,11 +64,11 @@ def serve(data_dir=None, port=8080):
 
     Parameters
     ----------
-    data_dir (optional): str
+    data_dir: str
         The path to the data directory. If not set, will try to find inside
         the default temporary file.
 
-    port (optional) (default=8080): int
+    port: int
         Defines the network port which the web server will start listening.
     """
     if not data_dir:
@@ -145,10 +145,10 @@ def serve(data_dir=None, port=8080):
 
             Parameters
             ----------
-            query_uri (optional): str
+            query_uri: str
                 Location where the query image is stored.
 
-            top (optional) (default=24): int
+            top: int
                 How many results should be returned from some search request.
 
             Returns

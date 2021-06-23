@@ -58,8 +58,7 @@ class ImageIO(FileIO):
         uri: str
             Location where the image are stored.
 
-        as_tensor (optional) (default=False): bool
-
+        as_tensor: bool
             If the image should be converted to its tensor representation.
             Defaults to False, which returns images to a byte representation
 
@@ -177,10 +176,10 @@ class ImageIO(FileIO):
         uri: str
             Description of where the image are located
 
-        new_size (optional): tuple
+        new_size: tuple
             The new intended dimension of the image
 
-        keep_aspect (optional) (default=False): bool
+        keep_aspect: bool
             If the image proportions should be preserved
             or not.
 
@@ -210,7 +209,7 @@ class ImageIO(FileIO):
         tensor: numpy.ndarray
             A tensor representing an image
 
-        as_tensor (optional) (default=False): bool
+        as_tensor: bool
             If the new compressed JPEG image should be
             returned as a ``numpy.ndarray``.
 
