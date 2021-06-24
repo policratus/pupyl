@@ -20,10 +20,14 @@ from pupyl.embeddings import exceptions
 class Characteristics(Enum):
     """Describes high level characteristics of complex feature extractors.
 
+    Notes
+    -----
     The actual supported characteristics are:
 
     ``LIGHTWEIGHT_REGULAR_PRECISION # MobileNetV2``
+
     ``MEDIUMWEIGHT_GOOD_PRECISION # DenseNet169``
+
     ``HEAVYWEIGHT_HUGE_PRECISION # EfficientNetB7``
     """
     # MobileNetV2

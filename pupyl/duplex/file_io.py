@@ -27,11 +27,13 @@ from pupyl.addendum.operators import intmul
 class Protocols(Enum):
     """Defines several possible protocol enumerators to be discovered.
 
+    Notes
+    -----
     The current supported protocols are:
 
-    UNKNOWN: Unknown protocol
-    HTTP: Hypertext Transfer Protocol (also Secure supported)
-    FILE: Local storage file.
+    ``UNKNOWN: Unknown protocol``
+    ``HTTP: Hypertext Transfer Protocol (also Secure supported)``
+    ``FILE: Local storage file.``
     """
 
     UNKNOWN = auto()
@@ -232,9 +234,10 @@ class FileIO(FileType):
 
         Example
         -------
-        ``infer_file_type_from_uri('image.jpg, mimetype=True')``
         ``infer_file_type_from_uri('image.jpg') # Returns 'JPG'``
-        ``# Returns ('JPG', 'image/jpeg')``
+
+        ``infer_file_type_from_uri('image.jpg, mimetype=True')
+        # Returns ('JPG', 'image/jpeg')``
         """
         guessed_init_type = mimetypes.guess_type(uri)
 

@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.abspath('../../pupyl'))
 # -- Project information -----------------------------------------------------
 
 project = 'pupyl'
-copyright = f'{datetime.today().year}, © Nelson Forte'
+copyright = f'{datetime.today().year}, Nelson Forte'
 author = 'Nelson Forte'
 
 release = '0.11.1'

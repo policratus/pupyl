@@ -10,7 +10,7 @@ class FileHeaderHex(Enum):
 
     The current ones supported are:
 
-    ``JPG, GIF, PNG, TIF, GZP, BZ2, ZIP, LXZ,``"""
+    ``JPG, GIF, PNG, TIF, GZP, BZ2, ZIP, LXZ``"""
 
     JPG = 'ffd8ff'
     GIF = '474946'
@@ -27,7 +27,7 @@ class FileMimeTypes(Enum):
 
     The current ones supported are:
 
-    ``JPG, GIF, PNG, TIF, GZP, BZ2, ZIP, LXZ,``"""
+    ``JPG, GIF, PNG, TIF, GZP, BZ2, ZIP, LXZ``"""
 
     JPG = 'image/jpeg'
     GIF = 'image/gif'

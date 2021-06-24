@@ -300,13 +300,13 @@ let's search and check the results:
     :width: 840
     :alt: pupyl web interface result
 
-That's it! For further information about ``pupyl``, please check the
-:ref:`API reference <api>`. If you want to help on the development, go to
-`<https://github.com/policratus/pupyl>`_. If you want to donate, check the
+That's it! For further information about ``pupyl`` or helping on the development,
+please check the `github <https://github.com/policratus/pupyl>`_ repository.
+If you want to donate, go to the
 `Patreon <https://www.patreon.com/pupyl>`_ page, the
 `Open collective <https://opencollective.com/pupyl>`_ page or the
 `LFX Crowdfunding <https://crowdfunding.lfx.linuxfoundation.org/projects/pupyl>`_.
-If you had some idea for the library, please let us know on
-`<https://github.com/policratus/pupyl/discussions>`_.
+If you had some idea for the library, please let us know on the
+`Discussions <https://github.com/policratus/pupyl/discussions>`_ page.
 
 Please, enjoy 🧿 ``pupyl``.

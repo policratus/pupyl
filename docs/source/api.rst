@@ -1,11 +1,8 @@
-.. _api:
-
 🔩 API Reference
 ================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Everything about pupyl API
 
    addendum
    duplex

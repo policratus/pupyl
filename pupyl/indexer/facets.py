@@ -227,6 +227,7 @@ class Index:
         Example
         -------
         ``index[10] # Returns the 10th item.``
+
         ``index[-1] # Returns the last item.``
         """
         if position >= 0:
