@@ -84,17 +84,17 @@ class ImageDatabase(ImageIO):
 
         Example
         -------
-        ``img_db = ImageDatabase(import_images=True, data_dir='pupyl')``
+        ``img_db = ImageDatabase(import_images=True, data_dir='pupyl')
 
-        ``img_db[10]``
+        img_db[10]
 
-        ``# May return:``
+        # May return:
 
-        ``# {'original_file_name': '2610447919_1b91946bd1.jpg',``
-        ``# 'original_path': '/tmp/tmpekd0cuie',``
-        ``# 'original_file_size': '52K',``
-        ``# 'original_access_time': '2021-06-14T19:07:27',``
-        ``# 'id': 10}``
+        {'original_file_name': '2610447919_1b91946bd1.jpg',
+        'original_path': '/tmp/tmpekd0cuie',
+        'original_file_size': '52K',
+        'original_access_time': '2021-06-14T19:07:27',
+        'id': 10}``
         """
         return self.load_image_metadata(position)
 

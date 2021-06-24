@@ -32,11 +32,6 @@ class Infix:
         Example
         -------
         1 << 2
-
-        See Also
-        --------
-        __rshift__: Supporting reversed right hand bitshift operations,
-        in this case the rightmost operator.
         """
         return Infix(lambda x, self=self, other=other: self.method(other, x))
 
@@ -52,11 +47,6 @@ class Infix:
         Example
         -------
         1 >> 2
-
-        See Also
-        --------
-        __rlshift__: Supporting reversed right hand bitshift operations,
-        in this case the leftmost operator.
         """
         return self.method(other)
 

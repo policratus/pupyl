@@ -32,7 +32,9 @@ class Protocols(Enum):
     The current supported protocols are:
 
     ``UNKNOWN: Unknown protocol``
+
     ``HTTP: Hypertext Transfer Protocol (also Secure supported)``
+
     ``FILE: Local storage file.``
     """
 
@@ -236,8 +238,8 @@ class FileIO(FileType):
         -------
         ``infer_file_type_from_uri('image.jpg') # Returns 'JPG'``
 
-        ``infer_file_type_from_uri('image.jpg, mimetype=True')
-        # Returns ('JPG', 'image/jpeg')``
+        ``infer_file_type_from_uri('image.jpg, mimetype=True') # Returns ('JPG'
+        , 'image/jpeg')``
         """
         guessed_init_type = mimetypes.guess_type(uri)
 
