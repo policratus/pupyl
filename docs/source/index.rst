@@ -9,21 +9,11 @@ maintaining a complete reverse image search engine. You can use it in your own
 data pipelines, web projects and wherever you find fit!
 
 .. toctree::
-   :maxdepth: 2
-   :caption: ▶️ Quickstart
+   :maxdepth: 3
+   :caption: 📑 Table of Contents
 
    starting
-
-.. toctree::
-   :maxdepth: 3
-   :caption: 📓 API Reference
-
    api
-
-.. toctree::
-   :maxdepth: 2
-   :caption: 🖊️ Library design
-
    design
 
 📔 Indices and tables

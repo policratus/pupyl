@@ -1,5 +1,6 @@
 🧰 Classes and Packages
 ========================
+
 A glimpse over the whole structure and organization of every package and
 class on ``pupyl``.
 
