@@ -109,10 +109,10 @@ if VERSION == COMPARISON_VERSION:
         )
 
         DOCS_CONF_FILE_MODIFIED = re.sub(
-            r'^.*\b(\w*release\w*)\b.*',
+            r'(release?)\b.*',
             f"release = '{VERSION}'",
             DOCS_CONF_FILE,
-            flags=re.MULTILINE
+            count=1
         )
 
     with open(join('pupyl', 'search.py'), 'w') as MAIN_MODULE, \
