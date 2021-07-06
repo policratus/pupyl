@@ -2,16 +2,13 @@
 """Updates pupyl version."""
 import re
 import argparse
-import subprocess
 from os.path import join
 
 from termcolor import cprint
 
 
-CURRENT_VERSION = subprocess.check_output(
-    'git describe --abbrev=0'.split(),
-    text=True
-).rstrip()
+with open('.version', 'rt') as VERSION_READ:
+    CURRENT_VERSION = VERSION_READ.read()
 
 PARSER = argparse.ArgumentParser(
     prog='Pupyl version updater.',
@@ -121,11 +118,13 @@ if VERSION == COMPARISON_VERSION:
     with open(join('pupyl', 'search.py'), 'w') as MAIN_MODULE, \
             open('setup.py', 'w') as SETUP_MODULE, \
             open(join('conda', 'meta.yaml'), 'w') as CONDA_META, \
-            open(join('docs', 'source', 'conf.py'), 'w') as DOCS:
+            open(join('docs', 'source', 'conf.py'), 'w') as DOCS, \
+            open('.version', 'w') as VERSION_FILE:
         MAIN_MODULE.write(MAIN_MODULE_MODIFIED)
         SETUP_MODULE.write(SETUP_MODULE_MODIFIED)
         CONDA_META.write(CONDA_META_MODIFIED)
         DOCS.write(DOCS_CONF_FILE_MODIFIED)
+        VERSION_FILE.write(f'v{VERSION}')
 
     cprint(f'Version updated to {VERSION}', 'blue')
 else:
