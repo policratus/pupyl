@@ -28,7 +28,9 @@ _For installation troubleshooting, visit [troubleshooting](TROUBLESHOOTING.md)._
 
 ## 🚸 Usage
 
-You can call pupyl's objects directly from your application code:
+You can call `pupyl`'s objects directly from your application code. For this example, a sample database will be indexed and after that, the following image will be used as a query image (_credits_: [@dlanor_s](https://unsplash.com/@dlanor_s)):
+
+![@dlanor_s](https://images.unsplash.com/photo-1520763185298-1b434c919102?w=970&q=80)
 
 ```Python
 from pupyl.search import PupylImageSearch
@@ -41,11 +43,44 @@ SEARCH.index(
     '/raw/master/samples/images.tar.xz'
 )
 
+QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102'
+
+[*SEARCH.search(QUERY_IMAGE)]
+
+# Here's the simplest result
+> [427, 473, 129, 346]
+
+# The results with image metadata
+[*SEARCH.search(QUERY_IMAGE, return_metadata=True)]
+
+> [
+    {
+        'original_file_name': '941444733_6de664bbbf.jpg',
+        'original_path': '/tmp/tmp_i42jozv',
+        'original_file_size': '80K',
+        'original_access_time': '2021-07-06T20:31:07',
+        'id': 427
+    },
+    {
+        'original_file_name': '2673396259_f151fbe7c1.jpg',
+        'original_path': '/tmp/tmp_i42jozv',
+        'original_file_size': '66K',
+        'original_access_time': '2021-07-06T20:31:07',
+        'id': 473
+    },
+    ...
+  ]
+
+# Opening the web interface
 interface.serve()
 ```
+A glimpse of the web interface, visualizing the results shown above:
+
+![web](docs/source/_static/pupylresults.png)
+
 _Disclaimer: the example above creates `pupyl` assets on your temporary directory. To define a non-volatile database, you should define `data_dir` parameter._
 
-Alternatively, you can interact with pupyl via command line. The same example above in CLI
+Alternatively, you can interact with `pupyl` via command line. The same example above in CLI
 terms:
 
 ### 🐚 Command line interface
