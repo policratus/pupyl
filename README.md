@@ -1,4 +1,4 @@
-![pupyl](docs/pupyl.png)
+![pupyl](https://raw.githubusercontent.com/policratus/pupyl/master/docs/pupyl.png)
 ![pupyl-ci](https://github.com/policratus/pupyl/workflows/pupyl-ci/badge.svg)
 [![codecov](https://codecov.io/gh/policratus/pupyl/branch/master/graph/badge.svg)](https://codecov.io/gh/policratus/pupyl)
 [![anaconda](https://anaconda.org/policratus/pupyl/badges/version.svg)](https://anaconda.org/policratus/pupyl/badges/version.svg)
@@ -76,7 +76,7 @@ interface.serve()
 ```
 A glimpse of the web interface, visualizing the results shown above:
 
-![web](docs/source/_static/pupylresults.png)
+![web](https://pupyl.readthedocs.io/en/latest/_images/pupylresults.png)
 
 _Disclaimer: the example above creates `pupyl` assets on your temporary directory. To define a non-volatile database, you should define `data_dir` parameter._
 
