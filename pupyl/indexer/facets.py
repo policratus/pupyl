@@ -18,7 +18,7 @@ from pupyl.storage.database import ImageDatabase
 class Index:
     """Procedures over multidimensional spaces."""
 
-    def __init__(self, size, data_dir=None, trees=.001, volatile=False):
+    def __init__(self, size, data_dir=None, trees=.01, volatile=False):
         """Indexing tensors operations and approximate nearest neighbours
         search.
 
@@ -170,12 +170,16 @@ class Index:
 
             del exc_type, exc_val, exc_tb
 
-            if self._is_new_index:
-                self.tree.build(self.size << intmul >> self.trees)
+            self.flush()
 
-                self.tree.save(self.path)
+    def flush(self):
+        """Commits an indexer work."""
+        if self._is_new_index:
+            self.tree.build(self.size << intmul >> self.trees, n_jobs=-1)
 
-            self.tree.unload()
+            self.tree.save(self.path)
+
+        self.refresh()
 
     def items(self):
         """Returns indexed items.
@@ -245,8 +249,7 @@ class Index:
         self.tree.load(self.path)
 
     def append(self, tensor, check_unique=False):
-        """
-        Inserts a new tensor at the end of the index.
+        """Inserts a new tensor at the end of the index.
 
         Attention
         ---------
@@ -282,7 +285,7 @@ class Index:
 
             if check_unique and len(self) > 1:
 
-                self.tree.build(self.size << intmul >> self.trees)
+                self.tree.build(self.size << intmul >> self.trees, n_jobs=-1)
 
                 result = self.item(
                     self.index(tensor),

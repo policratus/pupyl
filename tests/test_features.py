@@ -84,41 +84,6 @@ def test_extract():
                 extractor.network.output_shape[1]
 
 
-def test_acceleration_discovery(monkeypatch):
-    """
-    Unit test for acceleration_discovery staticmethod
-    """
-    @staticmethod
-    def mocked___init__(characteristics):
-        """
-        Closure to mock __init__ behaviour
-        """
-        del characteristics
-
-    @staticmethod
-    def mocked_acceleration_discovery():
-        """
-        Closure to mock acceleration_discovery behaviour
-        """
-        return True
-
-    monkeypatch.setattr(
-        Extractors,
-        '__init__',
-        mocked___init__
-    )
-
-    monkeypatch.setattr(
-        Extractors,
-        'acceleration_discovery',
-        mocked_acceleration_discovery
-    )
-
-    assert Extractors(
-        Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
-    ).acceleration_discovery()
-
-
 def test_output_shape_property():
     """Unit test for property output_shape."""
     for characteristic in Characteristics:

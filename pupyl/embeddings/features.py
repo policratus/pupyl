@@ -1,17 +1,17 @@
 """Factory for image feature extraction."""
 
-from enum import Enum, auto
 import warnings
-import os
+from enum import Enum, auto
+
+import termcolor
+import numpy
 
 from pupyl.verbosity import quiet_tf
 quiet_tf()
 
+import tensorflow
 import tensorflow.keras.backend as backend
 import tensorflow.keras.applications as networks
-import tensorflow
-import numpy
-import termcolor
 
 from pupyl.duplex.image import ImageIO
 from pupyl.embeddings import exceptions
@@ -39,8 +39,7 @@ class Characteristics(Enum):
 
     @staticmethod
     def by_name(name):
-        """
-        Returns a characteristic by its name.
+        """Returns a characteristic by its name.
 
         Parameters
         ----------
@@ -63,7 +62,7 @@ class Characteristics(Enum):
 class Extractors(ImageIO):
     """Pretrained CNNs for embedding generation."""
 
-    def __init__(self, characteristics):
+    def __init__(self, characteristics, extreme_mode=True):
         """
         Creates embedding extractors.
 
@@ -72,10 +71,15 @@ class Extractors(ImageIO):
         characteristics: Enum
             Describing the intended characteristics to transform images
             into its underlying embeddings.
-        """
-        self.acceleration_discovery()
 
+        extreme_mode: bool
+            Should the extreme mode (faster execution but not gentle with
+            memory) be enabled or disabled?
+        """
         self._characteristics = characteristics
+        self._extreme_mode = extreme_mode
+
+        self.acceleration_discovery()
 
         self.converter, self.network = self._infer_network()
         self.image_input_shape = self.network.input_shape[1:3]
@@ -104,10 +108,8 @@ class Extractors(ImageIO):
         """
         return self._features_output_shape
 
-    @staticmethod
-    def acceleration_discovery():
-        """
-        Performs a hardware processing acceleration discovery.
+    def acceleration_discovery(self):
+        """Performs a hardware processing acceleration discovery.
 
         Most NVIDIA® GPUs supported (through ``CUDA``), which results on
         faster embeddings extraction.
@@ -123,18 +125,19 @@ class Extractors(ImageIO):
                 )
             )
 
-            try:
-                tensorflow.config.experimental.set_memory_growth(gpu, True)
-            except RuntimeError:
-                warnings.warn(
-                    termcolor.colored(
-                        'Trying to define memory growth for an '
-                        'already initialized GPU',
-                        color='blue',
-                        attrs=['bold']
-                    ),
-                    ResourceWarning
-                )
+            if not self._extreme_mode:
+                try:
+                    tensorflow.config.experimental.set_memory_growth(gpu, True)
+                except RuntimeError:
+                    warnings.warn(
+                        termcolor.colored(
+                            'Trying to define memory growth for an '
+                            'already initialized GPU',
+                            color='blue',
+                            attrs=['bold']
+                        ),
+                        ResourceWarning
+                    )
 
     def _infer_network(self):
         """Translates a characteristic to a network architecture.
@@ -219,52 +222,9 @@ class Extractors(ImageIO):
         numpy.ndarray
             1D tensor with extracted features.
         """
-        return self.network.predict(
-            self.preprocessor(uri)
-        ).ravel()
-
-    @staticmethod
-    def save_tensor(func_gen, uri, file_name):
-        """Saves an arbitrary tensor to file.
-
-        Parameters
-        ----------
-        func_gen: function
-            The generator function of the tensor, for example, one that
-            reduces its dimensionality.
-
-        uri: str
-            Location of image to generate tensor.
-
-        file_name: str
-            Path with file name to be saved.
-        """
-        os.makedirs(os.path.dirname(file_name), exist_ok=True)
-
-        numpy.save(
-            file_name,
-            func_gen(uri),
-            allow_pickle=False,
-            fix_imports=False
-        )
-
-    @staticmethod
-    def load_tensor(file_name):
-        """Loads an arbitrary tensor from a file.
-
-        Parameters
-        ----------
-        file_name: str
-            The file name inside features database.
-
-        Returns
-        -------
-        numpy.ndarray:
-            With underlying tensor stored on ``file_name``.
-        """
-        return numpy.load(
-            file_name,
-            mmap_mode='r',
-            allow_pickle=False,
-            fix_imports=False
+        return tensorflow.squeeze(
+            self.network(
+                self.preprocessor(uri),
+                training=False
+            )
         )

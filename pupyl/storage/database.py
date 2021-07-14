@@ -354,7 +354,7 @@ class ImageDatabase(ImageIO):
                         else:
                             yield ffile
 
-    def load_image(self, index):
+    def load_image(self, index, as_tensor=False):
         """Returns the image data at a specified index.
 
         Parameters
@@ -362,9 +362,14 @@ class ImageDatabase(ImageIO):
         index: int
             The location of the image inside database.
 
+        as_tensor: bool
+            How to return the image from database: as ``bytes``
+            (``as_tensor=False``) or as a ``numpy.ndarray`` tensor
+            (``as_tensor=True``)
+
         Returns
         -------
-        bytes:
+        bytes or :
             Containing image data.
         """
-        return self.get_image(self.mount_file_name(index, 'jpg'))
+        return self.get_image(self.mount_file_name(index, 'jpg'), as_tensor)

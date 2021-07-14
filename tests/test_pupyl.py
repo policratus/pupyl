@@ -10,7 +10,7 @@ from pupyl.embeddings.features import Characteristics
 
 
 TEST_DATA_DIR = os.path.join(gettempdir(), 'pupyl_tests/')
-PUPYL = PupylImageSearch(data_dir=TEST_DATA_DIR)
+PUPYL = PupylImageSearch(data_dir=TEST_DATA_DIR, extreme_mode=True)
 TEST_SCAN_DIR = os.path.abspath('tests/test_scan/test_csv.csv.gz')
 TEST_INVALID_URL = os.path.abspath('tests/test_scan/invalid.csv')
 TEST_QUERY_IMAGE = 'https://static.flickr.com/210/500863916_bdd4b8cc5a.jpg'
@@ -64,7 +64,7 @@ def test_index_config_file():
     ) as config:
         configurations = json.load(config)
 
-    test_pupyl = PupylImageSearch(TEST_CONFIG_DIR)
+    test_pupyl = PupylImageSearch(TEST_CONFIG_DIR, extreme_mode=False)
 
     assert configurations['import_images'] == \
         test_pupyl._import_images
@@ -76,6 +76,19 @@ def test_index_config_file():
 def test_index():
     """Unit test for method index."""
     PUPYL.index(TEST_SCAN_DIR)
+
+    assert os.path.isdir(TEST_DATA_DIR) and \
+        os.path.isfile(os.path.join(TEST_DATA_DIR, 'pupyl.index')) and \
+        os.path.isfile(os.path.join(TEST_DATA_DIR, '0', '0.jpg'))
+
+
+def test_index_no_extreme_mode():
+    """Unit test for method index, non extreme mode case."""
+    pupyl_non_extreme = PupylImageSearch(
+        data_dir=TEST_DATA_DIR,
+        extreme_mode=False
+    )
+    pupyl_non_extreme.index(TEST_SCAN_DIR)
 
     assert os.path.isdir(TEST_DATA_DIR) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, 'pupyl.index')) and \
@@ -94,6 +107,23 @@ def test_search():
     expected_length_results = 1
 
     test_results = PUPYL.search(
+        TEST_QUERY_IMAGE,
+        top=expected_length_results
+    )
+
+    assert len([*test_results]) == expected_length_results
+
+
+def test_search_non_extreme_mode():
+    """Unit test for method search, non-extreme mode case."""
+    expected_length_results = 1
+
+    pupyl_non_extreme = PupylImageSearch(
+        data_dir=TEST_DATA_DIR,
+        extreme_mode=False
+    )
+
+    test_results = pupyl_non_extreme.search(
         TEST_QUERY_IMAGE,
         top=expected_length_results
     )
