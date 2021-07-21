@@ -12,4 +12,4 @@ These are the version supported (or not) for reporting security issues:
 
 ## Reporting a Vulnerability
 
-To report a vulnerability, please open an issue describing it on the [Issues](https://github.com/policratus/pupyl/issues) section. 
+To report a vulnerability, please open an issue describing it on the [Issues](https://github.com/policratus/pupyl/issues) section. Securities issues are adressed and resolved on at most 14 days.
