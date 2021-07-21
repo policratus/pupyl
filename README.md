@@ -45,6 +45,7 @@ SEARCH.index(
     '/raw/master/samples/images.tar.xz'
 )
 
+# Using, for instance, a remote image. Local images has pretty faster results.
 QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=224&q=70'
 
 [*SEARCH.search(QUERY_IMAGE)]
