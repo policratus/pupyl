@@ -59,7 +59,7 @@ With more information and returning image metadata from the results:
 # The results with image metadata
 [*SEARCH.search(QUERY_IMAGE, return_metadata=True)]
 ```
-Now the (possible) return is:
+Now an excerpt of the (possible) return is:
 ```Python
 [
     {
