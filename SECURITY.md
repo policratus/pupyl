@@ -12,4 +12,4 @@ These are the versions supported (or not) by the team, meaning that versions wit
 
 ## Reporting a Vulnerability
 
-To report a vulnerability, please open an issue describing it on the [Issues](https://github.com/policratus/pupyl/issues) section. Securities issues are adressed and resolved on at most 14 days.
+To report a vulnerability, please open an issue describing it on the [Issues](https://github.com/policratus/pupyl/issues) section. Security issues are addressed and resolved on at most 14 days.
