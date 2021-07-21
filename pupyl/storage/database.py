@@ -369,7 +369,7 @@ class ImageDatabase(ImageIO):
 
         Returns
         -------
-        bytes or :
+        bytes or numpy.ndarray:
             Containing image data.
         """
         return self.get_image(self.mount_file_name(index, 'jpg'), as_tensor)
