@@ -192,7 +192,7 @@ def test_path_property():
 
 def test_trees_property():
     """Unit test for path property."""
-    assert INDEX.trees == .001
+    assert INDEX.trees == .01
 
 
 def test_volatile_property():

@@ -22,11 +22,3 @@ data pipelines, web projects and wherever you find fit!
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-⤵️ Downloads
-############
-If you want this documentation in other formats, please download on the links
-below:
-
-:download:`PDF <https://pupyl.readthedocs.io/_/downloads/en/latest/pdf/>`
-:download:`EPUB <https://pupyl.readthedocs.io/_/downloads/en/latest/epub/>`

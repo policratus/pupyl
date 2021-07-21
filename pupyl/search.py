@@ -12,6 +12,8 @@ import os
 import json
 import concurrent.futures
 
+import numpy
+
 from pupyl.duplex.file_io import FileIO
 from pupyl.embeddings.features import Extractors, Characteristics
 from pupyl.storage.database import ImageDatabase
@@ -26,6 +28,7 @@ class PupylImageSearch:
     def __init__(
             self,
             data_dir=None,
+            extreme_mode=True,
             **kwargs
     ):
         """Pupyl image search factory.
@@ -35,6 +38,10 @@ class PupylImageSearch:
         data_dir: str
             The directory where all assets are stored.
 
+        extreme_mode: bool
+            If should the extreme mode (faster execution but more memory
+            consumption) be enabled or not.
+
         import_images: bool
             If images should (or was) imported into the database.
 
@@ -43,6 +50,8 @@ class PupylImageSearch:
             reading from an already created database, retrieves it from the
             (internal) configuration files.
         """
+        self._extreme_mode = extreme_mode
+
         if data_dir:
             self._data_dir = data_dir
         else:
@@ -79,6 +88,14 @@ class PupylImageSearch:
             import_images=self._import_images,
             data_dir=self._data_dir
         )
+
+        if extreme_mode:
+            self.extractor = Extractors(self._characteristic)
+
+            self.indexer = Index(
+                self.extractor.output_shape,
+                data_dir=self._data_dir
+            )
 
     def _index_configuration(self, mode, **kwargs):
         """Loads or saves an index configuration file, if exists.
@@ -141,15 +158,12 @@ class PupylImageSearch:
         performed, which creates some overheads on the index process, making
         it slower.
         """
-        with Extractors(
-                characteristics=self._characteristic
-        ) as extractor, Index(
-            extractor.output_shape,
-            data_dir=self._data_dir
-        ) as index:
+        check_unique = kwargs.get('check_unique')
 
-            self._index_configuration('w', feature_size=extractor.output_shape)
+        if check_unique is None:
+            check_unique = False
 
+        if self._extreme_mode:
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 futures = {
                     executor.submit(
@@ -158,51 +172,72 @@ class PupylImageSearch:
                         uri_from_file
                     ): rank
                     for rank, uri_from_file in enumerate(
-                        extractor.scan_images(uri)
+                        self.extractor.scan_images(uri)
                     )
                 }
 
                 ranks = []
 
-                for future in extractor.progress(
-                        concurrent.futures.as_completed(futures),
-                        message='Importing images:'
-                ):
+                for future in concurrent.futures.as_completed(futures):
                     ranks.append(futures[future])
 
-                for rank in extractor.progress(
-                    sorted(ranks),
-                    precise=True,
-                    message='Indexing images:'
+            embeddings = numpy.empty((len(ranks), self.extractor.output_shape))
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                futures = {
+                    executor.submit(
+                        self.extractor.extract,
+                        self.image_database.mount_file_name(rank, 'jpg')
+                    ): rank
+                    for rank in ranks
+                }
+
+                for future in self.extractor.progress(
+                    concurrent.futures.as_completed(futures),
+                    precise=False,
+                    message='Extracting features:'
                 ):
-                    features_tensor_name = self.image_database.\
-                        mount_file_name(
-                            rank,
-                            'npy'
+                    embeddings[futures[future]] = future.result()
+
+            for embedding in self.extractor.progress(
+                embeddings,
+                precise=True,
+                message='Indexing features:'
+            ):
+                self.indexer.append(embedding, check_unique=check_unique)
+
+            self.indexer.flush()
+
+            self._index_configuration(
+                'w', feature_size=self.extractor.output_shape
+            )
+
+        else:
+            with Extractors(
+                characteristics=self._characteristic,
+                extreme_mode=self._extreme_mode
+            ) as extractor:
+                with Index(
+                    extractor.output_shape, data_dir=self._data_dir
+                ) as indexer:
+                    for rank, uri_from_file in extractor.progress(
+                        enumerate(
+                            extractor.scan_images(uri)
+                        ),
+                        precise=False,
+                        message='Indexing images:'
+                    ):
+                        self.image_database.insert(rank, uri_from_file)
+
+                        embedding = extractor.extract(
+                            self.image_database.mount_file_name(rank, 'jpg')
                         )
 
-                    extractor.save_tensor(
-                        extractor.extract,
-                        self.image_database.mount_file_name(
-                            rank,
-                            'jpg'
-                        ),
-                        features_tensor_name
+                        indexer.append(embedding, check_unique=check_unique)
+
+                    self._index_configuration(
+                        'w', feature_size=extractor.output_shape
                     )
-
-                    check_unique = kwargs.get('check_unique')
-
-                    if check_unique is None:
-                        check_unique = False
-
-                    index.append(
-                        extractor.load_tensor(
-                            features_tensor_name
-                        ),
-                        check_unique=check_unique
-                    )
-
-                    os.remove(features_tensor_name)
 
     def search(self, query, top=4, return_metadata=False):
         """Executes the search for a similar image throughout the database
@@ -227,16 +262,24 @@ class PupylImageSearch:
             with metadata information about this images (case when
             ``return_metadata=True``).
         """
-        with Extractors(characteristics=self._characteristic) as extractor:
-            with Index(
-                    extractor.output_shape,
-                    data_dir=self._data_dir
-            ) as index:
-                for result in index.search(
+        if self._extreme_mode:
+            for result in self.indexer.search(
+                self.extractor.extract(query),
+                results=top
+            ):
+                yield self.image_database.load_image_metadata(result) \
+                    if return_metadata else result
+        else:
+            with Extractors(
+                characteristics=self._characteristic,
+                extreme_mode=self._extreme_mode
+            ) as extractor:
+                with Index(
+                    extractor.output_shape, data_dir=self._data_dir
+                ) as indexer:
+                    for result in indexer.search(
                         extractor.extract(query),
                         results=top
-                ):
-                    if return_metadata:
-                        yield self.image_database.load_image_metadata(result)
-                    else:
-                        yield result
+                    ):
+                        yield self.image_database.load_image_metadata(result) \
+                            if return_metadata else result

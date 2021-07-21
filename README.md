@@ -5,6 +5,8 @@
 [![PyPI version](https://badge.fury.io/py/pupyl.svg)](https://badge.fury.io/py/pupyl)
 [![Documentation Status](https://readthedocs.org/projects/pupyl/badge/?version=latest)](https://pupyl.readthedocs.io/en/latest/?badge=latest)
 [![Downloads](https://pepy.tech/badge/pupyl)](https://pepy.tech/project/pupyl)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4325/badge)](https://bestpractices.coreinfrastructure.org/projects/4325)
+[![Anaconda-Server Badge](https://anaconda.org/policratus/pupyl/badges/platforms.svg)](https://anaconda.org/policratus/pupyl)
 
 # pupyl - A Python Image Search Library
 
@@ -43,34 +45,42 @@ SEARCH.index(
     '/raw/master/samples/images.tar.xz'
 )
 
-QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102'
+QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=224&q=70'
 
 [*SEARCH.search(QUERY_IMAGE)]
-
-# Here's the simplest result
-> [427, 473, 129, 346]
-
+```
+This will return:
+```Python
+# Here's the simplest possible result
+> [129, 685, 346, 524]
+```
+With more information and returning image metadata from the results:
+```Python
 # The results with image metadata
 [*SEARCH.search(QUERY_IMAGE, return_metadata=True)]
-
-> [
+```
+Now an excerpt of the (possible) return is:
+```Python
+[
     {
-        'original_file_name': '941444733_6de664bbbf.jpg',
-        'original_path': '/tmp/tmp_i42jozv',
-        'original_file_size': '80K',
-        'original_access_time': '2021-07-06T20:31:07',
-        'id': 427
+        'id': 129,
+        'original_access_time': '2021-07-20T21:02:12',
+        'original_file_name': '517791629_f05c1518bd.jpg',
+        'original_file_size': '52K',
+        'original_path': '/tmp/tmplgiyjaw5'
     },
     {
-        'original_file_name': '2673396259_f151fbe7c1.jpg',
-        'original_path': '/tmp/tmp_i42jozv',
-        'original_file_size': '66K',
-        'original_access_time': '2021-07-06T20:31:07',
-        'id': 473
+        'id': 685,
+        'original_access_time': '2021-07-20T21:02:13',
+        'original_file_name': '427954022_a072d55df9.jpg',
+        'original_file_size': '65K',
+        'original_path': '/tmp/tmplgiyjaw5'
     },
     ...
-  ]
-
+]
+```
+To interact visually, use the web interface:
+```Python
 # Opening the web interface
 interface.serve()
 ```
