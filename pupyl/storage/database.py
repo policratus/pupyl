@@ -370,6 +370,8 @@ class ImageDatabase(ImageIO):
         Returns
         -------
         bytes or numpy.ndarray:
-            Containing image data.
+            Returns image `bytes` (`as_tensor=False`) or
+            `numpy.ndarray` (`as_tensor=True`), containing
+            image converted to its tensor representation.
         """
         return self.get_image(self.mount_file_name(index, 'jpg'), as_tensor)
