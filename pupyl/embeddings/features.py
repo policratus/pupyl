@@ -223,8 +223,7 @@ class Extractors(ImageIO):
             1D tensor with extracted features.
         """
         return tensorflow.squeeze(
-            self.network(
+            self.network.predict(
                 self.preprocessor(uri),
-                training=False
             )
         )
