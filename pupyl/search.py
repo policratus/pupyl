@@ -178,7 +178,11 @@ class PupylImageSearch:
 
                 ranks = []
 
-                for future in concurrent.futures.as_completed(futures):
+                for future in self.extractor.progress(
+                    concurrent.futures.as_completed(futures),
+                    precise=False,
+                    message='Scanning images:'
+                ):
                     ranks.append(futures[future])
 
             embeddings = numpy.empty((len(ranks), self.extractor.output_shape))

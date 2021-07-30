@@ -222,9 +222,4 @@ class Extractors(ImageIO):
         numpy.ndarray
             1D tensor with extracted features.
         """
-        return tensorflow.squeeze(
-            self.network(
-                self.preprocessor(uri),
-                training=False
-            )
-        )
+        return tensorflow.squeeze(self.network.predict(self.preprocessor(uri)))
