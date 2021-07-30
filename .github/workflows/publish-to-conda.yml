@@ -1,7 +1,8 @@
 name: publish-to-conda
 
 on:
-  workflow_dispatch
+  release:
+    types: [published]
 
 jobs:
   setup:
