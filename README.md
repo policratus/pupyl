@@ -10,6 +10,8 @@
 
 # pupyl - A Python Image Search Library
 
+https://user-images.githubusercontent.com/827563/128073724-2e042628-f770-4f54-ab07-6ed9c189902e.mov
+
 ## 🧿 pupyl what?
 
 The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform image search tasks. It's intended to made easy reading, indexing, retrieving and maintaining a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
