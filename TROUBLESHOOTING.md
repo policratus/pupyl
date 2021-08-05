@@ -36,3 +36,10 @@ error: Microsoft Visual C++ 14.0 is required. Get it with "Build Tools for Visua
 ```
 
 Install the `C++` compiler donwloading it from [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+
+## I have a NVIDIA© GPU but `pupyl` isn't using it.
+As `pupyl` relies on [tensorflow](https://www.tensorflow.org/) for [GPU](https://en.wikipedia.org/wiki/Graphics_processing_unit) integration and it relies consequentely on [CUDA](https://developer.nvidia.com/cuda-zone), you should check which `CUDA` version the current stable `tensorflow` version is dependent. `pupyl` has the compromise to always use the latest stable of `tensorflow`.
+
+`CUDA` and NVIDIA© drivers are platform dependent, so it's sufficiently complex to not be part of `pupyl` installation. Please, follow the installation guides:
+* For **Linux** distros: [NVIDIA CUDA Installation Guide for Linux](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html)
+* For **Windows** platforms: [CUDA Installation Guide for Microsoft Windows](https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html)
