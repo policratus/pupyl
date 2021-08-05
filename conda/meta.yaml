@@ -13,35 +13,20 @@ build:
   script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
-  host:
-    - python-annoy >=1.16.3
-    - pip
-    - python
-    - tensorflow >=2.2.0
   run:
-    - python-annoy >=1.16.3
-    - python
-    - tensorflow >=2.2.0
-
-test:
-  imports:
-    - pupyl
-    - pupyl.addendum
-    - pupyl.duplex
-    - pupyl.embeddings
-    - pupyl.indexer
-    - pupyl.storage
-    - pupyl.web
+    - python-annoy>=1.17.0
+    - python==3.8
+    - tensorflow>=2.5.0
 
 about:
   home: "https://github.com/policratus/pupyl"
   license: "GNU Lesser General Public v3 (LGPLv3)"
   license_family: LGPL
   license_file: "../LICENSE"
-  summary: "🧿 Pupyl is a really fast image search library which you can index your own (millions of) images and find similar images in millisecond"
+  summary: "🧿 Pupyl is a really fast image search library which you can index your own (millions of) images and find similar images in milliseconds."
   description: |
     The pupyl project (pronounced pyoo·piel) is a pythonic library to image search. It's intended to made easy to read, index, retrieve and maintain a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
-  doc_url: "https://pypi.org/project/pupyl/"
+  doc_url: "https://pupyl.readthedocs.io"
   dev_url: "https://github.com/policratus/pupyl"
 
 extra:
