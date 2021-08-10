@@ -189,7 +189,8 @@ class Extractors(ImageIO):
                 )
 
         raise exceptions.UnknownCharacteristics(
-            f'Characteristic {self._characteristics.name} is invalid.'
+            f'Characteristic {self._characteristics}'
+            ' is invalid.'
         )
 
     def preprocessor(self, uri):
