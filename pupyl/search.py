@@ -171,8 +171,12 @@ class PupylImageSearch:
                         rank,
                         uri_from_file
                     ): rank
-                    for rank, uri_from_file in enumerate(
-                        self.extractor.scan_images(uri)
+                    for rank, uri_from_file in self.extractor.progress(
+                        enumerate(
+                            self.extractor.scan_images(uri)
+                        ),
+                        precise=False,
+                        message='Importing images:'
                     )
                 }
 
