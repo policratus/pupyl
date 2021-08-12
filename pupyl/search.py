@@ -209,7 +209,9 @@ class PupylImageSearch:
                     try:
                         embeddings[futures[future]] = future.result()
                     except FileIsNotImage:
-                        embeddings[futures[future]] = numpy.full(self.extractor.output_shape, 255.)
+                        embeddings[futures[future]] = numpy.full(
+                            self.extractor.output_shape, 255.
+                        )
 
             for embedding in self.extractor.progress(
                 embeddings,
