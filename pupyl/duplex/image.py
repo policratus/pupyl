@@ -90,7 +90,7 @@ class ImageIO(FileIO):
 
             return bytess
 
-        raise FileIsNotImage
+        raise FileIsNotImage(f'{uri} is not recognized as a valid image file.')
 
     @classmethod
     def get_image_base64(cls, uri):

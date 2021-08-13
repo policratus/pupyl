@@ -61,14 +61,17 @@ class Index:
             os.makedirs(self._data_dir, exist_ok=True)
             self._path = os.path.join(self._data_dir, self.index_name)
         elif not self._data_dir and not self._volatile:
-            raise NoDataDirForPermanentIndex
+            raise NoDataDirForPermanentIndex(
+                'Data directory for permament index was not set.'
+            )
         elif not self._data_dir and self._volatile:
             _temp_file = FileIO.safe_temp_file()
             self._data_dir = os.path.dirname(_temp_file)
             self._path = _temp_file
-
         else:
-            raise DataDirDefinedForVolatileIndex
+            raise DataDirDefinedForVolatileIndex(
+                'Impossible to set a data directory for a volatile index.'
+            )
 
         if os.path.isfile(self._path):
             try:
@@ -78,7 +81,9 @@ class Index:
 
                 self._is_new_index = False
             except OSError as os_error:
-                raise FileIsNotAnIndex from os_error
+                raise FileIsNotAnIndex(
+                    f'File {self._path} is not an index.'
+                ) from os_error
         else:
             self.tree = AnnoyIndex(size, metric='angular')
             self._is_new_index = True
@@ -277,7 +282,7 @@ class Index:
             If a null (empty) tensor is passed through.
         """
         if sum(tensor) == 0.:
-            raise NullTensorError
+            raise NullTensorError('Refusing to append a null tensor.')
 
         if self._is_new_index:
 
@@ -342,7 +347,7 @@ class Index:
             If ``position`` is bigger than the index current size.
         """
         if self._is_new_index:
-            raise IndexNotBuildYet
+            raise IndexNotBuildYet('Index file not build yet.')
 
         if position > len(self):
             raise IndexError
@@ -538,7 +543,7 @@ class Index:
         position = kwargs.get('position')
 
         if len(self) <= 1:
-            raise EmptyIndexError
+            raise EmptyIndexError('Refusing to group an empty index.')
 
         if top >= 1:
             if isinstance(position, int):
@@ -561,7 +566,9 @@ class Index:
                     }
         else:
 
-            raise TopNegativeOrZero
+            raise TopNegativeOrZero(
+                'The top parameter must be greater than zero.'
+            )
 
     def export_by_group_by(self, path, top=10, **kwargs):
         """Export images, creating directories based on their groups.

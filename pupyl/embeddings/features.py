@@ -188,7 +188,10 @@ class Extractors(ImageIO):
                     input_shape=input_shape
                 )
 
-        raise exceptions.UnknownCharacteristics
+        raise exceptions.UnknownCharacteristics(
+            f'Characteristic {self._characteristics}'
+            ' is invalid.'
+        )
 
     def preprocessor(self, uri):
         """Image preprocessing methods, suitable for posterior network

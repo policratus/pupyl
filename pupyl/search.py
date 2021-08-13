@@ -15,6 +15,7 @@ import concurrent.futures
 import numpy
 
 from pupyl.duplex.file_io import FileIO
+from pupyl.duplex.exceptions import FileIsNotImage
 from pupyl.embeddings.features import Extractors, Characteristics
 from pupyl.storage.database import ImageDatabase
 from pupyl.indexer.facets import Index
@@ -171,8 +172,12 @@ class PupylImageSearch:
                         rank,
                         uri_from_file
                     ): rank
-                    for rank, uri_from_file in enumerate(
-                        self.extractor.scan_images(uri)
+                    for rank, uri_from_file in self.extractor.progress(
+                        enumerate(
+                            self.extractor.scan_images(uri)
+                        ),
+                        precise=False,
+                        message='Importing images:'
                     )
                 }
 
@@ -201,7 +206,12 @@ class PupylImageSearch:
                     precise=False,
                     message='Extracting features:'
                 ):
-                    embeddings[futures[future]] = future.result()
+                    try:
+                        embeddings[futures[future]] = future.result()
+                    except FileIsNotImage:
+                        embeddings[futures[future]] = numpy.full(
+                            self.extractor.output_shape, 255.
+                        )
 
             for embedding in self.extractor.progress(
                 embeddings,
