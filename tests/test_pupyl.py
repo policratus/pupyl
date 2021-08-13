@@ -14,6 +14,7 @@ PUPYL = PupylImageSearch(data_dir=TEST_DATA_DIR, extreme_mode=True)
 TEST_SCAN_DIR = os.path.abspath('tests/test_scan/test_csv.csv.gz')
 TEST_INVALID_URL = os.path.abspath('tests/test_scan/invalid.csv')
 TEST_QUERY_IMAGE = 'https://static.flickr.com/210/500863916_bdd4b8cc5a.jpg'
+TEST_INDEX_INVALID = os.path.abspath('tests/test_index_invalid')
 TEST_CONFIG_DIR = os.path.abspath('tests/test_index/')
 
 
@@ -80,6 +81,15 @@ def test_index():
     assert os.path.isdir(TEST_DATA_DIR) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, 'pupyl.index')) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, '0', '0.jpg'))
+
+
+def test_index_gaps():
+    """Unit test for method index, gaps in images case."""
+    with TemporaryDirectory() as temp_dir:
+        pupyl_index_gaps = PupylImageSearch(data_dir=temp_dir)
+        pupyl_index_gaps.index(TEST_INDEX_INVALID)
+
+        assert len(pupyl_index_gaps.image_database) == 2
 
 
 def test_index_no_extreme_mode():

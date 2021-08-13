@@ -253,7 +253,7 @@ class FileIO(FileType):
 
         try:
             if file_bytes is Protocols.UNKNOWN:
-                raise FileTypeNotSupportedYet
+                raise FileTypeNotSupportedYet(f'File {uri} not yet supported.')
 
             return self.guess_file_type(file_bytes, mimetype=mimetype)
         except FileTypeNotSupportedYet as file_type_not_supported_yet:
@@ -287,8 +287,7 @@ class FileIO(FileType):
         csv_string = cls.get(uri)
 
         if csv_string is Protocols.UNKNOWN:
-            raise FileTypeNotSupportedYet
-
+            raise FileTypeNotSupportedYet(f'File {uri} not yet supported.')
         csv_string = csv_string.decode('utf-8').splitlines()
 
         reader = csv.reader(csv_string)
@@ -470,7 +469,7 @@ class FileIO(FileType):
                     yield line
 
             else:
-                raise FileScanNotPossible
+                raise FileScanNotPossible(f'{uri} scan is impossible.')
         except (IsADirectoryError, PermissionError):
             for root, _, files in os.walk(uri):
                 for ffile in files:
