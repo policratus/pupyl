@@ -19,6 +19,7 @@ clean:
 	@find . -name "*.log" | xargs rm -rf
 	@find . -name "*.egg-info" | xargs rm -rf
 	@find . -name "build" | xargs rm -rf
+	@find . -name ".mypy_cache" | xargs rm -rf
 	@-pkill -i 8888 || true
 
 flake8: clean
