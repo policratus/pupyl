@@ -103,9 +103,13 @@ def serve(data_dir=None, port=8080, **kwargs):
             image_tags = self.images(query_list)
 
             if query_list:
-                query_image = '<img class="img-thumbnail" ' + \
-                    f'src="{query_list[0]}">' + \
-                    '<figcaption class="figure-caption">' + \
+                query_image_base64 = pupyl_image_search.image_database.\
+                    get_image_base64(query_list[0])
+
+                query_image = '<img class="img-thumbnail" ' +\
+                    'src="data:image/jpg;base64, ' +\
+                    f'{query_image_base64.decode()}" alt="&#129535; Pupyl">' +\
+                    '<figcaption class="figure-caption">' +\
                     'Query image used in the search.</figcaption>'
 
             self.wfile.write(

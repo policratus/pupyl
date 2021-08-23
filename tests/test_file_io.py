@@ -170,9 +170,16 @@ def test__get_local_successful():
 
 def test_get_unknown():
     """
-    Unit test for get method, unknown case
+        Unit test for get method, unknown case
     """
     assert FileIO.get(TEST_UNKNOWN) is Protocols.UNKNOWN
+
+
+def test_get_file_scheme():
+    """Unit test for get method, file scheme case."""
+    test_file = f'file:///{TEST_LOCAL}'
+
+    assert isinstance(FileIO.get(test_file), bytes)
 
 
 def test_scan_directory():
@@ -535,3 +542,10 @@ def test_scan_compressed_tar_file_http():
 
     for ffile in file_io.scan_compressed_tar_file(test_uri, test_file_reader):
         assert os.path.exists(ffile)
+
+
+def test__file_scheme_to_path():
+    """Unit test for method _file_scheme_to_path"""
+    test_uri = 'file:///path/to/a/test/file'
+
+    assert FileIO._file_scheme_to_path(test_uri) == '/path/to/a/test/file'

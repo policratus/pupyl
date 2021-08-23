@@ -108,12 +108,31 @@ class FileIO(FileType):
             or an Enum describing that the format wasn't recognized.
         """
         if cls._infer_protocol(uri) is Protocols.FILE:
+            if request.urlparse(uri).scheme == 'file':
+                uri = cls._file_scheme_to_path(uri)
+
             return cls._get_local(uri)
 
         if cls._infer_protocol(uri) is Protocols.HTTP:
             return cls._get_url(uri)
 
         return Protocols.UNKNOWN
+
+    @staticmethod
+    def _file_scheme_to_path(uri):
+        """Converter from a file:// scheme to a path.
+
+        Parameters
+        ----------
+        uri: str
+            An URI to convert from `file://` scheme to a path
+
+        Example
+        -------
+        ``FileIO._file_scheme_to_path(file:///home/policratus/1073140.jpg)``
+        ``# Returns '/home/policratus/1073140.jpg'``
+        """
+        return uri[len('file://'):]
 
     @classmethod
     def get_metadata(cls, uri):
@@ -207,7 +226,7 @@ class FileIO(FileType):
         if request.urlparse(uri).scheme.startswith('http'):
             return Protocols.HTTP
 
-        if uri.startswith('file') or os.path.exists(uri):
+        if request.urlparse(uri).scheme == 'file' or os.path.exists(uri):
             return Protocols.FILE
 
         return Protocols.UNKNOWN
