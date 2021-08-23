@@ -306,13 +306,13 @@ class ImageDatabase(ImageIO):
 
         self.save_image_metadata(index, uri)
 
-    def list_images(self, return_index=False, top=None):
-        """Returns all images in current database.
+    def list_images(self, return_ids=False, top=None):
+        """Returns images on current database.
 
         Parameters
         ----------
-        return_index: bool
-            If the method should also return the file index inside database.
+        return_ids: bool
+            If the method should also return the file ids inside database.
 
         top: int
             How many pictures from image database should be listed. Not setting
@@ -322,37 +322,33 @@ class ImageDatabase(ImageIO):
         Yields
         ------
         tuple or str:
-            If ``return_index=True``, a ``tuple`` with ``(int, str)``
+            If ``return_ids=True``, a ``tuple`` with ``(int, str)``
             representing respectively the index and the path inside the
-            database will be returned. Otherwise, if ``return_index=False``,
+            database will be returned. Otherwise, if ``return_ids=False``,
             just a ``str`` with the full path will return.
         """
         if top:
             counter = 0
 
         for root, _, files in os.walk(self._data_dir):
-
             for ffile in files:
+                if os.path.splitext(ffile)[-1] == '.jpg':
+                    ffile = os.path.join(root, ffile)
 
-                ffile = os.path.join(root, ffile)
+                    if top:
+                        counter += 1
 
-                with open(ffile, 'rb') as t_file:
-                    if self.is_image(t_file.read()):
+                        if counter > top:
+                            return
 
-                        if top:
-                            counter += 1
-
-                            if counter > top:
-                                return
-
-                        if return_index:
-                            yield int(
-                                os.path.splitext(
-                                    os.path.split(ffile)[1]
-                                )[0]
-                            ), ffile
-                        else:
-                            yield ffile
+                    if return_ids:
+                        yield int(
+                            os.path.splitext(
+                                os.path.split(ffile)[1]
+                            )[0]
+                        ), ffile
+                    else:
+                        yield ffile
 
     def load_image(self, index, as_tensor=False):
         """Returns the image data at a specified index.

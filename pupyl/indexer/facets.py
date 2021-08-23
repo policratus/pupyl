@@ -77,7 +77,7 @@ class Index:
             try:
                 self.tree = AnnoyIndex(size, metric='angular')
 
-                self.tree.load(self._path)
+                self.tree.load(self._path, prefault=False)
 
                 self._is_new_index = False
             except OSError as os_error:
@@ -251,7 +251,7 @@ class Index:
         it, followed by reloading back the index.
         """
         self.tree.unload()
-        self.tree.load(self.path)
+        self.tree.load(self.path, prefault=False)
 
     def append(self, tensor, check_unique=False):
         """Inserts a new tensor at the end of the index.
@@ -347,7 +347,7 @@ class Index:
             If ``position`` is bigger than the index current size.
         """
         if self._is_new_index:
-            raise IndexNotBuildYet('Index file not build yet.')
+            raise IndexNotBuildYet('Index file not built yet.')
 
         if position > len(self):
             raise IndexError

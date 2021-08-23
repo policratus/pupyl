@@ -52,7 +52,7 @@ TEMPLATE = lzma.decompress(
 ).decode()
 
 
-def serve(data_dir=None, port=8080):
+def serve(data_dir=None, port=8080, **kwargs):
     """Starts the web server.
 
     Parameters
@@ -63,11 +63,19 @@ def serve(data_dir=None, port=8080):
 
     port: int
         Defines the network port which the web server will start listening.
+
+    extreme_mode: bool
+        Optional mode for general acceleration.
     """
     if not data_dir:
         data_dir = FileIO.pupyl_temp_data_dir()
 
-    pupyl_image_search = PupylImageSearch(data_dir)
+    if kwargs.get('extreme_mode') is None:
+        _extreme_mode = True
+    else:
+        _extreme_mode = kwargs['extreme_mode']
+
+    pupyl_image_search = PupylImageSearch(data_dir, extreme_mode=_extreme_mode)
 
     class RequestHandler(SimpleHTTPRequestHandler):
         """A web request handler."""
@@ -188,8 +196,8 @@ def serve(data_dir=None, port=8080):
                 return image_tags
 
             for index, image in pupyl_image_search.image_database.list_images(
-                    return_index=True,
-                    top=9
+                return_ids=True,
+                top=9
             ):
                 image_base64 = pupyl_image_search.image_database.\
                     get_image_base64(

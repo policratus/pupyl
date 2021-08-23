@@ -292,8 +292,8 @@ def test_list_images():
     assert expected_result == actual_result
 
 
-def test_list_images_return_index():
-    """Unit test for method list_images, return index case."""
+def test_list_images_return_ids():
+    """Unit test for method list_images, return ids case."""
     expected_path = abspath('tests/test_database/0/0.jpg')
     expected_index = 0
     expected_result = (expected_index, expected_path)
@@ -305,7 +305,7 @@ def test_list_images_return_index():
 
     actual_index_path = [
         *image_database.list_images(
-            return_index=True
+            return_ids=True
         )
     ][0]
 
