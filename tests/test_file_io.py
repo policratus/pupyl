@@ -170,7 +170,7 @@ def test__get_local_successful():
 
 def test_get_unknown():
     """
-        Unit test for get method, unknown case
+    Unit test for get method, unknown case
     """
     assert FileIO.get(TEST_UNKNOWN) is Protocols.UNKNOWN
 
