@@ -545,7 +545,7 @@ def test_scan_compressed_tar_file_http():
 
 
 def test__file_scheme_to_path():
-    """Unit test for method _file_scheme_to_path"""
+    """Unit test for method _file_scheme_to_path."""
     test_uri = 'file:///path/to/a/test/file'
 
     assert FileIO._file_scheme_to_path(test_uri) == '/path/to/a/test/file'
