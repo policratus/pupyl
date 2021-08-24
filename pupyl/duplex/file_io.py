@@ -14,7 +14,8 @@ from io import BytesIO
 from itertools import cycle
 from enum import Enum, auto
 from datetime import datetime
-import urllib.request as request
+from urllib.request import Request, urlopen
+from urllib.parse import urlparse
 
 import termcolor
 
@@ -72,7 +73,9 @@ class FileIO(FileType):
         bytes:
             With image binary information.
         """
-        with request.urlopen(url) as ffile:
+        request = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+
+        with urlopen(request) as ffile:
             return ffile.read()
 
     @staticmethod
@@ -108,7 +111,7 @@ class FileIO(FileType):
             or an Enum describing that the format wasn't recognized.
         """
         if cls._infer_protocol(uri) is Protocols.FILE:
-            if request.urlparse(uri).scheme == 'file':
+            if urlparse(uri).scheme == 'file':
                 uri = cls._file_scheme_to_path(uri)
 
             return cls._get_local(uri)
@@ -158,9 +161,11 @@ class FileIO(FileType):
             )
 
         if cls._infer_protocol(uri) is Protocols.HTTP:
-            parsed_url = request.urlparse(uri)
+            parsed_url = urlparse(uri)
 
-            with request.urlopen(uri) as ffile:
+            request = Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
+
+            with urlopen(request) as ffile:
                 file_statistics = ffile.info()
 
             original_path, original_file_name = os.path.split(
@@ -174,7 +179,9 @@ class FileIO(FileType):
                     )[0]
                 )
             except TypeError:
-                with request.urlopen(uri) as ffile:
+                request = Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
+
+                with urlopen(request) as ffile:
                     measured_size = len(ffile.read())
 
             original_file_size = measured_size // (2 ** 10)
@@ -223,10 +230,10 @@ class FileIO(FileType):
         Enum:
             Referencing the discovered protocol
         """
-        if request.urlparse(uri).scheme.startswith('http'):
+        if urlparse(uri).scheme.startswith('http'):
             return Protocols.HTTP
 
-        if request.urlparse(uri).scheme == 'file' or os.path.exists(uri):
+        if urlparse(uri).scheme == 'file' or os.path.exists(uri):
             return Protocols.FILE
 
         return Protocols.UNKNOWN
@@ -526,10 +533,11 @@ class FileIO(FileType):
 
         elif inferred_protocol is Protocols.HTTP:
 
-            with request.urlopen(uri) as opened_url, \
-                tarfile.open(
-                    fileobj=opened_url,
-                    mode=file_reader.format(stream_type='|')
+            request = Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
+
+            with urlopen(request) as opened_url, tarfile.open(
+                fileobj=opened_url,
+                mode=file_reader.format(stream_type='|')
             ) as tar_file:
                 for member in cls.progress(tar_file):
                     tar_file.extract(member, path=temp_directory)
