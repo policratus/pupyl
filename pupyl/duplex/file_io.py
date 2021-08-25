@@ -14,8 +14,9 @@ from io import BytesIO
 from itertools import cycle
 from enum import Enum, auto
 from datetime import datetime
-from urllib.request import Request, urlopen
 from urllib.parse import urlparse
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 import termcolor
 
@@ -59,8 +60,8 @@ class FileIO(FileType):
             'pupyl'
         )
 
-    @staticmethod
-    def _get_url(url):
+    @classmethod
+    def _get_url(cls, url, **kwargs):
         """Loads a file from a remote (http(s)) location.
 
         Parameters
@@ -68,15 +69,41 @@ class FileIO(FileType):
         url: str
             The URL where the image are stored.
 
+        headers: dict
+            A header to be passed through the HTTP request. Usually
+            contains a header with an user-agent defined, like
+            ``{'User-Agent': 'Mozilla/5.0'}``
+
+        info: bool
+            Defines if should be returned metadata information from
+            the ``url``, instead of its ``bytes``.
+
         Returns
         -------
         bytes:
             With image binary information.
         """
-        request = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        try:
+            if kwargs.get('headers'):
+                request = Request(url, headers=kwargs['headers'])
+            else:
+                request = url
 
-        with urlopen(request) as ffile:
-            return ffile.read()
+            with urlopen(request, timeout=1) as ffile:
+                if kwargs.get('info'):
+                    return ffile.info()
+                else:
+                    return ffile.read()
+        except HTTPError as http_error:
+            print(
+                f'URL {url} returned HTTP error {http_error.code}, '
+                f'"{http_error.reason}". Retrying using other methods.'
+            )
+
+            if http_error.code == 403:
+                return cls._get_url(
+                    url, headers={'User-Agent': 'Mozilla/5.0'}
+                )
 
     @staticmethod
     def _get_local(path):
@@ -163,10 +190,7 @@ class FileIO(FileType):
         if cls._infer_protocol(uri) is Protocols.HTTP:
             parsed_url = urlparse(uri)
 
-            request = Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
-
-            with urlopen(request) as ffile:
-                file_statistics = ffile.info()
+            file_statistics = cls._get_url(uri, info=True)
 
             original_path, original_file_name = os.path.split(
                 f'{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}'
@@ -179,10 +203,7 @@ class FileIO(FileType):
                     )[0]
                 )
             except TypeError:
-                request = Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
-
-                with urlopen(request) as ffile:
-                    measured_size = len(ffile.read())
+                measured_size = len(cls._get_url(uri))
 
             original_file_size = measured_size // (2 ** 10)
 
@@ -464,38 +485,32 @@ class FileIO(FileType):
             'TXZ': 'r{stream_type}xz'
         }
 
+        type_to_scanner = {
+            'CSV': self.scan_csv,
+            'PLAIN': self.scan_csv,
+            'GZP': self.scan_csv_gzip,
+            'ZIP': self.scan_csv_zip,
+            'BZ2': self.scan_csv_bzip2,
+            'LXZ': self.scan_csv_xz,
+            'TXZ': self.scan_compressed_tar_file,
+            'TZ2': self.scan_compressed_tar_file,
+            'TGZ': self.scan_compressed_tar_file
+        }
+
         try:
             inferred_type = self.infer_file_type_from_uri(uri)
+            scanner_function = type_to_scanner[inferred_type]
 
-            if inferred_type in ('CSV', 'PLAIN'):
-                for line in self.scan_csv(uri):
-                    yield line
-
-            elif inferred_type == 'GZP':
-                for line in self.scan_csv_gzip(uri):
-                    yield line
-
-            elif inferred_type == 'ZIP':
-                for line in self.scan_csv_zip(uri):
-                    yield line
-
-            elif inferred_type == 'BZ2':
-                for line in self.scan_csv_bzip2(uri):
-                    yield line
-
-            elif inferred_type == 'LXZ':
-                for line in self.scan_csv_xz(uri):
-                    yield line
-
-            elif inferred_type in ('TXZ', 'TZ2', 'TGZ'):
-                for line in self.scan_compressed_tar_file(
-                    uri,
-                    tar_compressed_file_readers[inferred_type]
+            if inferred_type in ('TXZ', 'TZ2', 'TGZ'):
+                for line in scanner_function(
+                    uri, tar_compressed_file_readers[inferred_type]
                 ):
                     yield line
-
             else:
-                raise FileScanNotPossible(f'{uri} scan is impossible.')
+                for line in scanner_function(uri):
+                    yield line
+        except KeyError:
+            raise FileScanNotPossible(f'{uri} scan is impossible.')
         except (IsADirectoryError, PermissionError):
             for root, _, files in os.walk(uri):
                 for ffile in files:
@@ -533,9 +548,7 @@ class FileIO(FileType):
 
         elif inferred_protocol is Protocols.HTTP:
 
-            request = Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
-
-            with urlopen(request) as opened_url, tarfile.open(
+            with urlopen(uri) as opened_url, tarfile.open(
                 fileobj=opened_url,
                 mode=file_reader.format(stream_type='|')
             ) as tar_file:
