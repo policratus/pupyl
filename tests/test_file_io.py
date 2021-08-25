@@ -26,6 +26,7 @@ TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/' + \
     'thumb/e/e4/Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
 TEST_URL_NO_DATE = 'http://images.protopage.com/view/572714/' + \
     'axuvb8oxm7liskynxggfczfus.jpg'
+TEST_URL_FORBIDDEN = 'https://cutt.ly/hWtd8dN'
 TEST_CSV = abspath(TEST_SCAN_DIR + 'test_csv.csv')
 TEST_CSV_ZIP = abspath(TEST_SCAN_DIR + 'test_csv.csv.zip')
 TEST_CSV_GZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.gz')
@@ -147,6 +148,11 @@ def test__get_url_unsuccessful():
         assert True
 
 
+def test__get_url_forbidden():
+    """Unit test for method _get_url, HTTP 403 case."""
+    assert isinstance(FileIO._get_url(TEST_URL_FORBIDDEN), bytes)
+
+
 def test_get_http():
     """
     Unit test for get method, http case
@@ -173,6 +179,13 @@ def test_get_unknown():
     Unit test for get method, unknown case
     """
     assert FileIO.get(TEST_UNKNOWN) is Protocols.UNKNOWN
+
+
+def test_get_file_scheme():
+    """Unit test for get method, file scheme case."""
+    test_file = f'file:///{TEST_LOCAL}'
+
+    assert isinstance(FileIO.get(test_file), bytes)
 
 
 def test_scan_directory():
@@ -535,3 +548,10 @@ def test_scan_compressed_tar_file_http():
 
     for ffile in file_io.scan_compressed_tar_file(test_uri, test_file_reader):
         assert os.path.exists(ffile)
+
+
+def test__file_scheme_to_path():
+    """Unit test for method _file_scheme_to_path."""
+    test_uri = 'file:///path/to/a/test/file'
+
+    assert FileIO._file_scheme_to_path(test_uri) == '/path/to/a/test/file'
