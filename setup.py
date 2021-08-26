@@ -8,7 +8,7 @@ with open('README.md') as readme:
 
 setuptools.setup(
     name="pupyl",
-    version="0.12.1",
+    version="0.12.2",
     author="Nelson Forte",
     author_email="policratus@gmail.com",
     description="🧿 Pupyl is a really fast image search "
