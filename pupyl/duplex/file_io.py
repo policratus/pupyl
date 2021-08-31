@@ -52,6 +52,9 @@ class FileIO(FileType):
     remote or local files, progress bars, file metadata, among others.
     """
 
+    # Maximum file size supported, in GBs
+    max_file_size = 8
+
     @staticmethod
     def pupyl_temp_data_dir():
         """Returns a safe data directory."""
@@ -83,6 +86,8 @@ class FileIO(FileType):
         bytes:
             With image binary information.
         """
+        file_size = 0
+
         try:
             if kwargs.get('headers'):
                 request = Request(url, headers=kwargs['headers'])
@@ -90,10 +95,22 @@ class FileIO(FileType):
                 request = url
 
             with urlopen(request, timeout=1) as ffile:
-                if kwargs.get('info'):
-                    return ffile.info()
+                file_info = ffile.info()
+                content_length = file_info.get_all('Content-Length')
+
+                if content_length:
+                    file_size = int(int(content_length[0]) / (1024 ** 3))
+
+                if file_size >= cls.max_file_size:
+                    print(
+                        f'File {url} is bigger than {cls.max_file_size} GB. '
+                        'Cowardly refusing to read it.'
+                    )
                 else:
-                    return ffile.read()
+                    if kwargs.get('info'):
+                        return ffile.info()
+                    else:
+                        return ffile.read()
         except HTTPError as http_error:
             print(
                 f'URL {url} returned HTTP error {http_error.code}, '
@@ -105,8 +122,8 @@ class FileIO(FileType):
                     url, headers={'User-Agent': 'Mozilla/5.0'}
                 )
 
-    @staticmethod
-    def _get_local(path):
+    @classmethod
+    def _get_local(cls, path):
         """Loads a local file returning its bytes.
 
         Parameters
@@ -119,8 +136,17 @@ class FileIO(FileType):
         bytes:
             With file binary information contained on the file.
         """
-        with open(path, 'rb') as ffile:
-            return ffile.read()
+        # If file is bigger than 8 GB
+        file_size = int(os.path.getsize(path) / (1024 ** 3))
+
+        if file_size >= cls.max_file_size:
+            print(
+                f'File {path} is bigger than {cls.max_file_size} GB. '
+                'Cowardly refusing to read it.'
+            )
+        else:
+            with open(path, 'rb') as ffile:
+                return ffile.read()
 
     @classmethod
     def get(cls, uri):
