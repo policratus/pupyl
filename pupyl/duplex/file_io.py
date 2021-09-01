@@ -108,7 +108,7 @@ class FileIO(FileType):
                     )
                 else:
                     if kwargs.get('info'):
-                        return ffile.info()
+                        return file_info
                     else:
                         return ffile.read()
         except HTTPError as http_error:
