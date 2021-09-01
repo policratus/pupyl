@@ -136,8 +136,7 @@ class FileIO(FileType):
         bytes:
             With file binary information contained on the file.
         """
-        # If file is bigger than 8 GB
-        file_size = int(os.path.getsize(path) / (1024 ** 3))
+        file_size = int(os.path.getsize(path) / (2 ** 30))
 
         if file_size >= cls.max_file_size:
             print(

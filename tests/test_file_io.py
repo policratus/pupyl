@@ -163,7 +163,7 @@ def test__get_url_large_file():
 def test__get_local_big_file():
     """Unit test for method _get_local, big file case."""
     with tempfile.NamedTemporaryFile() as temp_file:
-        while int(os.path.getsize(temp_file.name) / (1024 ** 3)) < 8:
+        while int(os.path.getsize(temp_file.name) / (2 ** 30)) < 8:
             temp_file.write(b'a' * (2 ** 16))
 
         assert FileIO._get_local(temp_file.name) is None
