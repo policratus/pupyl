@@ -173,4 +173,4 @@ def test_pupyl_demo():
 
         test_results = [*test_pupyl.search(test_query_image)]
 
-        assert test_results == [408, 583, 221, 645]
+        assert test_results == [165, 266, 426, 508]
