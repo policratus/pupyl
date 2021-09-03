@@ -153,6 +153,24 @@ def test__get_url_forbidden():
     assert isinstance(FileIO._get_url(TEST_URL_FORBIDDEN), bytes)
 
 
+def test__get_url_large_file():
+    """Unit test for method _get_url, large file case."""
+    test_url_big_file = 'https://speed.hetzner.de/10GB.bin'
+
+    assert FileIO._get_url(test_url_big_file) is None
+
+
+def test__get_local_big_file():
+    """Unit test for method _get_local, big file case."""
+    with tempfile.NamedTemporaryFile() as temp_file:
+        while int(
+            os.path.getsize(temp_file.name) / (2 ** 30)
+        ) < FileIO.max_file_size:
+            temp_file.write(b'a' * (2 ** 16))
+
+        assert FileIO._get_local(temp_file.name) is None
+
+
 def test_get_http():
     """
     Unit test for get method, http case
