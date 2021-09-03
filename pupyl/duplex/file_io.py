@@ -96,10 +96,10 @@ class FileIO(FileType):
 
             with urlopen(request, timeout=1) as ffile:
                 file_info = ffile.info()
-                content_length = int(file_info.get_all('Content-Length')[0])
+                content_length = file_info.get_all('Content-Length')
 
                 if content_length:
-                    file_size = int(content_length / (2 ** 30))
+                    file_size = int(int(content_length[0]) / (2 ** 30))
 
                 if file_size >= cls.max_file_size:
                     print(
