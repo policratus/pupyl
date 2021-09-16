@@ -282,6 +282,7 @@ class ImageDatabase(ImageIO):
             with open(result_file_name, 'w') as json_file:
                 metadata = self.get_metadata(uri)
                 metadata['id'] = index
+                metadata['internal_path'] = self.mount_file_name(index, 'jpg')
 
                 json.dump(metadata, json_file)
 
