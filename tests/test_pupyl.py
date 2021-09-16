@@ -155,7 +155,11 @@ def test_search_returning_metadata():
         'id': 0,
         'original_file_name': '500863916_bdd4b8cc5a.jpg',
         'original_file_size': '25K',
-        'original_path': 'https://static.flickr.com/210'}
+        'internal_path': os.path.join(
+            gettempdir(), 'pupyl_tests', '0', '0.jpg'
+        ),
+        'original_path': 'https://static.flickr.com/210'
+    }
 
 
 def test_pupyl_demo():

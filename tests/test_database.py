@@ -16,7 +16,8 @@ TEST_METADATA = {
     'id': 0,
     'original_file_name': 'test_image.jpg',
     'original_path': 'tests',
-    'original_file_size': '5K'
+    'original_file_size': '5K',
+    'internal_path': 'tests/test_database/0/0.jpg'
 }
 
 TEST_METADATA_HTTP = {
@@ -354,5 +355,6 @@ def test_save_image_metadata():
     del test_metadata['original_access_time']
 
     test_metadata['original_path'] = relpath(test_metadata['original_path'])
+    test_metadata['internal_path'] = relpath(test_metadata['internal_path'])
 
     assert test_metadata == TEST_METADATA

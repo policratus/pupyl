@@ -6,9 +6,9 @@ based on indexed images on database.
 """
 import lzma
 import webbrowser
-from http.server import SimpleHTTPRequestHandler
 import socketserver
 from urllib.parse import urlparse, parse_qs
+from http.server import SimpleHTTPRequestHandler
 
 import termcolor
 
@@ -122,28 +122,22 @@ def serve(data_dir=None, port=8080, **kwargs):
             )
 
         @staticmethod
-        def filter_metadata(index):
-            """Returns a filtered metadata information.
+        def _format_metadata(metadata):
+            """Formats metadata information
 
             Parameters
             ----------
-            index: int
-                Index number of image
-
-            Returns
-            -------
-            dict:
-                With a pre-filtered metadata.
+            metadata: dict
+                The information to be formatted.
             """
-            metadata = pupyl_image_search.image_database.\
-                load_image_metadata(
-                    index, filtered=(
-                        'original_file_name',
-                        'original_file_size'
-                    )
-                )
+            formatted = ''
 
-            return ', '.join(map(str, metadata.values()))
+            for key, value in metadata.items():
+                key = key.replace('_', ' ').title()
+
+                formatted += f'<b>{key}</b>: {value} <br> '
+
+            return formatted
 
         def images(self, query_uri=None, top=None):
             """Returns image tags from database.
@@ -171,9 +165,11 @@ def serve(data_dir=None, port=8080, **kwargs):
 
             image_tags = ''
             img_src = '<figure class="figure">' + \
+                '<a href="data:image/jpg;base64, {image_b64}">' + \
                 '<img class="img-fluid border"' + \
                 'src="data:image/jpg;base64, {image_b64}" ' + \
-                'alt="&#129535; Pupyl"><figcaption class="figure-caption">' + \
+                'alt="&#129535; Pupyl"></a> ' + \
+                '<figcaption class="figure-caption">' + \
                 '{figure_caption}</figcaption></figure>'
 
             top = top if top else 24
@@ -190,11 +186,14 @@ def serve(data_dir=None, port=8080, **kwargs):
                             load_image(result)
                         ).decode('utf-8')
 
-                    filtered_metadata = self.filter_metadata(result)
+                    metadata = self._format_metadata(
+                        pupyl_image_search.image_database.
+                        load_image_metadata(result)
+                    )
 
                     image_tags += img_src.format(
                         image_b64=image,
-                        figure_caption=filtered_metadata
+                        figure_caption=metadata
                     )
 
                 return image_tags
@@ -208,11 +207,14 @@ def serve(data_dir=None, port=8080, **kwargs):
                         image
                     ).decode('utf-8')
 
-                filtered_metadata = self.filter_metadata(index)
+                metadata = self._format_metadata(
+                    pupyl_image_search.image_database.
+                    load_image_metadata(index)
+                )
 
                 image_tags += img_src.format(
                     image_b64=image_base64,
-                    figure_caption=filtered_metadata
+                    figure_caption=metadata
                 )
 
             return image_tags
