@@ -1,15 +1,15 @@
 """Unit tests related to storage.database module."""
-from os import sep
-from os.path import abspath, join, relpath, exists
 import tempfile
+from os import sep
 from unittest import TestCase
+from os.path import join, relpath, exists
 
 from pupyl.storage.database import ImageDatabase
 
 
 TEST_TEMP_DIRECTORY = tempfile.gettempdir()
-TEST_DIRECTORY = abspath('tests/test_database/')
-TEST_IMAGE = abspath('tests/test_image.jpg')
+TEST_DIRECTORY = join('tests', 'test_database')
+TEST_IMAGE = join('tests', 'test_image.jpg')
 TEST_INDEX = 999
 
 TEST_METADATA = {
@@ -17,7 +17,7 @@ TEST_METADATA = {
     'original_file_name': 'test_image.jpg',
     'original_path': 'tests',
     'original_file_size': '5K',
-    'internal_path': 'tests/test_database/0/0.jpg'
+    'internal_path': join('tests', 'test_database', '0', '0.jpg')
 }
 
 TEST_METADATA_HTTP = {
@@ -281,7 +281,7 @@ def test_load_image_metadata_filtered():
 
 def test_list_images():
     """Unit test for method list_images."""
-    expected_result = abspath('tests/test_database/0/0.jpg')
+    expected_result = 'tests/test_database/0/0.jpg'
 
     image_database = ImageDatabase(
         import_images=True,
@@ -295,7 +295,7 @@ def test_list_images():
 
 def test_list_images_return_ids():
     """Unit test for method list_images, return ids case."""
-    expected_path = abspath('tests/test_database/0/0.jpg')
+    expected_path = 'tests/test_database/0/0.jpg'
     expected_index = 0
     expected_result = (expected_index, expected_path)
 
