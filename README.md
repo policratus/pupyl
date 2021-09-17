@@ -66,18 +66,20 @@ Now an excerpt of the (possible) return is:
 ```Python
 [
     {
-        'id': 129,
-        'original_access_time': '2021-07-20T21:02:12',
-        'original_file_name': '517791629_f05c1518bd.jpg',
-        'original_file_size': '52K',
-        'original_path': '/tmp/tmplgiyjaw5'
+        "id": 129,
+        "internal_path": "/tmp/pupyl/0/129.jpg",
+        "original_access_time": "2021-09-17T13:42:33",
+        "original_file_name": "517791629_f05c1518bd.jpg",
+        "original_file_size": "52K",
+        "original_path": "/tmp/tmpn6duarq6"
     },
     {
-        'id': 685,
-        'original_access_time': '2021-07-20T21:02:13',
-        'original_file_name': '427954022_a072d55df9.jpg',
-        'original_file_size': '65K',
-        'original_path': '/tmp/tmplgiyjaw5'
+        "id": 685,
+        "internal_path": "/tmp/pupyl/0/685.jpg",
+        "original_access_time": "2021-09-17T13:42:34",
+        "original_file_name": "427954022_a072d55df9.jpg",
+        "original_file_size": "65K",
+        "original_path": "/tmp/tmpn6duarq6"
     },
     ...
 ]
