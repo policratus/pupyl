@@ -160,21 +160,3 @@ def test_search_returning_metadata():
         ),
         'original_path': 'https://static.flickr.com/210'
     }
-
-
-def test_pupyl_demo():
-    """Unit test for the index and search process describe on README.md"""
-    with TemporaryDirectory() as temp_dir:
-        test_pupyl = PupylImageSearch(data_dir=temp_dir)
-
-        test_pupyl.index(
-            'https://github.com/policratus/pupyl'
-            '/raw/master/samples/images.tar.xz'
-        )
-
-        test_query_image = 'https://images.unsplash.com/' + \
-            'photo-1520763185298-1b434c919102?w=224&q=70'
-
-        test_results = [*test_pupyl.search(test_query_image)]
-
-        assert test_results
