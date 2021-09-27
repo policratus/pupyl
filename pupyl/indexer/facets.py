@@ -184,6 +184,8 @@ class Index:
 
             self.tree.save(self.path)
 
+            self._is_new_index = False
+
         self.refresh()
 
     def items(self):

@@ -5,8 +5,9 @@ from tempfile import gettempdir, TemporaryDirectory
 from unittest import TestCase
 from urllib.error import URLError
 
+from pupyl.indexer.facets import Index
 from pupyl.search import PupylImageSearch
-from pupyl.embeddings.features import Characteristics
+from pupyl.embeddings.features import Extractors, Characteristics
 
 
 TEST_DATA_DIR = os.path.join(gettempdir(), 'pupyl_tests/')
@@ -151,12 +152,59 @@ def test_search_returning_metadata():
 
     del test_results['original_access_time']
 
-    assert test_results == {
-        'id': 0,
-        'original_file_name': '500863916_bdd4b8cc5a.jpg',
-        'original_file_size': '25K',
-        'internal_path': os.path.join(
-            gettempdir(), 'pupyl_tests', '0', '0.jpg'
-        ),
-        'original_path': 'https://static.flickr.com/210'
-    }
+    assert isinstance(test_results, dict)
+
+
+def test_remove():
+    """Unit test for method remove."""
+    index_to_remove = 0
+
+    length_indexer_before = len(PUPYL.indexer)
+    length_image_database_before = len(PUPYL.image_database)
+
+    PUPYL.remove(index_to_remove)
+
+    length_indexer_after = len(PUPYL.indexer)
+    length_image_database_after = len(PUPYL.image_database)
+
+    assert length_indexer_after == length_indexer_before - 1
+    assert length_image_database_after == length_image_database_before - 1
+
+
+def test_remove_non_extreme():
+    """Unit test for method remove, non extrem mode."""
+    index_to_remove = 0
+
+    with TemporaryDirectory() as temp_dir:
+        pupyl_non_extreme = PupylImageSearch(
+            data_dir=temp_dir,
+            extreme_mode=False
+        )
+
+        pupyl_non_extreme.index(TEST_SCAN_DIR)
+
+        with Extractors(
+            characteristics=Characteristics.HEAVYWEIGHT_HUGE_PRECISION,
+            extreme_mode=False
+        ) as extractor:
+            with Index(extractor.output_shape, data_dir=temp_dir) as indexer:
+                length_indexer_before = len(indexer)
+                length_image_database_before = len(
+                    pupyl_non_extreme.image_database
+                )
+
+        pupyl_non_extreme.remove(index_to_remove)
+
+        with Extractors(
+            characteristics=Characteristics.HEAVYWEIGHT_HUGE_PRECISION,
+            extreme_mode=False
+        ) as extractor:
+            with Index(extractor.output_shape, data_dir=temp_dir) as indexer:
+                length_indexer_after = len(indexer)
+                length_image_database_after = len(
+                    pupyl_non_extreme.image_database
+                )
+
+    assert length_image_database_after == \
+        length_image_database_before - 1
+    assert length_indexer_after == length_indexer_before - 1

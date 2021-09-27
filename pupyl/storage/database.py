@@ -307,6 +307,49 @@ class ImageDatabase(ImageIO):
 
         self.save_image_metadata(index, uri)
 
+    def remove(self, index):
+        """Removes the image at ``index``.
+
+        Parameters
+        ----------
+        index: int
+            The image index to remove from database.
+
+        Danger
+        ------
+        Use this method with caution. The delete image cannot be restored.
+        No prompt are shown before deletion.
+        """
+        image_path = self.mount_file_name(index, 'jpg')
+        metadata_path = self.mount_file_name(index, 'json')
+
+        os.remove(image_path)
+        os.remove(metadata_path)
+
+        for old_id in range(index + 1, len(self) + 1):
+            new_id = old_id - 1
+
+            metadata_old_id = self.mount_file_name(old_id, 'json')
+            metadata_new_id = self.mount_file_name(new_id, 'json')
+
+            image_old_id = self.mount_file_name(old_id, 'jpg')
+            image_new_id = self.mount_file_name(new_id, 'jpg')
+
+            os.rename(image_old_id, image_new_id)
+
+            with open(metadata_old_id, 'r+') as metadata_file:
+                metadata = json.load(metadata_file)
+
+                metadata['id'] = new_id
+                metadata['internal_path'] = self.mount_file_name(
+                    new_id, 'jpg'
+                )
+
+                metadata_file.seek(0)
+                json.dump(metadata, metadata_file)
+
+            os.rename(metadata_old_id, metadata_new_id)
+
     def list_images(self, return_ids=False, top=None):
         """Returns images on current database.
 

@@ -1,18 +1,17 @@
-"""
-Unit tests related to duplex.file_io module
-"""
+"""Unit tests related to duplex.file_io module."""
 import os
 import csv
 import tempfile
 import mimetypes
-from tarfile import is_tarfile
 from os import walk
-from os.path import abspath, exists, join
 from pathlib import Path
 from unittest import TestCase
+from tarfile import is_tarfile
+from urllib.error import URLError
+from os.path import abspath, exists, join
 
-from pupyl.duplex.file_types import TarCompressedTypes
 from pupyl.duplex.file_io import FileIO, Protocols
+from pupyl.duplex.file_types import TarCompressedTypes
 from pupyl.duplex.exceptions import FileTypeNotSupportedYet, \
     FileScanNotPossible
 
@@ -27,6 +26,8 @@ TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/' + \
 TEST_URL_NO_DATE = 'http://images.protopage.com/view/572714/' + \
     'axuvb8oxm7liskynxggfczfus.jpg'
 TEST_URL_FORBIDDEN = 'https://cutt.ly/hWtd8dN'
+TEST_URL_TIMEOUT = 'http://www.pedigree.com.sg/breeds/images/' + \
+    'norwich_terr_02.jpg'
 TEST_CSV = abspath(TEST_SCAN_DIR + 'test_csv.csv')
 TEST_CSV_ZIP = abspath(TEST_SCAN_DIR + 'test_csv.csv.zip')
 TEST_CSV_GZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.gz')
@@ -47,38 +48,36 @@ def util_test_csv(path):
 
 
 class TestCases(TestCase):
-    """ Unit tests over special cases. """
+    """Unit tests over special cases."""
 
     def test__get_local_unsuccessful(self):
-        """ Unit test for _get_local method, local unsuccessful case. """
+        """Unit test for _get_local method, local unsuccessful case."""
         with self.assertRaises(IOError):
             FileIO._get_local(TEST_UNKNOWN)
 
     def test_infer_file_type_from_uri_unknown(self):
-        """ Unit test infer_file_type_from_uri, unknown case. """
+        """Unit test infer_file_type_from_uri, unknown case."""
         with self.assertRaises(FileTypeNotSupportedYet):
             file_io = FileIO()
 
             file_io.infer_file_type_from_uri(TEST_UNKNOWN)
 
     def test_scan_unknown_file(self):
-        """
-        Unit test for scan method, unknown file case
-        """
+        """Unit test for scan method, unknown file case."""
         file_io = FileIO()
 
         with self.assertRaises(FileTypeNotSupportedYet):
             next(file_io.scan(TEST_UNKNOWN))
 
     def test_scan_file(self):
-        """ Unit test for scan method, file case."""
+        """Unit test for scan method, file case."""
         file_io = FileIO()
 
         with self.assertRaises(FileScanNotPossible):
             assert next(file_io.scan(TEST_LOCAL)) == TEST_LOCAL
 
     def test_scan_csv_unknown_file(self):
-        """ Unit test for scan_csv method, unknown file case. """
+        """Unit test for scan_csv method, unknown file case."""
         file_io = FileIO()
 
         with self.assertRaises(FileTypeNotSupportedYet):
@@ -87,7 +86,7 @@ class TestCases(TestCase):
     def test_infer_file_type_from_uri_unsupported(self):
         """
         Unit test for method infer_file_type_from_uri,
-        unsupported file type case
+        unsupported file type case.
         """
         file_io = FileIO()
 
@@ -96,6 +95,11 @@ class TestCases(TestCase):
                 TEST_UNSUPPORTED_FILE_TYPE,
                 mimetype=True
             )
+
+    def test__get_url_timeout(self):
+        """Unit tests for _get_url method, timeout case."""
+        with self.assertRaises(URLError):
+            FileIO._get_url(TEST_URL_TIMEOUT)
 
 
 def test_safe_temp_file():
@@ -117,40 +121,31 @@ def test_safe_temp_file_exists():
 
 
 def test__infer_protocol_http():
-    """ Unit tests for _infer_protocol method, http case. """
+    """Unit tests for _infer_protocol method, http case."""
     assert FileIO._infer_protocol(TEST_URL) is Protocols.HTTP
 
 
 def test__infer_protocol_local():
-    """ Unit tests for _infer_protocol method, local case. """
+    """Unit tests for _infer_protocol method, local case."""
     assert FileIO._infer_protocol(TEST_LOCAL) is Protocols.FILE
 
 
 def test__infer_protocol_unknown():
-    """ Unit tests for _infer_protocol method, unknown case.  """
+    """Unit tests for _infer_protocol method, unknown case."""
     assert FileIO._infer_protocol(TEST_UNKNOWN) is Protocols.UNKNOWN
 
 
 def test__get_url_successful():
-    """
-    Unit tests for _get_url method, successful case.
-    """
+    """Unit tests for _get_url method, successful case."""
     assert isinstance(FileIO._get_url(TEST_URL), bytes)
 
 
 def test__get_url_unsuccessful():
-    """
-    Unit tests for _get_url method, unsuccessful case.
-    """
+    """Unit tests for _get_url method, unsuccessful case."""
     try:
         FileIO._get_url(TEST_UNKNOWN)
     except IOError:
         assert True
-
-
-def test__get_url_forbidden():
-    """Unit test for method _get_url, HTTP 403 case."""
-    assert isinstance(FileIO._get_url(TEST_URL_FORBIDDEN), bytes)
 
 
 def test__get_url_large_file():
@@ -573,3 +568,8 @@ def test__file_scheme_to_path():
     test_uri = 'file:///path/to/a/test/file'
 
     assert FileIO._file_scheme_to_path(test_uri) == '/path/to/a/test/file'
+
+
+def test__get_url_forbidden():
+    """Unit test for method _get_url, HTTP 403 case."""
+    assert isinstance(FileIO._get_url(TEST_URL_FORBIDDEN), bytes)

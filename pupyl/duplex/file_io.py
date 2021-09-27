@@ -15,7 +15,7 @@ from itertools import cycle
 from enum import Enum, auto
 from datetime import datetime
 from urllib.parse import urlparse
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 import termcolor
@@ -81,18 +81,27 @@ class FileIO(FileType):
             Defines if should be returned metadata information from
             the ``url``, instead of its ``bytes``.
 
+        retry: int
+            Counter for the number of retries already issued.
+
         Returns
         -------
         bytes:
             With image binary information.
         """
         file_size = 0
+        max_retries = 3
 
         try:
             if kwargs.get('headers'):
                 request = Request(url, headers=kwargs['headers'])
             else:
                 request = url
+
+            if kwargs.get('retry'):
+                retry = kwargs['retry']
+            else:
+                retry = 1
 
             with urlopen(request, timeout=1) as ffile:
                 file_info = ffile.info()
@@ -112,15 +121,28 @@ class FileIO(FileType):
                     else:
                         return ffile.read()
         except HTTPError as http_error:
-            print(
-                f'URL {url} returned HTTP error {http_error.code}, '
-                f'"{http_error.reason}". Retrying using other methods.'
-            )
-
             if http_error.code == 403:
+                print(
+                    f'URL {url} returned HTTP error {http_error.code}, '
+                    f'"{http_error.reason}". Retrying using other methods.'
+                )
+
                 return cls._get_url(
                     url, headers={'User-Agent': 'Mozilla/5.0'}
                 )
+
+        except URLError as url_error:
+            print(
+                f'URL {url} request has thrown an error: {url_error.reason}. '
+                f'Retrying: {retry} of {max_retries}.'
+            )
+
+            retry += 1
+
+            if retry <= max_retries:
+                return cls._get_url(url, retry=retry)
+
+            raise URLError(f'URL {url} exhausted all retries. Giving up.')
 
     @classmethod
     def _get_local(cls, path):
