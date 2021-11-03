@@ -119,7 +119,9 @@ class PupylImageSearch:
             either a configuration couldn't be created or loaded.
         """
         try:
-            with open(self._index_config_path, mode) as config_file:
+            with open(
+                self._index_config_path, mode, encoding='utf-8'
+            ) as config_file:
                 if mode == 'r':
 
                     return json.load(config_file)

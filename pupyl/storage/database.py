@@ -247,7 +247,7 @@ class ImageDatabase(ImageIO):
         result_file_name = self.mount_file_name(index, 'json')
 
         try:
-            with open(result_file_name) as json_file:
+            with open(result_file_name, encoding='utf-8') as json_file:
                 metadata = json.load(json_file)
 
                 if kwargs.get('filtered'):
@@ -279,7 +279,7 @@ class ImageDatabase(ImageIO):
         os.makedirs(os.path.dirname(result_file_name), exist_ok=True)
 
         if self.is_image(bytess):
-            with open(result_file_name, 'w') as json_file:
+            with open(result_file_name, 'w', encoding='utf-8') as json_file:
                 metadata = self.get_metadata(uri)
                 metadata['id'] = index
                 metadata['internal_path'] = self.mount_file_name(index, 'jpg')
@@ -345,7 +345,9 @@ class ImageDatabase(ImageIO):
 
             os.rename(image_old_id, image_new_id)
 
-            with open(metadata_old_id, 'r+') as metadata_file:
+            with open(
+                metadata_old_id, 'r+', encoding='utf-8'
+            ) as metadata_file:
                 metadata = json.load(metadata_file)
 
                 metadata['id'] = new_id
