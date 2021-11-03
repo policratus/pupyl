@@ -317,8 +317,16 @@ class ImageDatabase(ImageIO):
 
         Danger
         ------
-        Use this method with caution. The delete image cannot be restored.
+        Use this method with caution. The deleted image cannot be restored.
         No prompt are shown before deletion.
+
+        Attention
+        ---------
+        Be advised that this operation is linear on the index size
+        (:math:`O(n)`). It provokes changes on the current image ``index``, for
+        all indexed images. For instance, if the ``index`` at 54 was deleted,
+        every image with index greater than 54 will have the ``id``
+        decreased by one.
         """
         image_path = self.mount_file_name(index, 'jpg')
         metadata_path = self.mount_file_name(index, 'json')
