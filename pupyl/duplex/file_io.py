@@ -121,12 +121,12 @@ class FileIO(FileType):
                     else:
                         return ffile.read()
         except HTTPError as http_error:
-            if http_error.code == 403:
-                print(
-                    f'URL {url} returned HTTP error {http_error.code}, '
-                    f'"{http_error.reason}". Retrying using other methods.'
-                )
+            print(
+                f'URL {url} returned HTTP error {http_error.code}, '
+                f'"{http_error.reason}". Retrying using other methods.'
+            )
 
+            if http_error.code == 403:
                 return cls._get_url(
                     url, headers={'User-Agent': 'Mozilla/5.0'}
                 )
