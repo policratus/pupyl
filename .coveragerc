@@ -6,9 +6,9 @@ omit =
 
 [report]
 exclude_lines =
-    def pupyl
+    def pupyl()
     # Excluding GPU discovery (below method) from coverage because
     # most of CI/CD platforms doesn't have this kind
     # of hardware available and always will be missed
     # from the coverage report.
-    def acceleration_discovery
+    def acceleration_discovery(self)

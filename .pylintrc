@@ -1,0 +1,11 @@
+[MESSAGE CONTROL]
+disable=wrong-import-position,
+    import-outside-toplevel,
+    no-name-in-module,
+    consider-using-from-import,
+    wrong-import-order,
+    ungrouped-imports
+
+[DESIGN]
+max-attributes=16
+max-locals=16

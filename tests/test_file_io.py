@@ -152,7 +152,7 @@ def test__get_url_large_file():
     """Unit test for method _get_url, large file case."""
     test_url_big_file = 'https://speed.hetzner.de/10GB.bin'
 
-    assert FileIO._get_url(test_url_big_file) is None
+    assert FileIO._get_url(test_url_big_file) == b''
 
 
 def test__get_local_big_file():
@@ -163,7 +163,7 @@ def test__get_local_big_file():
         ) < FileIO.max_file_size:
             temp_file.write(b'a' * (2 ** 16))
 
-        assert FileIO._get_local(temp_file.name) is None
+        assert FileIO._get_local(temp_file.name) == b''
 
 
 def test_get_http():
@@ -561,6 +561,13 @@ def test_scan_compressed_tar_file_http():
 
     for ffile in file_io.scan_compressed_tar_file(test_uri, test_file_reader):
         assert os.path.exists(ffile)
+
+
+def test_request_http_not_found():
+    """Unit test for method _get_url, http 404 case."""
+    test_uri = 'http://localhost:8888/notfound'
+
+    assert FileIO._get_url(test_uri) == b''
 
 
 def test__file_scheme_to_path():

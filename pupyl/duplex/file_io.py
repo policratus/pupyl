@@ -86,40 +86,43 @@ class FileIO(FileType):
 
         Returns
         -------
-        bytes:
-            With image binary information.
+        bytes or http.client.HTTPMessage:
+            ``bytes`` with image binary information or
+            ``http.client.HTTPMessage`` with file information (case
+            ``info`` is ``True``).
         """
-        file_size = 0
         max_retries = 3
 
+        if kwargs.get('headers'):
+            request = Request(url, headers=kwargs['headers'])
+        else:
+            request = url
+
+        if kwargs.get('retry'):
+            retry = kwargs['retry']
+        else:
+            retry = 1
+
         try:
-            if kwargs.get('headers'):
-                request = Request(url, headers=kwargs['headers'])
-            else:
-                request = url
-
-            if kwargs.get('retry'):
-                retry = kwargs['retry']
-            else:
-                retry = 1
-
             with urlopen(request, timeout=1) as ffile:
-                file_info = ffile.info()
-                content_length = file_info.get_all('Content-Length')
+                if kwargs.get('info'):
+                    return ffile.info()
+
+                content_length = ffile.info().get_all('Content-Length')
 
                 if content_length:
-                    file_size = int(int(content_length[0]) / (2 ** 30))
+                    if int(
+                        int(content_length[0]) / (2 ** 30)
+                    ) >= cls.max_file_size:
+                        print(
+                            f'File {url} is bigger than {cls.max_file_size} '
+                            ' GB. Cowardly refusing to read it.'
+                        )
 
-                if file_size >= cls.max_file_size:
-                    print(
-                        f'File {url} is bigger than {cls.max_file_size} GB. '
-                        'Cowardly refusing to read it.'
-                    )
-                else:
-                    if kwargs.get('info'):
-                        return file_info
-                    else:
-                        return ffile.read()
+                        return b''
+
+                return ffile.read()
+
         except HTTPError as http_error:
             print(
                 f'URL {url} returned HTTP error {http_error.code}, '
@@ -130,6 +133,8 @@ class FileIO(FileType):
                 return cls._get_url(
                     url, headers={'User-Agent': 'Mozilla/5.0'}
                 )
+
+            return b''
 
         except URLError as url_error:
             print(
@@ -142,7 +147,8 @@ class FileIO(FileType):
             if retry <= max_retries:
                 return cls._get_url(url, retry=retry)
 
-            raise URLError(f'URL {url} exhausted all retries. Giving up.')
+            raise URLError(f'URL {url} exhausted all retries. Giving up.') \
+                from url_error
 
     @classmethod
     def _get_local(cls, path):
@@ -158,9 +164,7 @@ class FileIO(FileType):
         bytes:
             With file binary information contained on the file.
         """
-        file_size = int(os.path.getsize(path) / (2 ** 30))
-
-        if file_size >= cls.max_file_size:
+        if int(os.path.getsize(path) / (2 ** 30)) >= cls.max_file_size:
             print(
                 f'File {path} is bigger than {cls.max_file_size} GB. '
                 'Cowardly refusing to read it.'
@@ -168,6 +172,8 @@ class FileIO(FileType):
         else:
             with open(path, 'rb') as ffile:
                 return ffile.read()
+
+        return b''
 
     @classmethod
     def get(cls, uri):
@@ -482,10 +488,11 @@ class FileIO(FileType):
         """
         file_bytes = BytesIO(cls.get(uri))
 
-        for ffile in zipfile.ZipFile(file_bytes).namelist():
-            with zipfile.ZipFile(file_bytes).open(ffile) as ufile:
-                for row in ufile:
-                    yield row.decode('utf-8').replace('\n', '')
+        with zipfile.ZipFile(file_bytes) as ffile:
+            for listed_file in ffile.namelist():
+                with zipfile.ZipFile(file_bytes).open(listed_file) as ufile:
+                    for row in ufile:
+                        yield row.decode('utf-8').replace('\n', '')
 
     @classmethod
     def scan_csv_xz(cls, uri):
@@ -556,8 +563,9 @@ class FileIO(FileType):
             else:
                 for line in scanner_function(uri):
                     yield line
-        except KeyError:
-            raise FileScanNotPossible(f'{uri} scan is impossible.')
+        except KeyError as key_error:
+            raise FileScanNotPossible(f'{uri} scan is impossible.') \
+                from key_error
         except (IsADirectoryError, PermissionError):
             for root, _, files in os.walk(uri):
                 for ffile in files:
@@ -581,30 +589,29 @@ class FileIO(FileType):
             Paths of the already untarred files on the temporary directory.
         """
         # Waiting to explicitly remove the temporary directory
-        temp_directory = tempfile.TemporaryDirectory().name
+        with tempfile.TemporaryDirectory() as temp_dir:
 
-        inferred_protocol = cls._infer_protocol(uri)
+            inferred_protocol = cls._infer_protocol(uri)
 
-        if inferred_protocol is Protocols.FILE:
+            if inferred_protocol is Protocols.FILE:
+                with tarfile.open(
+                    uri,
+                    file_reader.format(stream_type=':')
+                ) as tar_file:
+                    tar_file.extractall(temp_dir)
 
-            with tarfile.open(
-                uri,
-                file_reader.format(stream_type=':')
-            ) as tar_file:
-                tar_file.extractall(temp_directory)
+            elif inferred_protocol is Protocols.HTTP:
 
-        elif inferred_protocol is Protocols.HTTP:
+                with urlopen(uri) as opened_url, tarfile.open(
+                    fileobj=opened_url,
+                    mode=file_reader.format(stream_type='|')
+                ) as tar_file:
+                    for member in cls.progress(tar_file):
+                        tar_file.extract(member, path=temp_dir)
 
-            with urlopen(uri) as opened_url, tarfile.open(
-                fileobj=opened_url,
-                mode=file_reader.format(stream_type='|')
-            ) as tar_file:
-                for member in cls.progress(tar_file):
-                    tar_file.extract(member, path=temp_directory)
-
-        for root, _, files in os.walk(temp_directory):
-            for ffile in files:
-                yield os.path.join(root, ffile)
+            for root, _, files in os.walk(temp_dir):
+                for ffile in files:
+                    yield os.path.join(root, ffile)
 
     @staticmethod
     def _get_terminal_size():

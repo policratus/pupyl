@@ -19,10 +19,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python setup.py install
-    - name: Lint with flake8
+    - name: Check code with flake8
       run: |
         pip install flake8
         make flake8
+    - name: Linter with pylint
+      run: |
+        pip install pylint
+        make linter
     - name: Static type checking
       run: |
         pip install mypy types-termcolor
