@@ -103,8 +103,8 @@ class PupylImageSearch:
 
         Parameters
         ----------
-        mode (values: ('r', 'w')): str
-            Defines which mode should be used over configuration
+        mode: str
+            Defines which mode should be used over the configuration
             file. 'r' is for file reading, 'w' for writing.
 
         feature_size: int
@@ -119,7 +119,9 @@ class PupylImageSearch:
             either a configuration couldn't be created or loaded.
         """
         try:
-            with open(self._index_config_path, mode) as config_file:
+            with open(
+                self._index_config_path, mode, encoding='utf-8'
+            ) as config_file:
                 if mode == 'r':
 
                     return json.load(config_file)
@@ -297,3 +299,29 @@ class PupylImageSearch:
                     ):
                         yield self.image_database.load_image_metadata(result) \
                             if return_metadata else result
+
+    def remove(self, index):
+        """Removes an indexed image from the storage.
+
+        Parameters
+        ----------
+        index: int
+            The image to be deleted, based on ``index`` (internal image identification).
+
+        Example
+        -------
+        search.remove(12) # Will remove image with ``index`` 12 from the storage.
+        """
+        if self._extreme_mode:
+            self.indexer.remove(index)
+        else:
+            with Extractors(
+                characteristics=self._characteristic,
+                extreme_mode=self._extreme_mode
+            ) as extractor:
+                with Index(
+                    extractor.output_shape, data_dir=self._data_dir
+                ) as indexer:
+                    indexer.remove(index)
+
+        self.image_database.remove(index)

@@ -247,7 +247,7 @@ class ImageDatabase(ImageIO):
         result_file_name = self.mount_file_name(index, 'json')
 
         try:
-            with open(result_file_name) as json_file:
+            with open(result_file_name, encoding='utf-8') as json_file:
                 metadata = json.load(json_file)
 
                 if kwargs.get('filtered'):
@@ -279,7 +279,7 @@ class ImageDatabase(ImageIO):
         os.makedirs(os.path.dirname(result_file_name), exist_ok=True)
 
         if self.is_image(bytess):
-            with open(result_file_name, 'w') as json_file:
+            with open(result_file_name, 'w', encoding='utf-8') as json_file:
                 metadata = self.get_metadata(uri)
                 metadata['id'] = index
                 metadata['internal_path'] = self.mount_file_name(index, 'jpg')
@@ -306,6 +306,59 @@ class ImageDatabase(ImageIO):
             )
 
         self.save_image_metadata(index, uri)
+
+    def remove(self, index):
+        """Removes the image at ``index``.
+
+        Parameters
+        ----------
+        index: int
+            The image index to remove from database.
+
+        Danger
+        ------
+        Use this method with caution. The deleted image cannot be restored.
+        No prompt are shown before deletion.
+
+        Attention
+        ---------
+        Be advised that this operation is linear on the index size
+        (:math:`O(n)`). It provokes changes on the current image ``index``, for
+        all indexed images. For instance, if the ``index`` at 54 was deleted,
+        every image with index greater than 54 will have the ``id``
+        decreased by one.
+        """
+        image_path = self.mount_file_name(index, 'jpg')
+        metadata_path = self.mount_file_name(index, 'json')
+
+        os.remove(image_path)
+        os.remove(metadata_path)
+
+        for old_id in range(index + 1, len(self) + 1):
+            new_id = old_id - 1
+
+            metadata_old_id = self.mount_file_name(old_id, 'json')
+            metadata_new_id = self.mount_file_name(new_id, 'json')
+
+            image_old_id = self.mount_file_name(old_id, 'jpg')
+            image_new_id = self.mount_file_name(new_id, 'jpg')
+
+            os.rename(image_old_id, image_new_id)
+
+            with open(
+                metadata_old_id, 'r+', encoding='utf-8'
+            ) as metadata_file:
+                metadata = json.load(metadata_file)
+
+                metadata['id'] = new_id
+                metadata['internal_path'] = self.mount_file_name(
+                    new_id, 'jpg'
+                )
+
+                metadata_file.seek(0)
+                json.dump(metadata, metadata_file)
+
+            os.rename(metadata_old_id, metadata_new_id)
 
     def list_images(self, return_ids=False, top=None):
         """Returns images on current database.
