@@ -306,11 +306,13 @@ class PupylImageSearch:
         Parameters
         ----------
         index: int
-            The image to be deleted, based on ``index`` (internal image identification).
+            The image to be deleted, based on ``index``
+            (internal image identification).
 
         Example
         -------
-        search.remove(12) # Will remove image with ``index`` 12 from the storage.
+        search.remove(12) # Will remove image with ``index`` 12 from the
+        storage.
         """
         if self._extreme_mode:
             self.indexer.remove(index)
