@@ -306,7 +306,7 @@ class PupylImageSearch:
         Parameters
         ----------
         index: int
-            The image to be deleted internal identification
+            The image to be deleted, based on ``index`` (internal image identification).
 
         Example
         -------
