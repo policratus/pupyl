@@ -310,7 +310,7 @@ class PupylImageSearch:
 
         Example
         -------
-        search.remove(12) # Will remove image 12 from the storage
+        search.remove(12) # Will remove image with ``index`` 12 from the storage.
         """
         if self._extreme_mode:
             self.indexer.remove(index)
