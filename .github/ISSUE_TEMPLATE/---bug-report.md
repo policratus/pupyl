@@ -38,5 +38,8 @@ If applicable, add screenshots to help explain your problem.
 Please, on your report, tell us what version of `pupyl` the bug was found:
 - Version [e.g. 0.12.4]
 
+**Interaction activity**
+After you open a valid issue bug report, please maintain the thread active, meaning that you must interact with the developers to help solve the issue. If no interaction is detected after 7 days, the issue will be closed.
+
 **Additional context**
 Add any other context about the problem here.
