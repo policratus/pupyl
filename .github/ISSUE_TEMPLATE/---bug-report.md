@@ -34,5 +34,9 @@ If applicable, add screenshots to help explain your problem.
  - Browser [e.g. stock browser, safari]
  - Version [e.g. 22]
 
+**pupyl version**
+Please, on your report, tell us what version of `pupyl` the bug was found:
+- Version [e.g. 0.12.4]
+
 **Additional context**
 Add any other context about the problem here.
