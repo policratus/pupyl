@@ -85,7 +85,7 @@ Now, let's discuss each way of importing images:
 
       PUPYL.index(
         'https://github.com/policratus/pupyl'
-        '/raw/master/samples/images.tar.xz'
+        '/raw/main/samples/images.tar.xz'
       )
 
   where this method also supports ``http`` protocol. For local files, same
@@ -149,7 +149,7 @@ Now that you already :ref:`installed <installation>` ``pupyl`` and
 :ref:`indexed <indexing>` your own images, it's time to do some searches. For
 this example, please consider the following sample (``lzma`` compressed) remote
 ``tar`` file containing images:
-`<https://github.com/policratus/pupyl/raw/master/samples/images.tar.xz>`_. It
+`<https://github.com/policratus/pupyl/raw/main/samples/images.tar.xz>`_. It
 contains 709 ``jpg`` images (stored at ``pupyl``
 `github <https://github.com/policratus/pupyl>`_ repository). The
 example below will create ``pupyl`` database on your home folder, inside a
@@ -166,7 +166,7 @@ directory called ``pupyl``:
 
       PUPYL.index(
           'https://github.com/policratus/pupyl'
-          '/raw/master/samples/images.tar.xz'
+          '/raw/main/samples/images.tar.xz'
       )
 
 Searching is pretty simple, just needing to pick an image (local or remote) URI
