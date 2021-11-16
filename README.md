@@ -1,6 +1,6 @@
-![pupyl](https://raw.githubusercontent.com/policratus/pupyl/master/docs/pupyl.png)
+![pupyl](https://raw.githubusercontent.com/policratus/pupyl/main/docs/pupyl.png)
 ![pupyl-ci](https://github.com/policratus/pupyl/workflows/pupyl-ci/badge.svg)
-[![codecov](https://codecov.io/gh/policratus/pupyl/branch/master/graph/badge.svg)](https://codecov.io/gh/policratus/pupyl)
+[![codecov](https://codecov.io/gh/policratus/pupyl/branch/main/graph/badge.svg)](https://codecov.io/gh/policratus/pupyl)
 [![anaconda](https://anaconda.org/policratus/pupyl/badges/version.svg)](https://anaconda.org/policratus/pupyl/badges/version.svg)
 [![PyPI version](https://badge.fury.io/py/pupyl.svg)](https://badge.fury.io/py/pupyl)
 [![Documentation Status](https://readthedocs.org/projects/pupyl/badge/?version=latest)](https://pupyl.readthedocs.io/en/latest/?badge=latest)
@@ -45,7 +45,7 @@ SEARCH = PupylImageSearch()
 
 SEARCH.index(
     'https://github.com/policratus/pupyl'
-    '/raw/master/samples/images.tar.xz'
+    '/raw/main/samples/images.tar.xz'
 )
 
 # Using, for instance, a remote image. Local images has pretty faster results.

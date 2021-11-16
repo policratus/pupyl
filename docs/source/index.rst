@@ -1,5 +1,5 @@
 .. image::
-    https://raw.githubusercontent.com/policratus/pupyl/master/docs/pupyl.png
+    https://raw.githubusercontent.com/policratus/pupyl/main/docs/pupyl.png
     :width: 840
     :alt: pupyl :: A Python Image Search Library
 

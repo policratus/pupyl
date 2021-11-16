@@ -11,7 +11,7 @@ project = '🧿 pupyl'
 copyright = f'{datetime.today().year}, Nelson Forte'
 author = 'Nelson Forte'
 
-release = '0.12.4'
+release = '0.12.5'
 version = release
 
 # -- General configuration ---------------------------------------------------
