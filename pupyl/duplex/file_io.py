@@ -777,3 +777,14 @@ class FileIO(FileType):
         """
         with tarfile.open(dump_file) as dfile:
             dfile.extractall(output_dir)
+
+    @staticmethod
+    def extension(uri):
+        """Extract extension from ``uri``
+
+        Parameters
+        ----------
+        uri: str
+            URI to extract the file extension.
+        """
+        return os.path.splitext(uri)[-1]

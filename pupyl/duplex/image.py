@@ -6,11 +6,12 @@ from pupyl.verbosity import quiet_tf
 quiet_tf()
 
 import tensorflow
-from tensorflow import image as image_ops
+from numpy.random import choice
 from tensorflow import io as io_ops
+from tensorflow import image as image_ops
 
-from pupyl.duplex.exceptions import FileIsNotImage
 from pupyl.duplex.file_io import FileIO
+from pupyl.duplex.exceptions import FileIsNotImage
 
 
 class ImageIO(FileIO):
@@ -74,12 +75,15 @@ class ImageIO(FileIO):
             if as_tensor:
                 tensor = cls.encoded_to_tensor(bytess)
 
-                last_dimensions = tensor.get_shape()[-1]
+                if tensor.ndim == 4 and tensor.get_shape()[0] != 1:
+                    tensor = tensor[choice(tensor.get_shape()[0]), ::]
+                else:
+                    last_dimensions = tensor.get_shape()[-1]
 
-                if last_dimensions == 1:
-                    tensor = image_ops.grayscale_to_rgb(tensor)
-                elif last_dimensions == 4:
-                    tensor = io_ops.decode_png(bytess, channels=3)
+                    if last_dimensions == 1:
+                        tensor = image_ops.grayscale_to_rgb(tensor)
+                    elif last_dimensions == 4:
+                        tensor = io_ops.decode_png(bytess, channels=3)
 
                 tensor = tensorflow.dtypes.cast(
                     tensor,

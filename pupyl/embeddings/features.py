@@ -22,7 +22,7 @@ class Characteristics(Enum):
 
     Notes
     -----
-    The actual supported characteristics are:
+    The currently supported characteristics are:
 
     ``LIGHTWEIGHT_REGULAR_PRECISION # MobileNetV2``
 

@@ -217,6 +217,9 @@ class ImageDatabase(ImageIO):
         str:
             With the full path inside the database.
         """
+        if extension[0] == '.':
+            extension = extension[1:]
+
         return os.path.join(
             self._data_dir,
             str(self.what_bucket(index)),
@@ -282,7 +285,9 @@ class ImageDatabase(ImageIO):
             with open(result_file_name, 'w', encoding='utf-8') as json_file:
                 metadata = self.get_metadata(uri)
                 metadata['id'] = index
-                metadata['internal_path'] = self.mount_file_name(index, 'jpg')
+                metadata['internal_path'] = self.mount_file_name(
+                    index, self.extension(uri)
+                )
 
                 json.dump(metadata, json_file)
 
@@ -298,11 +303,16 @@ class ImageDatabase(ImageIO):
             Where the original file is located.
         """
         if self._import_images:
-            self.save_image(
-                self.mount_file_name(index, 'jpg'),
-                self.compress(
+            if self.extension(uri) != '.gif':
+                image = self.compress(
                     self.size(uri, new_size=self._image_size, keep_aspect=True)
                 )
+            else:
+                image = self.get_image(uri)
+
+            self.save_image(
+                self.mount_file_name(index, self.extension(uri)),
+                image
             )
 
         self.save_image_metadata(index, uri)
@@ -386,7 +396,7 @@ class ImageDatabase(ImageIO):
 
         for root, _, files in os.walk(self._data_dir):
             for ffile in files:
-                if os.path.splitext(ffile)[-1] == '.jpg':
+                if self.extension(ffile) in ('.jpg', '.gif'):
                     ffile = os.path.join(root, ffile)
 
                     if top:
