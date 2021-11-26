@@ -198,7 +198,9 @@ class PupylImageSearch:
                 futures = {
                     executor.submit(
                         self.extractor.extract,
-                        self.image_database.mount_file_name(rank, 'jpg')
+                        self.image_database.load_image_metadata(
+                            rank, filtered=['internal_path']
+                        )['internal_path']
                     ): rank
                     for rank in ranks
                 }
@@ -246,7 +248,9 @@ class PupylImageSearch:
                         self.image_database.insert(rank, uri_from_file)
 
                         embedding = extractor.extract(
-                            self.image_database.mount_file_name(rank, 'jpg')
+                            self.image_database.load_image_metadata(
+                                rank, filterd=['internal_path']
+                            )['internal_path']
                         )
 
                         indexer.append(embedding, check_unique=check_unique)

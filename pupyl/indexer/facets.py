@@ -611,10 +611,10 @@ class Index:
 
             try:
                 copyfile(
-                    self._image_database.mount_file_name(
+                    self._image_database.load_image_metadata(
                         item,
-                        'jpg'
-                    ),
+                        filtered=['internal_path']
+                    )['internal_path'],
                     os.path.join(
                         save_path,
                         'group.jpg'
@@ -625,17 +625,17 @@ class Index:
 
             for rank, similar in enumerate(similars):
 
-                original_file_path = self._image_database.mount_file_name(
+                original_file_path = self._image_database.load_image_metadata(
                     similar,
-                    'jpg'
-                )
+                    filtered=['internal_path']
+                )['internal_path']
 
                 try:
                     copyfile(
                         original_file_path,
                         os.path.join(
                             save_path,
-                            f'{rank + 1}.jpg'
+                            f'{rank + 1}{self.extension(original_file_path)}'
                         )
                     )
                 except FileNotFoundError:

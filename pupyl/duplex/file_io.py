@@ -57,7 +57,15 @@ class FileIO(FileType):
 
     @staticmethod
     def pupyl_temp_data_dir():
-        """Returns a safe data directory."""
+        """Returns the path of a temporary directory to store pupyl assets.
+
+        Returns
+        -------
+        str:
+            A path containing the underlying temporary directory, found in the
+            current operating system, added with a special directory for
+            saving pupyl assets.
+        """
         return os.path.join(
             tempfile.gettempdir(),
             'pupyl'

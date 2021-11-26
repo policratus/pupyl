@@ -217,8 +217,7 @@ class ImageDatabase(ImageIO):
         str:
             With the full path inside the database.
         """
-        if extension[0] == '.':
-            extension = extension[1:]
+        extension = extension[1:] if extension[0] == '.' else extension
 
         return os.path.join(
             self._data_dir,
@@ -338,7 +337,9 @@ class ImageDatabase(ImageIO):
         every image with index greater than 54 will have the ``id``
         decreased by one.
         """
-        image_path = self.mount_file_name(index, 'jpg')
+        image_path = self.load_image_metadata(
+            index, filtered=['internal_path']
+        )['internal_path']
         metadata_path = self.mount_file_name(index, 'json')
 
         os.remove(image_path)
@@ -350,8 +351,13 @@ class ImageDatabase(ImageIO):
             metadata_old_id = self.mount_file_name(old_id, 'json')
             metadata_new_id = self.mount_file_name(new_id, 'json')
 
-            image_old_id = self.mount_file_name(old_id, 'jpg')
-            image_new_id = self.mount_file_name(new_id, 'jpg')
+            image_old_id = self.load_image_metadata(
+                old_id, filtered=['internal_path']
+            )['internal_path']
+
+            image_new_id = self.load_image_metadata(
+                new_id, filtered=['internal_path']
+            )['internal_path']
 
             os.rename(image_old_id, image_new_id)
 
@@ -361,9 +367,7 @@ class ImageDatabase(ImageIO):
                 metadata = json.load(metadata_file)
 
                 metadata['id'] = new_id
-                metadata['internal_path'] = self.mount_file_name(
-                    new_id, 'jpg'
-                )
+                metadata['internal_path'] = image_new_id
 
                 metadata_file.seek(0)
                 json.dump(metadata, metadata_file)
@@ -434,4 +438,6 @@ class ImageDatabase(ImageIO):
             `numpy.ndarray` (`as_tensor=True`), containing
             image converted to its tensor representation.
         """
-        return self.get_image(self.mount_file_name(index, 'jpg'), as_tensor)
+        return self.get_image(self.load_image_metadata(
+            index, filtered=['internal_path'])['internal_path'], as_tensor
+        )
