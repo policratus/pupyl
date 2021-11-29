@@ -631,11 +631,15 @@ class Index:
                 )['internal_path']
 
                 try:
+                    file_extension = self._image_database.extension(
+                        original_file_path
+                    )
+
                     copyfile(
                         original_file_path,
                         os.path.join(
                             save_path,
-                            f'{rank + 1}{self.extension(original_file_path)}'
+                            f'{rank + 1}{file_extension}'
                         )
                     )
                 except FileNotFoundError:

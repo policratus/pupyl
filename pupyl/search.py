@@ -195,15 +195,18 @@ class PupylImageSearch:
             embeddings = numpy.empty((len(ranks), self.extractor.output_shape))
 
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                futures = {
-                    executor.submit(
-                        self.extractor.extract,
-                        self.image_database.load_image_metadata(
-                            rank, filtered=['internal_path']
-                        )['internal_path']
-                    ): rank
-                    for rank in ranks
-                }
+                try:
+                    futures = {
+                        executor.submit(
+                            self.extractor.extract,
+                            self.image_database.load_image_metadata(
+                                rank, filtered=['internal_path']
+                            )['internal_path']
+                        ): rank
+                        for rank in ranks
+                    }
+                except IndexError:
+                    raise FileIsNotImage('Please, check your input images.')
 
                 for future in self.extractor.progress(
                     concurrent.futures.as_completed(futures),

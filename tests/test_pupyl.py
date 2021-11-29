@@ -7,6 +7,7 @@ from urllib.error import URLError
 
 from pupyl.indexer.facets import Index
 from pupyl.search import PupylImageSearch
+from pupyl.duplex.exceptions import FileIsNotImage
 from pupyl.embeddings.features import Extractors, Characteristics
 
 
@@ -26,6 +27,13 @@ class TestCases(TestCase):
         """Unit test for method index, invalid url case."""
         with self.assertRaises(URLError):
             PUPYL.index(TEST_INVALID_URL)
+
+    def test_index_gaps(self):
+        """Unit test for method index, gaps in images case."""
+        with self.assertRaises(FileIsNotImage):
+            with TemporaryDirectory() as temp_dir:
+                pupyl_index_gaps = PupylImageSearch(data_dir=temp_dir)
+                pupyl_index_gaps.index(TEST_INDEX_INVALID)
 
 
 def test_index_no_config_file():
@@ -82,15 +90,6 @@ def test_index():
     assert os.path.isdir(TEST_DATA_DIR) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, 'pupyl.index')) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, '0', '0.jpg'))
-
-
-def test_index_gaps():
-    """Unit test for method index, gaps in images case."""
-    with TemporaryDirectory() as temp_dir:
-        pupyl_index_gaps = PupylImageSearch(data_dir=temp_dir)
-        pupyl_index_gaps.index(TEST_INDEX_INVALID)
-
-        assert len(pupyl_index_gaps.image_database) == 2
 
 
 def test_index_no_extreme_mode():

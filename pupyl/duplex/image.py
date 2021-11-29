@@ -6,7 +6,6 @@ from pupyl.verbosity import quiet_tf
 quiet_tf()
 
 import tensorflow
-from numpy.random import choice
 from tensorflow import io as io_ops
 from tensorflow import image as image_ops
 
@@ -76,7 +75,7 @@ class ImageIO(FileIO):
                 tensor = cls.encoded_to_tensor(bytess)
 
                 if tensor.ndim == 4 and tensor.get_shape()[0] != 1:
-                    tensor = tensor[choice(tensor.get_shape()[0]), ::]
+                    tensor = tensorflow.math.reduce_mean(tensor, axis=0)
                 else:
                     last_dimensions = tensor.get_shape()[-1]
 
