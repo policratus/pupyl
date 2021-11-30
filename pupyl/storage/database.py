@@ -340,7 +340,7 @@ class ImageDatabase(ImageIO):
         decreased by one.
         """
         image_path = self.load_image_metadata(
-            index, filtered=['internal_path']
+            len(self), filtered=['internal_path']
         )['internal_path']
         metadata_path = self.mount_file_name(index, 'json')
 
