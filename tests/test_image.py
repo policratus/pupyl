@@ -15,6 +15,7 @@ from pupyl.duplex.exceptions import FileIsNotImage
 TEST_LOCAL = abspath('tests/test_image.jpg')
 TEST_LOCAL_RBGA = abspath('tests/test_png.png')
 TEST_LOCAL_GRAY = abspath('tests/test_grayscale.jpg')
+TEST_LOCAL_GIF = abspath('tests/test_gif.gif')
 TEST_NOT_IMAGE = abspath('tests/not_image.jpg')
 TEST_SAVED_TENSOR = abspath('tests/compressed_image.npy')
 TEST_SIZE = (280, 260)
@@ -52,6 +53,11 @@ def test_get_image_as_tensor():
 
     assert isinstance(
         ImageIO.get_image(TEST_LOCAL_RBGA, as_tensor=True),
+        tensorflow.Tensor
+    )
+
+    assert isinstance(
+        ImageIO.get_image(TEST_LOCAL_GIF, as_tensor=True),
         tensorflow.Tensor
     )
 

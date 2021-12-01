@@ -12,7 +12,7 @@ import os
 import json
 import concurrent.futures
 
-import numpy
+from numpy import empty
 
 from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.exceptions import FileIsNotImage
@@ -192,7 +192,7 @@ class PupylImageSearch:
                 ):
                     ranks.append(futures[future])
 
-            embeddings = numpy.empty((len(ranks), self.extractor.output_shape))
+            embeddings = empty((len(ranks), self.extractor.output_shape))
 
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 try:
@@ -205,20 +205,16 @@ class PupylImageSearch:
                         ): rank
                         for rank in ranks
                     }
-                except IndexError:
-                    raise FileIsNotImage('Please, check your input images.')
+                except IndexError as index_error:
+                    raise FileIsNotImage('Please, check your input images.') \
+                        from index_error
 
                 for future in self.extractor.progress(
                     concurrent.futures.as_completed(futures),
                     precise=False,
                     message='Extracting features:'
                 ):
-                    try:
-                        embeddings[futures[future]] = future.result()
-                    except FileIsNotImage:
-                        embeddings[futures[future]] = numpy.full(
-                            self.extractor.output_shape, 255.
-                        )
+                    embeddings[futures[future]] = future.result()
 
             for embedding in self.extractor.progress(
                 embeddings,

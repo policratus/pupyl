@@ -1,6 +1,7 @@
 """Operations and storage for images."""
 
 import os
+from shutil import copy, move
 import json
 
 from pupyl.duplex.image import ImageIO
@@ -339,20 +340,10 @@ class ImageDatabase(ImageIO):
         every image with index greater than 54 will have the ``id``
         decreased by one.
         """
-        image_path = self.load_image_metadata(
-            len(self), filtered=['internal_path']
-        )['internal_path']
-        metadata_path = self.mount_file_name(index, 'json')
-
-        os.remove(image_path)
-        os.remove(metadata_path)
-
-        for old_id in range(index + 1, len(self) + 1):
+        for old_id in range(index + 1, len(self)):
             new_id = old_id - 1
 
-            metadata_old_id = self.mount_file_name(old_id, 'json')
-            metadata_new_id = self.mount_file_name(new_id, 'json')
-
+            # Renaming images first
             image_old_id = self.load_image_metadata(
                 old_id, filtered=['internal_path']
             )['internal_path']
@@ -361,10 +352,16 @@ class ImageDatabase(ImageIO):
                 new_id, filtered=['internal_path']
             )['internal_path']
 
-            os.rename(image_old_id, image_new_id)
+            move(image_old_id, image_new_id)
+
+            # Now, the metadata files
+            metadata_old_id = self.mount_file_name(old_id, 'json')
+            metadata_new_id = self.mount_file_name(new_id, 'json')
+
+            copy(metadata_old_id, metadata_new_id)
 
             with open(
-                metadata_old_id, 'r+', encoding='utf-8'
+                metadata_new_id, 'r+', encoding='utf-8'
             ) as metadata_file:
                 metadata = json.load(metadata_file)
 
@@ -374,7 +371,7 @@ class ImageDatabase(ImageIO):
                 metadata_file.seek(0)
                 json.dump(metadata, metadata_file)
 
-            os.rename(metadata_old_id, metadata_new_id)
+        os.remove(self.mount_file_name(len(self), 'json'))
 
     def list_images(self, return_ids=False, top=None):
         """Returns images on current database.

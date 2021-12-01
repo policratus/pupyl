@@ -2,7 +2,7 @@
 
 import os
 from warnings import warn as warning
-from shutil import move, copyfile
+from shutil import move, copy
 
 from annoy import AnnoyIndex
 
@@ -609,19 +609,16 @@ class Index:
                 exist_ok=True
             )
 
-            try:
-                copyfile(
-                    self._image_database.load_image_metadata(
-                        item,
-                        filtered=['internal_path']
-                    )['internal_path'],
-                    os.path.join(
-                        save_path,
-                        'group.jpg'
-                    )
+            copy(
+                self._image_database.load_image_metadata(
+                    item,
+                    filtered=['internal_path']
+                )['internal_path'],
+                os.path.join(
+                    save_path,
+                    'group.jpg'
                 )
-            except FileNotFoundError:
-                continue
+            )
 
             for rank, similar in enumerate(similars):
 
@@ -630,17 +627,14 @@ class Index:
                     filtered=['internal_path']
                 )['internal_path']
 
-                try:
-                    file_extension = self._image_database.extension(
-                        original_file_path
-                    )
+                file_extension = self._image_database.extension(
+                    original_file_path
+                )
 
-                    copyfile(
-                        original_file_path,
-                        os.path.join(
-                            save_path,
-                            f'{rank + 1}{file_extension}'
-                        )
+                copy(
+                    original_file_path,
+                    os.path.join(
+                        save_path,
+                        f'{rank + 1}{file_extension}'
                     )
-                except FileNotFoundError:
-                    continue
+                )
