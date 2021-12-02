@@ -15,7 +15,7 @@
 
 ## 🧿 pupyl what?
 
-The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform image search tasks. It's intended to made easy reading, indexing, retrieving and maintaining a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
+The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform image search tasks (even over animated GIFs). It's intended to make easy reading, indexing, retrieving and maintaining a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
 
 ## 🎉 Getting started
 ### 📦 Installation
@@ -37,6 +37,8 @@ You can call `pupyl`'s objects directly from your application code. For this exa
 
 ![@dlanor_s](https://images.unsplash.com/photo-1520763185298-1b434c919102?w=970&q=80)
 
+_`pupyl` also supports using [animated gifs](https://en.wikipedia.org/wiki/GIF#Animated_GIF) as query images and can store it too._
+
 ```Python
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
@@ -48,7 +50,7 @@ SEARCH.index(
     '/raw/main/samples/images.tar.xz'
 )
 
-# Using, for instance, a remote image. Local images has pretty faster results.
+# Using, for instance, a remote image. Local images have pretty faster results.
 QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=224&q=70'
 
 [*SEARCH.search(QUERY_IMAGE)]
@@ -117,7 +119,7 @@ See all dependencies here: [dependencies](https://github.com/policratus/pupyl/ne
 See a getting started guide and the API reference on [https://pupyl.readthedocs.io/](http://pupyl.rtfd.io/).
 
 ## 🖊️ Citation
-If you use `pupyl` on your publications or projects, please cite:
+If you use `pupyl` in your publications or projects, please cite:
 
 ```BibTeX
 @misc{pupyl,
