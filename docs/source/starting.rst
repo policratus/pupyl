@@ -10,25 +10,27 @@ even not knowing what is a)
 `python virtual environment <https://docs.python.org/3.8/tutorial/venv.html>`_,
 you just need to issue:
 
-*Installing from* `pypi <https://pypi.org/project/pupyl/>`_:
+*Installing from* `pypi <https://pypi.org/project/pupyl/>`_ *(stable versions)*:
 
 .. code-block:: shell
 
     pip install pupyl
 
-*Installing from* `anaconda <https://anaconda.org/policratus/pupyl>`_:
+*Installing from* `anaconda <https://anaconda.org/policratus/pupyl>`_ *(stable versions)*:
 
 .. code-block:: shell
 
     conda install -c policratus pupyl
 
-*Installing manually from* `github <https://github.com/policratus/pupyl>`_:
+*Installing manually from* `github <https://github.com/policratus/pupyl>`_ *(development versions)*:
 
 .. code-block:: shell
 
     git clone git@github.com:policratus/pupyl.git
     cd pupyl
     python setup.py install
+
+*If you encounter any installation issues, please go to* `troubleshooting <https://github.com/policratus/pupyl/blob/main/TROUBLESHOOTING.md>`_.
 
 .. _indexing:
 
@@ -268,7 +270,7 @@ this:
 interface, allowing you to interact with a created image database. This
 interface looks like this:
 
-.. image:: _static/pupylwebinterface.png
+.. image:: _static/pupylwebinterface.jpg
     :width: 840
     :alt: pupyl web interface
 
@@ -296,7 +298,7 @@ Finally, using the same picture described on the :ref:`searching <searching>`
 section and the database created on the section :ref:`indexing <indexing>`,
 let's search and check the results:
 
-.. image:: _static/pupylresults.png
+.. image:: _static/pupylresults.gif
     :width: 840
     :alt: pupyl web interface result
 
