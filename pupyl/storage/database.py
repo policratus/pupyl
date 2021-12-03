@@ -1,8 +1,8 @@
 """Operations and storage for images."""
 
 import os
-from shutil import copy, move
 import json
+from shutil import copy, move
 
 from pupyl.duplex.image import ImageIO
 
