@@ -38,9 +38,7 @@ class TestCases(TestCase):
 
 
 def test_get_image_as_tensor():
-    """
-    Unit test for get_image method, as_tensor optional parameter set
-    """
+    """Unit test for get_image method, as_tensor optional parameter set."""
     assert isinstance(
         ImageIO.get_image(TEST_LOCAL, as_tensor=True),
         tensorflow.Tensor
@@ -62,10 +60,18 @@ def test_get_image_as_tensor():
     )
 
 
+def test_mean_gif():
+    """Unit test for mean_gif method."""
+    assert ImageIO.mean_gif(TEST_LOCAL_GIF).ndim == 3
+
+
+def test_mean_gif_not_gif():
+    """Unit test for mean_gif method, not a gif file."""
+    assert ImageIO.mean_gif(TEST_LOCAL).ndim == 3
+
+
 def test_size_size():
-    """
-    Unit test for size method, return size case
-    """
+    """Unit test for size method, return size case."""
     assert ImageIO.size(TEST_LOCAL) == TEST_SIZE
 
 

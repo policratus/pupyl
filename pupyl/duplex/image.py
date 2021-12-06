@@ -74,15 +74,12 @@ class ImageIO(FileIO):
             if as_tensor:
                 tensor = cls.encoded_to_tensor(bytess)
 
-                if tensor.ndim == 4 and tensor.get_shape()[0] != 1:
-                    tensor = tensorflow.math.reduce_mean(tensor, axis=0)
-                else:
-                    last_dimensions = tensor.get_shape()[-1]
+                last_dimensions = tensor.get_shape()[-1]
 
-                    if last_dimensions == 1:
-                        tensor = image_ops.grayscale_to_rgb(tensor)
-                    elif last_dimensions == 4:
-                        tensor = io_ops.decode_png(bytess, channels=3)
+                if last_dimensions == 1:
+                    tensor = image_ops.grayscale_to_rgb(tensor)
+                elif last_dimensions == 4:
+                    tensor = io_ops.decode_png(bytess, channels=3)
 
                 tensor = tensorflow.dtypes.cast(
                     tensor,
@@ -94,6 +91,54 @@ class ImageIO(FileIO):
             return bytess
 
         raise FileIsNotImage(f'{uri} is not recognized as a valid image file.')
+
+    @classmethod
+    def is_animated_gif(cls, uri):
+        """Tests if the content is an animated GIF image.
+
+        Parameters
+        ----------
+        uri: str
+            Place where the animated GIF is stored.
+
+        Returns
+        -------
+        bool:
+            Describing if ``tensor`` represents a GIF animation or not.
+        """
+        tensor = cls.get_image(uri, as_tensor=True)
+
+        if tensor.ndim == 4 and tensor.get_shape()[0] != 1:
+            return True
+
+        return False
+
+    @classmethod
+    def mean_gif(cls, uri):
+        """Transforms an animated GIF to an static representation
+        (based on the mean image).
+
+        Parameters
+        ----------
+        uri: str
+            Place where the animated GIF is stored.
+
+        Returns
+        -------
+        numpy.ndarray:
+            A new representation for the GIF (animated) image.
+        """
+        if cls.is_animated_gif(uri):
+            return tensorflow.math.reduce_mean(
+                cls.get_image(uri, as_tensor=True),
+                axis=0
+            )
+
+        print(
+            f'File {uri} is not an animated gif. Returning image itself.'
+        )
+
+        return cls.get_image(uri, as_tensor=True)
 
     @classmethod
     def get_image_base64(cls, uri):

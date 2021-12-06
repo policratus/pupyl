@@ -305,12 +305,12 @@ class ImageDatabase(ImageIO):
             Where the original file is located.
         """
         if self._import_images:
-            if self.extension(uri) != '.gif':
+            if self.is_animated_gif(uri):
+                image = self.get_image(uri)
+            else:
                 image = self.compress(
                     self.size(uri, new_size=self._image_size, keep_aspect=True)
                 )
-            else:
-                image = self.get_image(uri)
 
             self.save_image(
                 self.mount_file_name(index, self.extension(uri)),
