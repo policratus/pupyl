@@ -21,6 +21,7 @@ TEST_INDEX_INVALID_FILE = os.path.join(TEST_INDEX_PATH, 'test_index')
 TEST_INDEX_EXPORT = os.path.join(TEST_INDEX_PATH, 'test_index_export')
 TEST_EMPTY_INDEX = os.path.join(TEST_INDEX_PATH, 'test_empty_index')
 TEST_CHECK_UNIQUE = os.path.join(TEST_INDEX_PATH, 'test_check_unique')
+TEST_ANIMATED_GIF = os.path.join(TEST_INDEX_PATH, 'test_gif.gif')
 TEST_VECTOR_SIZE = 128
 
 INDEX = Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH)
@@ -152,6 +153,13 @@ def test_items_values():
 
         assert test_item == method_item and \
             test_value == method_value
+
+
+def test_preprocessor_animated_gif():
+    """Unit test for method preprocessor, animated GIF case."""
+    with Extractors(Characteristics.HEAVYWEIGHT_HUGE_PRECISION) as extractors:
+        assert extractors.preprocessor(TEST_ANIMATED_GIF).shape == \
+            (1, 300, 400, 3)
 
 
 def test___get_item__():

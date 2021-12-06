@@ -222,13 +222,13 @@ class ImageIO(FileIO):
         Parameters
         ----------
         uri: str
-            Description of where the image are located
+            Description of where the image are located.
 
-        new_size: tuple
-            The new intended dimension of the image
+        new_size: tuple of ints
+            The new intended dimension of the image.
 
         keep_aspect: bool
-            If the image proportions should be preserved
+            If the image proportions should be preserved.
             or not.
 
         Returns
@@ -239,14 +239,35 @@ class ImageIO(FileIO):
             through.
         """
         if new_size:
-            return image_ops.resize(
+            return cls.resize_tensor(
                 cls.get_image(uri, as_tensor=True),
                 new_size,
-                method=image_ops.ResizeMethod.NEAREST_NEIGHBOR,
-                preserve_aspect_ratio=keep_aspect
+                keep_aspect=keep_aspect
             )
 
         return cls.get_image(uri, as_tensor=True).shape[:2]
+
+    @staticmethod
+    def resize_tensor(tensor, size, keep_aspect=False):
+        """Resize a tensor representing an image.
+
+        Parameters
+        ----------
+        tensor: numpy.ndarray
+            An image transformed to a raw tensor.
+
+        size: tuple of ints
+            The new size.
+
+        Returns
+        -------
+        numpy.ndarray
+            A resized tensor based on ``size`` parameter.
+        """
+        return image_ops.resize(
+            tensor, size, method=image_ops.ResizeMethod.LANCZOS5,
+            preserve_aspect_ratio=keep_aspect
+        )
 
     @classmethod
     def compress(cls, tensor, as_tensor=False):

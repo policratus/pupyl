@@ -212,10 +212,12 @@ class Extractors(ImageIO):
         numpy.ndarray
             Containing the processed image
         """
-        return numpy.expand_dims(
-            self.converter(self.size(uri, self.image_input_shape)),
-            axis=0
-        )
+        if self.is_animated_gif(uri):
+            tensor = self.mean_gif(uri)
+        else:
+            tensor = self.size(uri, self.image_input_shape)
+
+        return numpy.expand_dims(self.converter(tensor), axis=0)
 
     def extract(self, uri):
         """Converts image uri to its embeddings.
