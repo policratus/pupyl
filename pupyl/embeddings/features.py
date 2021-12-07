@@ -213,7 +213,9 @@ class Extractors(ImageIO):
             Containing the processed image
         """
         if self.is_animated_gif(uri):
-            tensor = self.mean_gif(uri)
+            tensor = self.resize_tensor(
+                self.mean_gif(uri), self.image_input_shape
+            )
         else:
             tensor = self.size(uri, self.image_input_shape)
 

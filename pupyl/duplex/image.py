@@ -265,7 +265,8 @@ class ImageIO(FileIO):
             A resized tensor based on ``size`` parameter.
         """
         return image_ops.resize(
-            tensor, size, method=image_ops.ResizeMethod.LANCZOS5,
+            tensor, size, method=image_ops.ResizeMethod.BILINEAR,
+            antialias=True,
             preserve_aspect_ratio=keep_aspect
         )
 

@@ -596,30 +596,30 @@ class FileIO(FileType):
         str:
             Paths of the already untarred files on the temporary directory.
         """
-        # Waiting to explicitly remove the temporary directory
-        with tempfile.TemporaryDirectory() as temp_dir:
+        # Won't explicitly remove the temporary directory
+        temp_dir = tempfile.TemporaryDirectory().name
 
-            inferred_protocol = cls._infer_protocol(uri)
+        inferred_protocol = cls._infer_protocol(uri)
 
-            if inferred_protocol is Protocols.FILE:
-                with tarfile.open(
-                    uri,
-                    file_reader.format(stream_type=':')
-                ) as tar_file:
-                    tar_file.extractall(temp_dir)
+        if inferred_protocol is Protocols.FILE:
+            with tarfile.open(
+                uri,
+                file_reader.format(stream_type=':')
+            ) as tar_file:
+                tar_file.extractall(temp_dir)
 
-            elif inferred_protocol is Protocols.HTTP:
+        elif inferred_protocol is Protocols.HTTP:
 
-                with urlopen(uri) as opened_url, tarfile.open(
-                    fileobj=opened_url,
-                    mode=file_reader.format(stream_type='|')
-                ) as tar_file:
-                    for member in cls.progress(tar_file):
-                        tar_file.extract(member, path=temp_dir)
+            with urlopen(uri) as opened_url, tarfile.open(
+                fileobj=opened_url,
+                mode=file_reader.format(stream_type='|')
+            ) as tar_file:
+                for member in cls.progress(tar_file):
+                    tar_file.extract(member, path=temp_dir)
 
-            for root, _, files in os.walk(temp_dir):
-                for ffile in files:
-                    yield os.path.join(root, ffile)
+        for root, _, files in os.walk(temp_dir):
+            for ffile in files:
+                yield os.path.join(root, ffile)
 
     @staticmethod
     def _get_terminal_size():
