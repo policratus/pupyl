@@ -597,7 +597,7 @@ class FileIO(FileType):
             Paths of the already untarred files on the temporary directory.
         """
         # Won't explicitly remove the temporary directory
-        temp_dir = tempfile.TemporaryDirectory().name
+        temp_dir = tempfile.mkdtemp()
 
         inferred_protocol = cls._infer_protocol(uri)
 
