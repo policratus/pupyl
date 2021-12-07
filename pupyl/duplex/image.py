@@ -6,11 +6,11 @@ from pupyl.verbosity import quiet_tf
 quiet_tf()
 
 import tensorflow
-from tensorflow import image as image_ops
 from tensorflow import io as io_ops
+from tensorflow import image as image_ops
 
-from pupyl.duplex.exceptions import FileIsNotImage
 from pupyl.duplex.file_io import FileIO
+from pupyl.duplex.exceptions import FileIsNotImage
 
 
 class ImageIO(FileIO):
@@ -91,6 +91,54 @@ class ImageIO(FileIO):
             return bytess
 
         raise FileIsNotImage(f'{uri} is not recognized as a valid image file.')
+
+    @classmethod
+    def is_animated_gif(cls, uri):
+        """Tests if the content is an animated GIF image.
+
+        Parameters
+        ----------
+        uri: str
+            Place where the animated GIF is stored.
+
+        Returns
+        -------
+        bool:
+            Describing if ``tensor`` represents a GIF animation or not.
+        """
+        tensor = cls.get_image(uri, as_tensor=True)
+
+        if tensor.ndim == 4 and tensor.get_shape()[0] != 1:
+            return True
+
+        return False
+
+    @classmethod
+    def mean_gif(cls, uri):
+        """Transforms an animated GIF to an static representation
+        (based on the mean image).
+
+        Parameters
+        ----------
+        uri: str
+            Place where the animated GIF is stored.
+
+        Returns
+        -------
+        numpy.ndarray:
+            A new representation for the GIF (animated) image.
+        """
+        if cls.is_animated_gif(uri):
+            return tensorflow.math.reduce_mean(
+                cls.get_image(uri, as_tensor=True),
+                axis=0
+            )
+
+        print(
+            f'File {uri} is not an animated gif. Returning image itself.'
+        )
+
+        return cls.get_image(uri, as_tensor=True)
 
     @classmethod
     def get_image_base64(cls, uri):
@@ -174,13 +222,13 @@ class ImageIO(FileIO):
         Parameters
         ----------
         uri: str
-            Description of where the image are located
+            Description of where the image are located.
 
-        new_size: tuple
-            The new intended dimension of the image
+        new_size: tuple of ints
+            The new intended dimension of the image.
 
         keep_aspect: bool
-            If the image proportions should be preserved
+            If the image proportions should be preserved.
             or not.
 
         Returns
@@ -191,14 +239,36 @@ class ImageIO(FileIO):
             through.
         """
         if new_size:
-            return image_ops.resize(
+            return cls.resize_tensor(
                 cls.get_image(uri, as_tensor=True),
                 new_size,
-                method=image_ops.ResizeMethod.NEAREST_NEIGHBOR,
-                preserve_aspect_ratio=keep_aspect
+                keep_aspect=keep_aspect
             )
 
         return cls.get_image(uri, as_tensor=True).shape[:2]
+
+    @staticmethod
+    def resize_tensor(tensor, size, keep_aspect=False):
+        """Resize a tensor representing an image.
+
+        Parameters
+        ----------
+        tensor: numpy.ndarray
+            An image transformed to a raw tensor.
+
+        size: tuple of ints
+            The new size.
+
+        Returns
+        -------
+        numpy.ndarray
+            A resized tensor based on ``size`` parameter.
+        """
+        return image_ops.resize(
+            tensor, size, method=image_ops.ResizeMethod.BILINEAR,
+            antialias=True,
+            preserve_aspect_ratio=keep_aspect
+        )
 
     @classmethod
     def compress(cls, tensor, as_tensor=False):

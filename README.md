@@ -10,12 +10,11 @@
 
 # pupyl - A Python Image Search Library
 
-![pupyl](https://user-images.githubusercontent.com/827563/133819347-f5b6b2f2-a4aa-4ec6-aa23-3dd81e46b857.gif)
-
+![pupyl](https://user-images.githubusercontent.com/827563/144621405-f844d848-7815-4c97-8afd-fe18034f3f5d.gif)
 
 ## 🧿 pupyl what?
 
-The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform image search tasks. It's intended to made easy reading, indexing, retrieving and maintaining a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
+The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform image search tasks (even over animated GIFs). It's intended to make easy reading, indexing, retrieving and maintaining a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
 
 ## 🎉 Getting started
 ### 📦 Installation
@@ -37,6 +36,8 @@ You can call `pupyl`'s objects directly from your application code. For this exa
 
 ![@dlanor_s](https://images.unsplash.com/photo-1520763185298-1b434c919102?w=970&q=80)
 
+_`pupyl` also supports using [animated gifs](https://en.wikipedia.org/wiki/GIF#Animated_GIF) as query images and can store and retrieve it too._
+
 ```Python
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
@@ -48,7 +49,7 @@ SEARCH.index(
     '/raw/main/samples/images.tar.xz'
 )
 
-# Using, for instance, a remote image. Local images has pretty faster results.
+# Using, for instance, a remote image. Local images have pretty faster results.
 QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=224&q=70'
 
 [*SEARCH.search(QUERY_IMAGE)]
@@ -56,7 +57,7 @@ QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=22
 This will return:
 ```Python
 # Here's the simplest possible result
-> [129, 685, 346, 524]
+> [486, 12, 203, 176]
 ```
 With more information and returning image metadata from the results:
 ```Python
@@ -67,20 +68,20 @@ Now an excerpt of the (possible) return is:
 ```Python
 [
     {
-        "id": 129,
-        "internal_path": "/tmp/pupyl/0/129.jpg",
-        "original_access_time": "2021-09-17T13:42:33",
-        "original_file_name": "517791629_f05c1518bd.jpg",
-        "original_file_size": "52K",
-        "original_path": "/tmp/tmpn6duarq6"
+        "id": 486,
+        "internal_path": "/tmp/pupyl/0/486.gif",
+        "original_access_time": "2021-12-03T13:23:47",
+        "original_file_name": "icegif-5690.gif",
+        "original_file_size": "261K",
+        "original_path": "/tmp/tmp3gdxlwr6"
     },
     {
-        "id": 685,
-        "internal_path": "/tmp/pupyl/0/685.jpg",
-        "original_access_time": "2021-09-17T13:42:34",
-        "original_file_name": "427954022_a072d55df9.jpg",
-        "original_file_size": "65K",
-        "original_path": "/tmp/tmpn6duarq6"
+        "id": 12,
+        "internal_path": "/tmp/pupyl/0/12.gif",
+        "original_access_time": "2021-12-03T13:23:46",
+        "original_file_name": "roses.gif",
+        "original_file_size": "1597K",
+        "original_path": "/tmp/tmp3gdxlwr6"
     },
     ...
 ]
@@ -92,7 +93,7 @@ interface.serve()
 ```
 A glimpse of the web interface, visualizing the results shown above:
 
-![web](https://pupyl.readthedocs.io/en/latest/_images/pupylresults.png)
+![web](https://pupyl.readthedocs.io/en/latest/_images/pupylresults.gif)
 
 _Disclaimer: the example above creates `pupyl` assets on your temporary directory. To define a non-volatile database, you should define `data_dir` parameter._
 
@@ -117,7 +118,7 @@ See all dependencies here: [dependencies](https://github.com/policratus/pupyl/ne
 See a getting started guide and the API reference on [https://pupyl.readthedocs.io/](http://pupyl.rtfd.io/).
 
 ## 🖊️ Citation
-If you use `pupyl` on your publications or projects, please cite:
+If you use `pupyl` in your publications or projects, please cite:
 
 ```BibTeX
 @misc{pupyl,

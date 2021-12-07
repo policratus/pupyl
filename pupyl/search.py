@@ -12,7 +12,7 @@ import os
 import json
 import concurrent.futures
 
-import numpy
+from numpy import empty
 
 from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.exceptions import FileIsNotImage
@@ -192,28 +192,29 @@ class PupylImageSearch:
                 ):
                     ranks.append(futures[future])
 
-            embeddings = numpy.empty((len(ranks), self.extractor.output_shape))
+            embeddings = empty((len(ranks), self.extractor.output_shape))
 
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                futures = {
-                    executor.submit(
-                        self.extractor.extract,
-                        self.image_database.mount_file_name(rank, 'jpg')
-                    ): rank
-                    for rank in ranks
-                }
+                try:
+                    futures = {
+                        executor.submit(
+                            self.extractor.extract,
+                            self.image_database.load_image_metadata(
+                                rank, filtered=['internal_path']
+                            )['internal_path']
+                        ): rank
+                        for rank in ranks
+                    }
+                except IndexError as index_error:
+                    raise FileIsNotImage('Please, check your input images.') \
+                        from index_error
 
                 for future in self.extractor.progress(
                     concurrent.futures.as_completed(futures),
                     precise=False,
                     message='Extracting features:'
                 ):
-                    try:
-                        embeddings[futures[future]] = future.result()
-                    except FileIsNotImage:
-                        embeddings[futures[future]] = numpy.full(
-                            self.extractor.output_shape, 255.
-                        )
+                    embeddings[futures[future]] = future.result()
 
             for embedding in self.extractor.progress(
                 embeddings,
@@ -246,7 +247,9 @@ class PupylImageSearch:
                         self.image_database.insert(rank, uri_from_file)
 
                         embedding = extractor.extract(
-                            self.image_database.mount_file_name(rank, 'jpg')
+                            self.image_database.load_image_metadata(
+                                rank, filterd=['internal_path']
+                            )['internal_path']
                         )
 
                         indexer.append(embedding, check_unique=check_unique)

@@ -57,7 +57,15 @@ class FileIO(FileType):
 
     @staticmethod
     def pupyl_temp_data_dir():
-        """Returns a safe data directory."""
+        """Returns the path of a temporary directory to store pupyl assets.
+
+        Returns
+        -------
+        str:
+            A path containing the underlying temporary directory, found in the
+            current operating system, added with a special directory for
+            saving pupyl assets.
+        """
         return os.path.join(
             tempfile.gettempdir(),
             'pupyl'
@@ -588,30 +596,30 @@ class FileIO(FileType):
         str:
             Paths of the already untarred files on the temporary directory.
         """
-        # Waiting to explicitly remove the temporary directory
-        with tempfile.TemporaryDirectory() as temp_dir:
+        # Won't explicitly remove the temporary directory
+        temp_dir = tempfile.mkdtemp()
 
-            inferred_protocol = cls._infer_protocol(uri)
+        inferred_protocol = cls._infer_protocol(uri)
 
-            if inferred_protocol is Protocols.FILE:
-                with tarfile.open(
-                    uri,
-                    file_reader.format(stream_type=':')
-                ) as tar_file:
-                    tar_file.extractall(temp_dir)
+        if inferred_protocol is Protocols.FILE:
+            with tarfile.open(
+                uri,
+                file_reader.format(stream_type=':')
+            ) as tar_file:
+                tar_file.extractall(temp_dir)
 
-            elif inferred_protocol is Protocols.HTTP:
+        elif inferred_protocol is Protocols.HTTP:
 
-                with urlopen(uri) as opened_url, tarfile.open(
-                    fileobj=opened_url,
-                    mode=file_reader.format(stream_type='|')
-                ) as tar_file:
-                    for member in cls.progress(tar_file):
-                        tar_file.extract(member, path=temp_dir)
+            with urlopen(uri) as opened_url, tarfile.open(
+                fileobj=opened_url,
+                mode=file_reader.format(stream_type='|')
+            ) as tar_file:
+                for member in cls.progress(tar_file):
+                    tar_file.extract(member, path=temp_dir)
 
-            for root, _, files in os.walk(temp_dir):
-                for ffile in files:
-                    yield os.path.join(root, ffile)
+        for root, _, files in os.walk(temp_dir):
+            for ffile in files:
+                yield os.path.join(root, ffile)
 
     @staticmethod
     def _get_terminal_size():
@@ -777,3 +785,14 @@ class FileIO(FileType):
         """
         with tarfile.open(dump_file) as dfile:
             dfile.extractall(output_dir)
+
+    @staticmethod
+    def extension(uri):
+        """Extract extension from ``uri``
+
+        Parameters
+        ----------
+        uri: str
+            URI to extract the file extension.
+        """
+        return os.path.splitext(uri)[-1]

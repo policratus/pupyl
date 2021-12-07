@@ -178,6 +178,19 @@ def test_insert_import_images():
         and exists(f'{TEST_TEMP_DIRECTORY}/0/10.json')
 
 
+def test_insert_import_images_gif():
+    """Unit test for method insert, import gif images case."""
+    image_database = ImageDatabase(
+        data_dir=TEST_TEMP_DIRECTORY,
+        import_images=True
+    )
+
+    image_database.insert(11, 'tests/test_gif.gif')
+
+    assert exists(f'{TEST_TEMP_DIRECTORY}/0/11.gif') \
+        and exists(f'{TEST_TEMP_DIRECTORY}/0/11.json')
+
+
 def test_insert_no_import_images():
     """Unit test for method insert, no import images case."""
     image_database = ImageDatabase(

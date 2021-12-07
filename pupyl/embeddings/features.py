@@ -22,7 +22,7 @@ class Characteristics(Enum):
 
     Notes
     -----
-    The actual supported characteristics are:
+    The currently supported characteristics are:
 
     ``LIGHTWEIGHT_REGULAR_PRECISION # MobileNetV2``
 
@@ -156,10 +156,11 @@ class Extractors(ImageIO):
         weights = 'imagenet'
         pooling = 'max'
         include_top = False
-        input_shape = (224, 224, 3)
 
         if self._characteristics is \
                 Characteristics.LIGHTWEIGHT_REGULAR_PRECISION:
+            input_shape = (224, 224, 3)
+
             return networks.mobilenet_v2.preprocess_input, \
                 networks.mobilenet_v2.MobileNetV2(
                     weights=weights,
@@ -170,6 +171,8 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.MEDIUMWEIGHT_GOOD_PRECISION:
+            input_shape = (224, 224, 3)
+
             return networks.densenet.preprocess_input, \
                 networks.densenet.DenseNet169(
                     weights=weights,
@@ -180,6 +183,8 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.HEAVYWEIGHT_HUGE_PRECISION:
+            input_shape = (600, 600, 3)
+
             return networks.efficientnet.preprocess_input, \
                 networks.efficientnet.EfficientNetB7(
                     weights=weights,
@@ -207,10 +212,14 @@ class Extractors(ImageIO):
         numpy.ndarray
             Containing the processed image
         """
-        return numpy.expand_dims(
-            self.converter(self.size(uri, self.image_input_shape)),
-            axis=0
-        )
+        if self.is_animated_gif(uri):
+            tensor = self.resize_tensor(
+                self.mean_gif(uri), self.image_input_shape
+            )
+        else:
+            tensor = self.size(uri, self.image_input_shape)
+
+        return numpy.expand_dims(self.converter(tensor), axis=0)
 
     def extract(self, uri):
         """Converts image uri to its embeddings.

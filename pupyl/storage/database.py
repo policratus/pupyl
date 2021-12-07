@@ -2,6 +2,7 @@
 
 import os
 import json
+from shutil import copy, move
 
 from pupyl.duplex.image import ImageIO
 
@@ -217,6 +218,8 @@ class ImageDatabase(ImageIO):
         str:
             With the full path inside the database.
         """
+        extension = extension[1:] if extension[0] == '.' else extension
+
         return os.path.join(
             self._data_dir,
             str(self.what_bucket(index)),
@@ -260,7 +263,9 @@ class ImageDatabase(ImageIO):
                 return metadata
 
         except FileNotFoundError:
-            raise IndexError from FileNotFoundError
+            raise IndexError(
+                f'Index not found: {index}'
+            ) from FileNotFoundError
 
     def save_image_metadata(self, index, uri):
         """Stores image metadata information retrieved from the file.
@@ -282,7 +287,9 @@ class ImageDatabase(ImageIO):
             with open(result_file_name, 'w', encoding='utf-8') as json_file:
                 metadata = self.get_metadata(uri)
                 metadata['id'] = index
-                metadata['internal_path'] = self.mount_file_name(index, 'jpg')
+                metadata['internal_path'] = self.mount_file_name(
+                    index, self.extension(uri)
+                )
 
                 json.dump(metadata, json_file)
 
@@ -298,11 +305,16 @@ class ImageDatabase(ImageIO):
             Where the original file is located.
         """
         if self._import_images:
-            self.save_image(
-                self.mount_file_name(index, 'jpg'),
-                self.compress(
+            if self.is_animated_gif(uri):
+                image = self.get_image(uri)
+            else:
+                image = self.compress(
                     self.size(uri, new_size=self._image_size, keep_aspect=True)
                 )
+
+            self.save_image(
+                self.mount_file_name(index, self.extension(uri)),
+                image
             )
 
         self.save_image_metadata(index, uri)
@@ -328,37 +340,38 @@ class ImageDatabase(ImageIO):
         every image with index greater than 54 will have the ``id``
         decreased by one.
         """
-        image_path = self.mount_file_name(index, 'jpg')
-        metadata_path = self.mount_file_name(index, 'json')
-
-        os.remove(image_path)
-        os.remove(metadata_path)
-
-        for old_id in range(index + 1, len(self) + 1):
+        for old_id in range(index + 1, len(self)):
             new_id = old_id - 1
 
+            # Renaming images first
+            image_old_id = self.load_image_metadata(
+                old_id, filtered=['internal_path']
+            )['internal_path']
+
+            image_new_id = self.load_image_metadata(
+                new_id, filtered=['internal_path']
+            )['internal_path']
+
+            move(image_old_id, image_new_id)
+
+            # Now, the metadata files
             metadata_old_id = self.mount_file_name(old_id, 'json')
             metadata_new_id = self.mount_file_name(new_id, 'json')
 
-            image_old_id = self.mount_file_name(old_id, 'jpg')
-            image_new_id = self.mount_file_name(new_id, 'jpg')
-
-            os.rename(image_old_id, image_new_id)
+            copy(metadata_old_id, metadata_new_id)
 
             with open(
-                metadata_old_id, 'r+', encoding='utf-8'
+                metadata_new_id, 'r+', encoding='utf-8'
             ) as metadata_file:
                 metadata = json.load(metadata_file)
 
                 metadata['id'] = new_id
-                metadata['internal_path'] = self.mount_file_name(
-                    new_id, 'jpg'
-                )
+                metadata['internal_path'] = image_new_id
 
                 metadata_file.seek(0)
                 json.dump(metadata, metadata_file)
 
-            os.rename(metadata_old_id, metadata_new_id)
+        os.remove(self.mount_file_name(len(self), 'json'))
 
     def list_images(self, return_ids=False, top=None):
         """Returns images on current database.
@@ -386,7 +399,7 @@ class ImageDatabase(ImageIO):
 
         for root, _, files in os.walk(self._data_dir):
             for ffile in files:
-                if os.path.splitext(ffile)[-1] == '.jpg':
+                if self.extension(ffile) in ('.jpg', '.gif'):
                     ffile = os.path.join(root, ffile)
 
                     if top:
@@ -424,4 +437,6 @@ class ImageDatabase(ImageIO):
             `numpy.ndarray` (`as_tensor=True`), containing
             image converted to its tensor representation.
         """
-        return self.get_image(self.mount_file_name(index, 'jpg'), as_tensor)
+        return self.get_image(self.load_image_metadata(
+            index, filtered=['internal_path'])['internal_path'], as_tensor
+        )

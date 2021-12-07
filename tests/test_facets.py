@@ -11,6 +11,7 @@ from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
     NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
     NullTensorError, TopNegativeOrZero, EmptyIndexError
 from pupyl.duplex.file_io import FileIO
+from pupyl.search import PupylImageSearch
 from pupyl.embeddings.features import Extractors, Characteristics
 
 
@@ -20,6 +21,7 @@ TEST_INDEX_INVALID_FILE = os.path.join(TEST_INDEX_PATH, 'test_index')
 TEST_INDEX_EXPORT = os.path.join(TEST_INDEX_PATH, 'test_index_export')
 TEST_EMPTY_INDEX = os.path.join(TEST_INDEX_PATH, 'test_empty_index')
 TEST_CHECK_UNIQUE = os.path.join(TEST_INDEX_PATH, 'test_check_unique')
+TEST_ANIMATED_GIF = os.path.join(TEST_INDEX_PATH, 'test_gif.gif')
 TEST_VECTOR_SIZE = 128
 
 INDEX = Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH)
@@ -151,6 +153,13 @@ def test_items_values():
 
         assert test_item == method_item and \
             test_value == method_value
+
+
+def test_preprocessor_animated_gif():
+    """Unit test for method preprocessor, animated GIF case."""
+    with Extractors(Characteristics.HEAVYWEIGHT_HUGE_PRECISION) as extractors:
+        assert extractors.preprocessor(TEST_ANIMATED_GIF).shape == \
+            (1, 600, 600, 3)
 
 
 def test___get_item__():
@@ -370,35 +379,37 @@ def test_export_group_by():
     """Unit test for method export_group_by method."""
     test_vector_size = 2560
 
-    test_files = set(f'{fname}.jpg' for fname in range(16))
-    test_files.add('group.jpg')
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_search = PupylImageSearch(temp_dir)
+        test_search.index(TEST_INDEX_EXPORT)
 
-    with Index(test_vector_size, data_dir=TEST_INDEX_EXPORT) as index:
-        for _ in range(8):
-            index.append(numpy.random.normal(size=test_vector_size))
+        with tempfile.TemporaryDirectory() as new_temp_dir:
+            with Index(test_vector_size, data_dir=temp_dir) as index:
+                index.export_by_group_by(new_temp_dir)
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            index.export_by_group_by(temp_dir)
-
-            for _, _, files in os.walk(temp_dir):
-                for ffile in files:
-                    assert ffile in test_files
+                assert os.path.exists(os.path.join(new_temp_dir, '0', '1.jpg'))
+                assert os.path.exists(
+                    os.path.join(new_temp_dir, '0', 'group.jpg')
+                )
+                assert os.path.exists(os.path.join(new_temp_dir, '1', '1.jpg'))
+                assert os.path.exists(
+                    os.path.join(new_temp_dir, '1', 'group.jpg')
+                )
 
 
 def test_export_group_by_position():
     """Unit test for method export_group_by method, position case."""
     test_vector_size = 2560
 
-    test_files = set(f'{fname}.jpg' for fname in range(16))
-    test_files.add('group.jpg')
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_search = PupylImageSearch(temp_dir)
+        test_search.index(TEST_INDEX_EXPORT)
 
-    with Index(test_vector_size, data_dir=TEST_INDEX_EXPORT) as index:
-        for _ in range(2):
-            index.append(numpy.random.normal(size=test_vector_size))
+        with tempfile.TemporaryDirectory() as new_temp_dir:
+            with Index(test_vector_size, data_dir=temp_dir) as index:
+                index.export_by_group_by(new_temp_dir, position=1)
 
-        with tempfile.TemporaryDirectory() as temp_dir:
-            index.export_by_group_by(temp_dir, top=1, position=0)
-
-            for _, _, files in os.walk(temp_dir):
-                for ffile in files:
-                    assert ffile in test_files
+                assert os.path.exists(os.path.join(new_temp_dir, '1', '1.jpg'))
+                assert os.path.exists(
+                    os.path.join(new_temp_dir, '1', 'group.jpg')
+                )

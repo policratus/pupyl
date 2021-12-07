@@ -1,12 +1,13 @@
 """Unit tests for main module pupyl."""
 import os
 import json
-from tempfile import gettempdir, TemporaryDirectory
 from unittest import TestCase
 from urllib.error import URLError
+from tempfile import gettempdir, TemporaryDirectory
 
 from pupyl.indexer.facets import Index
 from pupyl.search import PupylImageSearch
+from pupyl.duplex.exceptions import FileIsNotImage
 from pupyl.embeddings.features import Extractors, Characteristics
 
 
@@ -26,6 +27,13 @@ class TestCases(TestCase):
         """Unit test for method index, invalid url case."""
         with self.assertRaises(URLError):
             PUPYL.index(TEST_INVALID_URL)
+
+    def test_index_gaps(self):
+        """Unit test for method index, gaps in images case."""
+        with self.assertRaises(FileIsNotImage):
+            with TemporaryDirectory() as temp_dir:
+                pupyl_index_gaps = PupylImageSearch(data_dir=temp_dir)
+                pupyl_index_gaps.index(TEST_INDEX_INVALID)
 
 
 def test_index_no_config_file():
@@ -84,15 +92,6 @@ def test_index():
         os.path.isfile(os.path.join(TEST_DATA_DIR, '0', '0.jpg'))
 
 
-def test_index_gaps():
-    """Unit test for method index, gaps in images case."""
-    with TemporaryDirectory() as temp_dir:
-        pupyl_index_gaps = PupylImageSearch(data_dir=temp_dir)
-        pupyl_index_gaps.index(TEST_INDEX_INVALID)
-
-        assert len(pupyl_index_gaps.image_database) == 2
-
-
 def test_index_no_extreme_mode():
     """Unit test for method index, non extreme mode case."""
     pupyl_non_extreme = PupylImageSearch(
@@ -144,31 +143,42 @@ def test_search_non_extreme_mode():
 
 def test_search_returning_metadata():
     """Unit test for method search, returning image metadata case."""
-    test_results = [*PUPYL.search(
-        TEST_QUERY_IMAGE,
-        top=1,
-        return_metadata=True
-    )][0]
+    with TemporaryDirectory() as temp_dir:
+        test_pupyl = PupylImageSearch(temp_dir)
+        test_pupyl.index(TEST_SCAN_DIR)
 
-    del test_results['original_access_time']
+        test_results = [*test_pupyl.search(
+            TEST_QUERY_IMAGE,
+            top=1,
+            return_metadata=True
+        )][0]
 
-    assert isinstance(test_results, dict)
+        del test_results['original_access_time']
+
+        assert isinstance(test_results, dict)
 
 
 def test_remove():
     """Unit test for method remove."""
     index_to_remove = 0
 
-    length_indexer_before = len(PUPYL.indexer)
-    length_image_database_before = len(PUPYL.image_database)
+    with TemporaryDirectory() as temp_dir:
+        test_pupyl = PupylImageSearch(temp_dir)
 
-    PUPYL.remove(index_to_remove)
+        test_pupyl.index(TEST_SCAN_DIR)
 
-    length_indexer_after = len(PUPYL.indexer)
-    length_image_database_after = len(PUPYL.image_database)
+        print([*os.listdir(os.path.join(temp_dir, '0'))])
 
-    assert length_indexer_after == length_indexer_before - 1
-    assert length_image_database_after == length_image_database_before - 1
+        length_indexer_before = len(test_pupyl.indexer)
+        length_image_database_before = len(test_pupyl.image_database)
+
+        test_pupyl.remove(index_to_remove)
+
+        length_indexer_after = len(test_pupyl.indexer)
+        length_image_database_after = len(test_pupyl.image_database)
+
+        assert length_indexer_after == length_indexer_before - 1
+        assert length_image_database_after == length_image_database_before - 1
 
 
 def test_remove_non_extreme():
