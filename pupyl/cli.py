@@ -1,8 +1,11 @@
 """ Manage cli arguments"""
 
 import os
+import json
 import argparse
 from pathlib import Path
+
+import termcolor
 
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
@@ -41,13 +44,27 @@ class PupylCommandLineInterface:
         index_parser = sub_parsers.add_parser(
             'index', help='indexes images into database'
         )
-
         index_parser.add_argument(
             'input_images', help='data directory for image files'
         )
 
         sub_parsers.add_parser(
             'serve', help='creates a web service to interact with database'
+        )
+
+        search_parser = sub_parsers.add_parser(
+            'search', help='search inside a database for similar images.'
+        )
+        search_parser.add_argument(
+            'query', help='URI of an image to use as query.'
+        )
+        search_parser.add_argument(
+            '--top', type=int, default=10,
+            help='filter how many results to show.'
+        )
+        search_parser.add_argument(
+            '--metadata', action='store_true',
+            help='returns metadata instead of image ids.'
         )
 
         parser.add_argument(
@@ -90,8 +107,13 @@ def pupyl():
 
     if args.data_dir == PUPYL_HOME_FOLDER and args.sub_parser_name:
         print(
-            "Since the argument --data_dir wasn't filled, "
-            f'creating pupyl assets on {args.data_dir}'
+            termcolor.colored(
+                "Since the argument --data_dir wasn't filled,",
+                color='cyan'
+            ),
+            termcolor.colored(
+                f'creating pupyl assets on {args.data_dir}', color='cyan'
+            )
         )
 
     pupyl_search = PupylImageSearch(data_dir=args.data_dir)
@@ -100,7 +122,22 @@ def pupyl():
         pupyl_search.index(
             args.input_images
         )
+
     elif args.sub_parser_name == 'serve':
         interface.serve(data_dir=args.data_dir)
+
+    elif args.sub_parser_name == 'search':
+        for result in pupyl_search.search(
+            query=args.query, return_metadata=args.metadata
+        ):
+            if isinstance(result, dict):
+                print(
+                    termcolor.colored(
+                        json.dumps(result, indent=4), color='green'
+                    )
+                )
+            else:
+                print(termcolor.colored(result, color='green'))
+
     else:
         cli.parsers().print_help()
