@@ -6,13 +6,13 @@ from shutil import move, copy
 
 from annoy import AnnoyIndex
 
+from pupyl.duplex.file_io import FileIO
+from pupyl.addendum.operators import intmul
+from pupyl.storage.database import ImageDatabase
 from pupyl.indexer.exceptions import FileIsNotAnIndex, \
     IndexNotBuildYet, NoDataDirForPermanentIndex, \
     DataDirDefinedForVolatileIndex, NullTensorError, \
     TopNegativeOrZero, EmptyIndexError
-from pupyl.addendum.operators import intmul
-from pupyl.duplex.file_io import FileIO
-from pupyl.storage.database import ImageDatabase
 
 
 class Index:
@@ -573,7 +573,7 @@ class Index:
             )
 
     def export_by_group_by(self, path, top=10, **kwargs):
-        """Export images, creating directories based on their groups.
+        """Export images, grouping them by similarity.
 
         Parameters
         ----------
@@ -599,42 +599,48 @@ class Index:
                 item = kwargs['position']
                 similars = element
 
-            save_path = os.path.join(
-                path,
-                str(item)
-            )
+            save_path = os.path.join(path, str(item))
 
-            os.makedirs(
-                save_path,
-                exist_ok=True
-            )
+            os.makedirs(save_path, exist_ok=True)
 
             copy(
                 self._image_database.load_image_metadata(
                     item,
                     filtered=['internal_path']
                 )['internal_path'],
-                os.path.join(
-                    save_path,
-                    'group.jpg'
-                )
+                os.path.join(save_path, 'group.jpg')
             )
 
-            for rank, similar in enumerate(similars):
+            self.export_results(save_path, similars)
 
-                original_file_path = self._image_database.load_image_metadata(
-                    similar,
-                    filtered=['internal_path']
-                )['internal_path']
+    def export_results(self, path, similars):
+        """Export internal image at ``position`` by copying it to ``path``.
 
-                file_extension = self._image_database.extension(
-                    original_file_path
+        Parameters
+        ----------
+        path: str
+            Place where to export the images.
+
+        similars: iterable
+            Containing image ids to export to ``path``.
+        """
+        os.makedirs(path, exist_ok=True)
+
+        for rank, similar in enumerate(similars):
+
+            original_file_path = self._image_database.load_image_metadata(
+                similar,
+                filtered=['internal_path']
+            )['internal_path']
+
+            file_extension = self._image_database.extension(
+                original_file_path
+            )
+
+            copy(
+                original_file_path,
+                os.path.join(
+                    path,
+                    f'{rank + 1}{file_extension}'
                 )
-
-                copy(
-                    original_file_path,
-                    os.path.join(
-                        save_path,
-                        f'{rank + 1}{file_extension}'
-                    )
-                )
+            )
