@@ -59,7 +59,7 @@ class PupylCommandLineInterface:
 
         sub_parsers.add_parser(
             'serve',
-            help='creates a web service to interact with the database.'
+            help='creates a web interface to interact with the database.'
         )
 
         # Search parser
