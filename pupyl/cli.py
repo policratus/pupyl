@@ -35,7 +35,7 @@ class PupylCommandLineInterface:
             own (millions of) images and find similar images in milliseconds.
             """,
             epilog="""
-            👥 Contribute to pupyl on https://github.com/policratus/pupyl'
+            👥 Contribute to pupyl on https://github.com/policratus/pupyl
             """
         )
 
