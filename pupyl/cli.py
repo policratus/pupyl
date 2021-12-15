@@ -1,8 +1,11 @@
 """ Manage cli arguments"""
 
 import os
+import json
 import argparse
 from pathlib import Path
+
+import termcolor
 
 from pupyl.search import PupylImageSearch
 from pupyl.web import interface
@@ -32,29 +35,65 @@ class PupylCommandLineInterface:
             own (millions of) images and find similar images in milliseconds.
             """,
             epilog="""
-            👥 Contribute to pupyl on https://github.com/policratus/pupyl'
+            👥 Contribute to pupyl on https://github.com/policratus/pupyl
             """
-        )
-
-        sub_parsers = parser.add_subparsers(dest='sub_parser_name')
-
-        index_parser = sub_parsers.add_parser(
-            'index', help='indexes images into database'
-        )
-
-        index_parser.add_argument(
-            'input_images', help='data directory for image files'
-        )
-
-        sub_parsers.add_parser(
-            'serve', help='creates a web service to interact with database'
         )
 
         parser.add_argument(
             '--data_dir',
             type=str,
             default=PUPYL_HOME_FOLDER,
-            help='data directory for database assets'
+            help='data directory for database assets.'
+        )
+
+        sub_parsers = parser.add_subparsers(dest='options')
+
+        # Index parser
+        index_parser = sub_parsers.add_parser(
+            'index', help='indexes images into the database.'
+        )
+        index_parser.add_argument(
+            'input_images',
+            help='data directory containing image files to index.'
+        )
+
+        sub_parsers.add_parser(
+            'serve',
+            help='creates a web interface to interact with the database.'
+        )
+
+        # Search parser
+        search_parser = sub_parsers.add_parser(
+            'search', help='search inside a database for similar images.'
+        )
+        search_parser.add_argument(
+            'query', help='URI of an image to use as query.'
+        )
+        search_parser.add_argument(
+            '--top', type=int, default=10, metavar='n',
+            help='filters how many results to show.'
+        )
+        search_parser.add_argument(
+            '--metadata', action='store_true',
+            help='returns metadata instead of image ids.'
+        )
+
+        # Export parser
+        export_parser = sub_parsers.add_parser(
+            'export',
+            help='search inside database, but export result files to a '
+            'directory.'
+        )
+        export_parser.add_argument(
+            'query',
+            help='URI of an image to use as query.'
+        )
+        export_parser.add_argument(
+            'output', help='directory to export search results as images.'
+        )
+        export_parser.add_argument(
+            '--top', type=int, default=10, metavar='n',
+            help='filters how many results to show.'
         )
 
         return parser
@@ -88,19 +127,43 @@ def pupyl():
     cli = PupylCommandLineInterface()
     args = cli.argument_parser()
 
-    if args.data_dir == PUPYL_HOME_FOLDER and args.sub_parser_name:
+    if args.data_dir == PUPYL_HOME_FOLDER and args.options:
         print(
-            "Since the argument --data_dir wasn't filled, "
-            f'creating pupyl assets on {args.data_dir}'
+            termcolor.colored(
+                "Since the argument --data_dir wasn't filled,",
+                color='cyan'
+            ),
+            termcolor.colored(
+                f'creating pupyl assets on {args.data_dir}', color='cyan'
+            )
         )
 
     pupyl_search = PupylImageSearch(data_dir=args.data_dir)
 
-    if args.sub_parser_name == 'index':
+    if args.options == 'index':
         pupyl_search.index(
             args.input_images
         )
-    elif args.sub_parser_name == 'serve':
+
+    elif args.options == 'serve':
         interface.serve(data_dir=args.data_dir)
+
+    elif args.options == 'search':
+        for result in pupyl_search.search(
+            query=args.query, return_metadata=args.metadata, top=args.top
+        ):
+            if isinstance(result, dict):
+                print(
+                    termcolor.colored(
+                        json.dumps(result, indent=4), color='green'
+                    )
+                )
+            else:
+                print(termcolor.colored(result, color='green'))
+
+    elif args.options == 'export':
+        pupyl_search.indexer.export_results(
+            args.output, pupyl_search.search(args.query, top=args.top)
+        )
     else:
         cli.parsers().print_help()

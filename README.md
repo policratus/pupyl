@@ -107,6 +107,9 @@ pupyl --data_dir /path/to/your/data/dir index /path/to/images/
 
 # Opening web interface
 pupyl --data_dir /path/to/your/data/dir serve
+
+# Searching using command line interface
+pupyl --data_dir /path/to/your/data/dir search /path/to/query/image.ext
 ```
 
 > 💡 Type `pupyl --help` to discover all the CLI's capabilities.

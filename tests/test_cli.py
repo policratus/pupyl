@@ -28,7 +28,7 @@ def test_parser_index_case():
     expected_vars = {
         'data_dir': data_dir,
         'input_images': input_path,
-        'sub_parser_name': sub_command,
+        'options': sub_command,
     }
 
     args = CLI.argument_parser(
@@ -45,11 +45,34 @@ def test_parser_serve_case():
 
     expected_vars = {
         'data_dir': data_dir,
-        'sub_parser_name': sub_command,
+        'options': sub_command,
     }
 
     args = CLI.argument_parser(
         commands=['--data_dir', data_dir, sub_command]
+    )
+
+    assert vars(args) == expected_vars
+
+
+def test_parser_export_case():
+    """Unit test for the export subcommand with all arguments."""
+    sub_command = 'export'
+    query_image = 'path/to/query/image'
+    output_dir = 'path/to/output/dir'
+    data_dir = 'path/to/assets'
+    top = 10
+
+    expected_vars = {
+        'data_dir': data_dir,
+        'query': query_image,
+        'output': output_dir,
+        'options': sub_command,
+        'top': top
+    }
+
+    args = CLI.argument_parser(
+        commands=['--data_dir', data_dir, sub_command, query_image, output_dir]
     )
 
     assert vars(args) == expected_vars
@@ -64,7 +87,7 @@ def test_argument_parser_parameters():
     test_namespace = Namespace(
         data_dir=data_dir,
         input_images=input_path,
-        sub_parser_name=sub_command
+        options=sub_command
     )
 
     test_arguments_parsed = CLI.argument_parser(

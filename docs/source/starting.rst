@@ -234,23 +234,24 @@ just call ``pupyl`` (or ``pupyl -h``) see the arguments:
 
 .. code-block::
 
-    usage: pupyl [-h] [--data_dir DATA_DIR] {index,serve} ...
+    usage: pupyl [-h] [--data_dir DATA_DIR] {index,serve,search,export} ...
 
-    🧿 Manage pupyl CLI arguments.
-
-    pupyl is a really fast image search library which you can index your own
-    (millions of) images and find similar images in milliseconds.
+    🧿 Manage pupyl CLI arguments. pupyl is a really fast image search library
+    which you can index your own (millions of) images and find similar
+    images in milliseconds.
 
     positional arguments:
-    {index,serve}
-    index              indexes images into database
-    serve              creates a web service to interact with database
+      {index,serve,search,export}
+        index               indexes images into the database.
+        serve               creates a web interface to interact with the database.
+        search              search inside a database for similar images.
+        export              search inside database, but export result files to a directory.
 
     optional arguments:
-    -h, --help           show this help message and exit
-    --data_dir DATA_DIR  data directory for database assets
+      -h, --help            show this help message and exit
+      --data_dir DATA_DIR   data directory for database assets.
 
-    👥 Contribute to pupyl on https://github.com/policratus/pupyl'
+    👥 Contribute to pupyl on https://github.com/policratus/pupyl
 
 Indexing like described on :ref:`indexing <indexing>` section can be done like
 this:
@@ -262,6 +263,20 @@ this:
 
     # Windows systems
     pupyl -data_dir C:\path\to\your\data\dir index C:\path\to\images\
+
+Searching (described on section :ref:`searching <searching>`) is also possible
+through CLI and it goes like this:
+
+.. code-block::
+
+    # Unix based systems
+    pupyl --data_dir /path/to/your/data/dir search /path/to/image.ext
+
+    # Windows systems
+    pupyl -data_dir C:\path\to\your\data\dir index C:\path\to\images.ext
+
+Every single option on CLI has some features and flags which is not shown here
+for the sake of simplicity. You are encouraged to test it all.
 
 🌐 Web interface
 #################
