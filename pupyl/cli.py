@@ -43,45 +43,45 @@ class PupylCommandLineInterface:
             '--data_dir',
             type=str,
             default=PUPYL_HOME_FOLDER,
-            help='Data directory for database assets.'
+            help='data directory for database assets.'
         )
 
         sub_parsers = parser.add_subparsers(dest='options')
 
         # Index parser
         index_parser = sub_parsers.add_parser(
-            'index', help='Indexes images into the database.'
+            'index', help='indexes images into the database.'
         )
         index_parser.add_argument(
             'input_images',
-            help='Data directory containing image files to index.'
+            help='data directory containing image files to index.'
         )
 
         sub_parsers.add_parser(
             'serve',
-            help='Creates a web service to interact with the database.'
+            help='creates a web service to interact with the database.'
         )
 
         # Search parser
         search_parser = sub_parsers.add_parser(
-            'search', help='Search inside a database for similar images.'
+            'search', help='search inside a database for similar images.'
         )
         search_parser.add_argument(
             'query', help='URI of an image to use as query.'
         )
         search_parser.add_argument(
             '--top', type=int, default=10, metavar='n',
-            help='Filters how many results to show.'
+            help='filters how many results to show.'
         )
         search_parser.add_argument(
             '--metadata', action='store_true',
-            help='Returns metadata instead of image ids.'
+            help='returns metadata instead of image ids.'
         )
 
         # Export parser
         export_parser = sub_parsers.add_parser(
             'export',
-            help='Search inside database, but export result files to a '
+            help='search inside database, but export result files to a '
             'directory.'
         )
         export_parser.add_argument(
@@ -89,11 +89,11 @@ class PupylCommandLineInterface:
             help='URI of an image to use as query.'
         )
         export_parser.add_argument(
-            'output', help='Directory to export search results as images.'
+            'output', help='directory to export search results as images.'
         )
         export_parser.add_argument(
             '--top', type=int, default=10, metavar='n',
-            help='Filters how many results to show.'
+            help='filters how many results to show.'
         )
 
         return parser
