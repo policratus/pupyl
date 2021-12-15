@@ -4,13 +4,12 @@
 [![anaconda](https://anaconda.org/policratus/pupyl/badges/version.svg)](https://anaconda.org/policratus/pupyl/badges/version.svg)
 [![PyPI version](https://badge.fury.io/py/pupyl.svg)](https://badge.fury.io/py/pupyl)
 [![Documentation Status](https://readthedocs.org/projects/pupyl/badge/?version=latest)](https://pupyl.readthedocs.io/en/latest/?badge=latest)
-[![Downloads](https://pepy.tech/badge/pupyl)](https://pepy.tech/project/pupyl)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4325/badge)](https://bestpractices.coreinfrastructure.org/projects/4325)
 [![Anaconda-Server Badge](https://anaconda.org/policratus/pupyl/badges/platforms.svg)](https://anaconda.org/policratus/pupyl)
 
 # pupyl - A Python Image Search Library
 
-![pupyl](https://user-images.githubusercontent.com/827563/144621405-f844d848-7815-4c97-8afd-fe18034f3f5d.gif)
+![pupyl](https://user-images.githubusercontent.com/827563/146164650-bf1b30f7-838f-43b9-9eff-1a2a85a59975.gif)
 
 ## 🧿 pupyl what?
 
