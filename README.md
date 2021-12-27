@@ -4,6 +4,7 @@
 [![anaconda](https://anaconda.org/policratus/pupyl/badges/version.svg)](https://anaconda.org/policratus/pupyl/badges/version.svg)
 [![PyPI version](https://badge.fury.io/py/pupyl.svg)](https://badge.fury.io/py/pupyl)
 [![Documentation Status](https://readthedocs.org/projects/pupyl/badge/?version=latest)](https://pupyl.readthedocs.io/en/latest/?badge=latest)
+[![Downloads](https://pepy.tech/badge/pupyl)](https://pepy.tech/project/pupyl)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4325/badge)](https://bestpractices.coreinfrastructure.org/projects/4325)
 [![Anaconda-Server Badge](https://anaconda.org/policratus/pupyl/badges/platforms.svg)](https://anaconda.org/policratus/pupyl)
 
