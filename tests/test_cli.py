@@ -62,13 +62,15 @@ def test_parser_export_case():
     output_dir = 'path/to/output/dir'
     data_dir = 'path/to/assets'
     top = 10
+    keep_ids = False
 
     expected_vars = {
         'data_dir': data_dir,
         'query': query_image,
         'output': output_dir,
         'options': sub_command,
-        'top': top
+        'top': top,
+        'keep_ids': keep_ids
     }
 
     args = CLI.argument_parser(
