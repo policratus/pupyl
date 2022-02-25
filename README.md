@@ -12,6 +12,16 @@
 
 ![pupyl](https://user-images.githubusercontent.com/827563/146164650-bf1b30f7-838f-43b9-9eff-1a2a85a59975.gif)
 
+# Table of contents
+  * [🧿 pupyl what?](#-pupyl-what)
+  * [🎉 Getting started](#-getting-started)
+    + [📦 Installation](#-installation)
+  * [🚸 Usage](#-usage)
+    + [🐚 Command line interface](#-command-line-interface)
+  * [📌 Dependencies](#-dependencies)
+  * [📝 Documentation](#-documentation)
+  * [🖊️ Citation](#%EF%B8%8F-citation)
+
 ## 🧿 pupyl what?
 
 The `pupyl` project (pronounced _pyoo·piel_) is a pythonic library to perform image search tasks (even over animated GIFs). It's intended to make easy reading, indexing, retrieving and maintaining a complete reverse image search engine. You can use it in your own data pipelines, web projects and wherever you find fit!
