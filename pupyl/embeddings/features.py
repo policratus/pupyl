@@ -10,8 +10,8 @@ from pupyl.verbosity import quiet_tf
 quiet_tf()
 
 import tensorflow
-import tensorflow.keras.backend as backend
-import tensorflow.keras.applications as networks
+import keras.backend as backend
+import keras.applications as networks
 
 from pupyl.duplex.image import ImageIO
 from pupyl.embeddings import exceptions

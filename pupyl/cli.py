@@ -95,6 +95,10 @@ class PupylCommandLineInterface:
             '--top', type=int, default=10, metavar='n',
             help='filters how many results to show.'
         )
+        export_parser.add_argument(
+            '--keep_ids', action='store_true',
+            help='should the original image ids must be preserved or not.'
+        )
 
         return parser
 
@@ -163,7 +167,8 @@ def pupyl():
 
     elif args.options == 'export':
         pupyl_search.indexer.export_results(
-            args.output, pupyl_search.search(args.query, top=args.top)
+            args.output, pupyl_search.search(args.query, top=args.top),
+            args.keep_ids
         )
     else:
         cli.parsers().print_help()

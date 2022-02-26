@@ -613,7 +613,7 @@ class Index:
 
             self.export_results(save_path, similars)
 
-    def export_results(self, path, similars):
+    def export_results(self, path, similars, keep_ids=False):
         """Export internal image at ``position`` by copying it to ``path``.
 
         Parameters
@@ -623,6 +623,9 @@ class Index:
 
         similars: iterable
             Containing image ids to export to ``path``.
+
+        keep_ids: bool
+            If the original ids must be preserved or not.
         """
         os.makedirs(path, exist_ok=True)
 
@@ -633,14 +636,13 @@ class Index:
                 filtered=['internal_path']
             )['internal_path']
 
-            file_extension = self._image_database.extension(
-                original_file_path
-            )
-
-            copy(
-                original_file_path,
-                os.path.join(
-                    path,
-                    f'{rank + 1}{file_extension}'
+            if keep_ids:
+                file_name = os.path.basename(original_file_path)
+            else:
+                file_extension = self._image_database.extension(
+                    original_file_path
                 )
-            )
+
+                file_name = f'{rank + 1}{file_extension}'
+
+            copy(original_file_path, os.path.join(path, file_name))

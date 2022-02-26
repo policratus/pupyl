@@ -68,11 +68,23 @@ def test_parser_export_case():
         'query': query_image,
         'output': output_dir,
         'options': sub_command,
-        'top': top
+        'top': top,
+        'keep_ids': False
     }
 
     args = CLI.argument_parser(
         commands=['--data_dir', data_dir, sub_command, query_image, output_dir]
+    )
+
+    assert vars(args) == expected_vars
+
+    expected_vars['keep_ids'] = True
+
+    args = CLI.argument_parser(
+        commands=[
+            '--data_dir', data_dir, sub_command, query_image, output_dir,
+            '--keep_ids'
+        ]
     )
 
     assert vars(args) == expected_vars
