@@ -62,7 +62,6 @@ def test_parser_export_case():
     output_dir = 'path/to/output/dir'
     data_dir = 'path/to/assets'
     top = 10
-    keep_ids = False
 
     expected_vars = {
         'data_dir': data_dir,
@@ -70,11 +69,22 @@ def test_parser_export_case():
         'output': output_dir,
         'options': sub_command,
         'top': top,
-        'keep_ids': keep_ids
+        'keep_ids': False
     }
 
     args = CLI.argument_parser(
         commands=['--data_dir', data_dir, sub_command, query_image, output_dir]
+    )
+
+    assert vars(args) == expected_vars
+
+    expected_vars['keep_ids'] = True
+
+    args = CLI.argument_parser(
+        commands=[
+            '--data_dir', data_dir, sub_command, query_image, output_dir,
+            '--keep_ids'
+        ]
     )
 
     assert vars(args) == expected_vars
