@@ -12,7 +12,7 @@ from pupyl.storage.database import ImageDatabase
 from pupyl.indexer.exceptions import FileIsNotAnIndex, \
     IndexNotBuildYet, NoDataDirForPermanentIndex, \
     DataDirDefinedForVolatileIndex, NullTensorError, \
-    TopNegativeOrZero, EmptyIndexError
+    TopNegativeOrZero, EmptyIndexError, ExportIdsAndNames
 
 
 class Index:
@@ -613,7 +613,7 @@ class Index:
 
             self.export_results(save_path, similars)
 
-    def export_results(self, path, similars, keep_ids=False):
+    def export_results(self, path, similars, keep_ids=False, keep_names=False):
         """Export internal image at ``position`` by copying it to ``path``.
 
         Parameters
@@ -626,6 +626,9 @@ class Index:
 
         keep_ids: bool
             If the original ids must be preserved or not.
+
+        keep_names: bool
+            If the original names must be preserved or not.
         """
         os.makedirs(path, exist_ok=True)
 
@@ -636,8 +639,17 @@ class Index:
                 filtered=['internal_path']
             )['internal_path']
 
-            if keep_ids:
+            if keep_ids and not keep_names:
                 file_name = os.path.basename(original_file_path)
+            elif not keep_ids and keep_names:
+                file_name = self._image_database.load_image_metadata(
+                    similar,
+                    filtered=['original_file_name']
+                )['original_file_name']
+            elif keep_ids and keep_names:
+                raise ExportIdsAndNames(
+                    'Impossible to export ids and names at the same time'
+                )
             else:
                 file_extension = self._image_database.extension(
                     original_file_path

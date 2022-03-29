@@ -31,3 +31,7 @@ class TopNegativeOrZero(Error):
 
 class EmptyIndexError(Error):
     """Raised when a loaded index is empty."""
+
+
+class ExportIdsAndNames(Error):
+    """Raised when trying to export names and ids at the same time."""

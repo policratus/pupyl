@@ -6,6 +6,7 @@ import mimetypes
 from os import walk
 from pathlib import Path
 from unittest import TestCase
+from shutil import disk_usage
 from tarfile import is_tarfile
 from urllib.error import URLError
 from os.path import abspath, exists, join
@@ -158,9 +159,15 @@ def test__get_url_large_file():
 def test__get_local_big_file():
     """Unit test for method _get_local, big file case."""
     with tempfile.NamedTemporaryFile() as temp_file:
-        while int(
-            os.path.getsize(temp_file.name) / (2 ** 30)
-        ) < FileIO.max_file_size:
+        max_file_size_in_bytes = FileIO.max_file_size * (2 ** 30)
+        free_disk = disk_usage(temp_file.name).free
+
+        if max_file_size_in_bytes > free_disk:
+            max_size = free_disk - 26214400
+        else:
+            max_size = max_file_size_in_bytes
+
+        while int(os.path.getsize(temp_file.name)) < max_size:
             temp_file.write(b'a' * (2 ** 16))
 
         assert FileIO._get_local(temp_file.name) == b''

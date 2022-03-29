@@ -95,9 +95,15 @@ class PupylCommandLineInterface:
             '--top', type=int, default=10, metavar='n',
             help='filters how many results to show.'
         )
-        export_parser.add_argument(
+
+        export_exclusive_group = export_parser.add_mutually_exclusive_group()
+        export_exclusive_group.add_argument(
             '--keep_ids', action='store_true',
             help='should the original image ids must be preserved or not.'
+        )
+        export_exclusive_group.add_argument(
+            '--keep_names', action='store_true',
+            help='should the original image names must be preserved or not.'
         )
 
         return parser
@@ -141,6 +147,8 @@ def pupyl():
                 f'creating pupyl assets on {args.data_dir}', color='cyan'
             )
         )
+    elif not args.options:
+        cli.parsers().print_help()
 
     pupyl_search = PupylImageSearch(data_dir=args.data_dir)
 
@@ -168,7 +176,7 @@ def pupyl():
     elif args.options == 'export':
         pupyl_search.indexer.export_results(
             args.output, pupyl_search.search(args.query, top=args.top),
-            args.keep_ids
+            args.keep_ids, args.keep_names
         )
     else:
         cli.parsers().print_help()
