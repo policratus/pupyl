@@ -9,7 +9,7 @@ import numpy
 from pupyl.indexer.facets import Index
 from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
     NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
-    NullTensorError, TopNegativeOrZero, EmptyIndexError
+    NullTensorError, TopNegativeOrZero, EmptyIndexError, ExportIdsAndNames
 from pupyl.duplex.file_io import FileIO
 from pupyl.search import PupylImageSearch
 from pupyl.embeddings.features import Extractors, Characteristics
@@ -91,10 +91,31 @@ class TestCases(TestCase):
                 _ = [*index.group_by(top=-1)]
 
     def test_empty_index(self):
-        """Unit test for top parameter, negative case."""
+        """Unit test for an empty index."""
         with self.assertRaises(EmptyIndexError):
             with Index(1, TEST_EMPTY_INDEX) as index:
                 _ = [*index.group_by()]
+
+    def test_export_exclusive_options(self):
+        """Unit test for exclusive options."""
+        test_vector_size = 2560
+
+        with self.assertRaises(ExportIdsAndNames):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                test_search = PupylImageSearch(temp_dir)
+
+                test_search.index(TEST_INDEX_EXPORT)
+
+                with tempfile.TemporaryDirectory() as new_temp_dir:
+                    with Index(test_vector_size, data_dir=temp_dir) as index:
+                        index.export_results(
+                            new_temp_dir,
+                            test_search.search(
+                                os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                            ),
+                            keep_ids=True,
+                            keep_names=True
+                        )
 
 
 def test_append_check_unique():
@@ -430,6 +451,15 @@ def test_export_results():
                         os.path.join(TEST_INDEX_EXPORT, '1.jpg')
                     ),
                     keep_ids=True
+                )
+
+                assert os.path.exists(os.path.join(new_temp_dir, '1.jpg'))
+
+                index.export_results(
+                    new_temp_dir, test_search.search(
+                        os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                    ),
+                    keep_names=True
                 )
 
                 assert os.path.exists(os.path.join(new_temp_dir, '1.jpg'))

@@ -69,7 +69,8 @@ def test_parser_export_case():
         'output': output_dir,
         'options': sub_command,
         'top': top,
-        'keep_ids': False
+        'keep_ids': False,
+        'keep_names': False
     }
 
     args = CLI.argument_parser(
