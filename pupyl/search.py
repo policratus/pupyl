@@ -12,8 +12,6 @@ import os
 import json
 import concurrent.futures
 
-from numpy import empty
-
 from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.exceptions import FileIsNotImage
 from pupyl.embeddings.features import Extractors, Characteristics
@@ -192,36 +190,43 @@ class PupylImageSearch:
                 ):
                     ranks.append(futures[future])
 
-            embeddings = empty((len(ranks), self.extractor.output_shape))
-
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 try:
                     futures = {
                         executor.submit(
-                            self.extractor.extract,
+                            self.extractor.extract_save,
+                            self.image_database.mount_file_name(
+                                rank, 'pupyl'
+                            ),
                             self.image_database.load_image_metadata(
                                 rank, filtered=['internal_path']
                             )['internal_path']
                         ): rank
                         for rank in ranks
                     }
+
+                    for future in self.extractor.progress(
+                        concurrent.futures.as_completed(futures),
+                        precise=False,
+                        message='Extracting features:'
+                    ):
+                        pass
+
                 except IndexError as index_error:
                     raise FileIsNotImage('Please, check your input images.') \
                         from index_error
 
-                for future in self.extractor.progress(
-                    concurrent.futures.as_completed(futures),
-                    precise=False,
-                    message='Extracting features:'
-                ):
-                    embeddings[futures[future]] = future.result()
-
-            for embedding in self.extractor.progress(
-                embeddings,
+            for rank in self.extractor.progress(
+                sorted(ranks),
                 precise=True,
                 message='Indexing features:'
             ):
-                self.indexer.append(embedding, check_unique=check_unique)
+                self.indexer.append(
+                    self.extractor.load(
+                        self.image_database.mount_file_name(rank, 'pupyl.npy')
+                    ),
+                    check_unique=check_unique
+                )
 
             self.indexer.flush()
 
@@ -230,6 +235,7 @@ class PupylImageSearch:
             )
 
         else:
+            # TODO: Implement resume indexing to extreme_mode = False too.
             with Extractors(
                 characteristics=self._characteristic,
                 extreme_mode=self._extreme_mode

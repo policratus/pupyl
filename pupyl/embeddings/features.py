@@ -1,10 +1,11 @@
 """Factory for image feature extraction."""
 
+import os
 import warnings
 from enum import Enum, auto
 
-import termcolor
 import numpy
+import termcolor
 
 from pupyl.verbosity import quiet_tf
 quiet_tf()
@@ -235,3 +236,49 @@ class Extractors(ImageIO):
             1D tensor with extracted features.
         """
         return tensorflow.squeeze(self.network.predict(self.preprocessor(uri)))
+
+    def extract_save(self, path, uri):
+        """Extracts features from an image, saving to disk after all.
+
+        Parameters
+        ----------
+        path: str
+            Where to store the tensor.
+
+        uri: str
+            Location of the image to be converted to a embedding.
+        """
+        if os.path.exists(path):
+            print('Resuming indexing', end='\r')
+        else:
+            self.save(path, self.extract(uri))
+
+    @staticmethod
+    def save(path, tensor):
+        """Writes down a ``tensor`` referencing ``index``.
+
+        Parameters
+        ----------
+        path: str
+            Where to store the tensor.
+
+        tensor: Tensor
+            The tensor itself, to be saved.
+        """
+        numpy.save(path, tensor.numpy(), allow_pickle=False, fix_imports=False)
+
+    @staticmethod
+    def load(path):
+        """Loads up a ``tensor`` referencing ``index``.
+
+        Parameters
+        ----------
+        path: str
+            Where to load from the tensor.
+
+        Returns
+        -------
+        numpy.ndarray
+            Tensor loaded back again.
+        """
+        return numpy.load(path, allow_pickle=False, fix_imports=False)
