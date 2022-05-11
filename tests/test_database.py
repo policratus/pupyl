@@ -216,7 +216,7 @@ def test_load_image():
     def inst_load_image(index):
         """Closure for method load_image."""
         return image_database.get_image(
-            image_database.mount_file_name(index, 'jpg')
+            image_database.mount_file_name(index, extension='jpg')
         )
 
     test_image = image_database.load_image(test_index)
@@ -238,7 +238,7 @@ def test_what_bucket():
 
 
 def test_mount_file_name():
-    """Unit test for method what_bucket."""
+    """Unit test for method mount_file_name."""
     image_database = ImageDatabase(
         import_images=True,
         data_dir=TEST_DIRECTORY
@@ -250,7 +250,25 @@ def test_mount_file_name():
         f'{TEST_INDEX}.json'
     )
 
-    assert image_database.mount_file_name(TEST_INDEX, 'json') == expected_path
+    assert image_database.mount_file_name(
+        TEST_INDEX, extension='json'
+    ) == expected_path
+
+
+def test_mount_file_name_no_extension():
+    """Unit test for method mount_file_name, no extension case."""
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    expected_path = join(
+        TEST_DIRECTORY,
+        str(image_database.what_bucket(TEST_INDEX)),
+        f'{TEST_INDEX}'
+    )
+
+    assert image_database.mount_file_name(TEST_INDEX) == expected_path
 
 
 def test_load_image_metadata():

@@ -196,7 +196,7 @@ class PupylImageSearch:
                         executor.submit(
                             self.extractor.extract_save,
                             self.image_database.mount_file_name(
-                                rank, 'pupyl'
+                                rank, extension='npy'
                             ),
                             self.image_database.load_image_metadata(
                                 rank, filtered=['internal_path']
@@ -205,12 +205,13 @@ class PupylImageSearch:
                         for rank in ranks
                     }
 
-                    for future in self.extractor.progress(
-                        concurrent.futures.as_completed(futures),
-                        precise=False,
-                        message='Extracting features:'
-                    ):
-                        pass
+                    _ = [
+                        *self.extractor.progress(
+                            concurrent.futures.as_completed(futures),
+                            precise=False,
+                            message='Extracting features:'
+                        )
+                    ]
 
                 except IndexError as index_error:
                     raise FileIsNotImage('Please, check your input images.') \
@@ -223,19 +224,21 @@ class PupylImageSearch:
             ):
                 self.indexer.append(
                     self.extractor.load(
-                        self.image_database.mount_file_name(rank, 'pupyl.npy')
+                        self.image_database.mount_file_name(
+                            rank, extension='npy'
+                        )
                     ),
                     check_unique=check_unique
                 )
 
             self.indexer.flush()
+            self.indexer.clean_embeddings_cache(ranks)
 
             self._index_configuration(
                 'w', feature_size=self.extractor.output_shape
             )
 
         else:
-            # TODO: Implement resume indexing to extreme_mode = False too.
             with Extractors(
                 characteristics=self._characteristic,
                 extreme_mode=self._extreme_mode
@@ -252,13 +255,22 @@ class PupylImageSearch:
                     ):
                         self.image_database.insert(rank, uri_from_file)
 
-                        embedding = extractor.extract(
+                        extractor.extract_save(
+                            self.image_database.mount_file_name(
+                                rank, extension='npy'
+                            ),
                             self.image_database.load_image_metadata(
                                 rank, filterd=['internal_path']
                             )['internal_path']
                         )
 
-                        indexer.append(embedding, check_unique=check_unique)
+                        indexer.append(
+                            extractor.load(
+                                self.image_database.mount_file_name(
+                                    rank, extension='npy'
+                                )
+                            ),
+                            check_unique=check_unique)
 
                     self._index_configuration(
                         'w', feature_size=extractor.output_shape

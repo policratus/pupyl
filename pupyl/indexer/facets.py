@@ -187,14 +187,23 @@ class Index:
             self._is_new_index = False
 
         self.refresh()
-        self.clean()
 
-    def clean(self):
-        """Removes assets used during an indexing process."""
+    def clean_embeddings_cache(self, ranks):
+        """Removes embeddings assets used during an indexing process.
+
+        Parameters
+        ----------
+        ranks: iterable
+            Containing ids to remove.
+        """
         for root, _, files in os.walk(self._data_dir):
             for ffile in files:
-                if self._image_database.extension(ffile) == 'npy':
-                    os.remove(os.path.join(self._data_dir, ffile))
+                try:
+                    if int(os.path.splitext(ffile)[0]) in ranks and \
+                            self._image_database.extension(ffile) == '.npy':
+                        os.remove(os.path.join(root, ffile))
+                except ValueError:
+                    continue
 
     def items(self):
         """Returns indexed items.

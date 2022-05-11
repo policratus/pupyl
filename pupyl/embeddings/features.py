@@ -248,9 +248,7 @@ class Extractors(ImageIO):
         uri: str
             Location of the image to be converted to a embedding.
         """
-        if os.path.exists(path):
-            print('Resuming indexing', end='\r')
-        else:
+        if not os.path.exists(path):
             self.save(path, self.extract(uri))
 
     @staticmethod
