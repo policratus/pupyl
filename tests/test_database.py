@@ -1,6 +1,7 @@
 """Unit tests related to storage.database module."""
 import tempfile
 from os import sep
+from shutil import copy
 from unittest import TestCase
 from os.path import join, relpath, exists
 
@@ -202,6 +203,25 @@ def test_insert_no_import_images():
 
     assert not exists(f'{TEST_TEMP_DIRECTORY}/0/20.jpg') and \
         exists(f'{TEST_TEMP_DIRECTORY}/0/20.json')
+
+
+def test_insert_image_exists_target():
+    """Unit test for method insert, image exists on target path."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        image_database = ImageDatabase(
+            data_dir=temp_dir,
+            import_images=True
+        )
+
+        test_gif_path = join('tests', 'test_gif.gif')
+
+        copy(test_gif_path, join(temp_dir, '30.gif'))
+
+        image_database.insert(30, test_gif_path)
+
+        assert image_database.load_image_metadata(
+            30, filtered=('original_file_name')
+        )['original_file_name'] == 'test_gif.gif'
 
 
 def test_load_image():
