@@ -20,6 +20,11 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'tensorflow==2.8.0',
+        # Next line was added to fix an issue related to a
+        # faulty integration between keras 2.9.0 and
+        # tensorflow 2.8.0, regarding a pinned protobuf version.
+        # Hope to remove it as soon as possible.
+        'protobuf==3.20.1',
         'annoy==1.17.0'
     ],
     classifiers=[
