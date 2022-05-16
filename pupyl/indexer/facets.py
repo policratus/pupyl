@@ -1,8 +1,8 @@
 """Hyperspace indexing and operations."""
 
 import os
-from warnings import warn as warning
 from shutil import move, copy
+from warnings import warn as warning
 
 from annoy import AnnoyIndex
 
@@ -188,22 +188,19 @@ class Index:
 
         self.refresh()
 
-    def clean_embeddings_cache(self, ranks):
-        """Removes embeddings assets used during an indexing process.
+    def remove_feature_cache(self, index):
+        """Removes a feature cache used during an indexing process.
 
         Parameters
         ----------
-        ranks: iterable
-            Containing ids to remove.
+        index: int
+            ``index`` associated to a cache marked for removal.
         """
-        for root, _, files in os.walk(self._data_dir):
-            for ffile in files:
-                try:
-                    if int(os.path.splitext(ffile)[0]) in ranks and \
-                            self._image_database.extension(ffile) == '.npy':
-                        os.remove(os.path.join(root, ffile))
-                except ValueError:
-                    continue
+        cache_name = self._image_database.mount_file_name(
+            index, extension='npy'
+        )
+
+        os.remove(cache_name)
 
     def items(self):
         """Returns indexed items.

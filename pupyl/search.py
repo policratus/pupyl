@@ -232,7 +232,11 @@ class PupylImageSearch:
                 )
 
             self.indexer.flush()
-            self.indexer.clean_embeddings_cache(ranks)
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                executor.submit(
+                    self.indexer.remove_feature_cache, rank
+                )
 
             self._index_configuration(
                 'w', feature_size=self.extractor.output_shape
