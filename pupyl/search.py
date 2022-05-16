@@ -234,9 +234,10 @@ class PupylImageSearch:
             self.indexer.flush()
 
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                executor.submit(
-                    self.indexer.remove_feature_cache, rank
-                )
+                for rank in ranks:
+                    executor.submit(
+                        self.indexer.remove_feature_cache, rank
+                    )
 
             self._index_configuration(
                 'w', feature_size=self.extractor.output_shape
