@@ -64,6 +64,9 @@ QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102?w=22
 
 [*SEARCH.search(QUERY_IMAGE)]
 ```
+
+_Disclaimer: the example above creates `pupyl` assets on your temporary directory. To define a non-volatile database, you should define `data_dir` parameter._
+
 This will return:
 ```Python
 # Here's the simplest possible result
@@ -104,8 +107,6 @@ interface.serve()
 A glimpse of the web interface, visualizing the results shown above:
 
 ![web](https://pupyl.readthedocs.io/en/latest/_images/pupylresults.gif)
-
-_Disclaimer: the example above creates `pupyl` assets on your temporary directory. To define a non-volatile database, you should define `data_dir` parameter._
 
 Alternatively, you can interact with `pupyl` via command line. The same example above in CLI
 terms:

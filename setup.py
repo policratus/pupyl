@@ -8,7 +8,7 @@ with open('README.md') as readme:
 
 setuptools.setup(
     name="pupyl",
-    version="0.13.3",
+    version="0.13.4",
     author="Nelson Forte",
     author_email="policratus@gmail.com",
     description="🧿 Pupyl is a really fast image search "
@@ -19,8 +19,12 @@ setuptools.setup(
     url="https://github.com/policratus/pupyl",
     packages=setuptools.find_packages(),
     install_requires=[
-        'tensorflow==2.8.0',
-        'keras==2.8.0',
+        # Next line was added to fix an issue related to a
+        # faulty integration between keras 2.9.0 and tensorflow 2.9.0
+        # Hope to remove it as soon as possible.
+        'protobuf==3.20.1',
+        'tensorflow==2.9.0',
+        'keras==2.9.0',
         'annoy==1.17.0'
     ],
     classifiers=[
