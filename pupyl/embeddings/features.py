@@ -281,5 +281,4 @@ class Extractors(ImageIO):
         numpy.ndarray
             Tensor loaded back again.
         """
-        if os.path.exists(path):
-            return numpy.load(path, allow_pickle=False, fix_imports=False)
+        return numpy.load(path, allow_pickle=False, fix_imports=False)
