@@ -5,14 +5,12 @@ Pupyl is a really fast image search library which you
 can index your own (millions of) images and find similar
 images in milliseconds.
 """
-__version__ = 'v0.13.3'
+__version__ = 'v0.13.4'
 
 
 import os
 import json
 import concurrent.futures
-
-from numpy import empty
 
 from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.exceptions import FileIsNotImage
@@ -192,38 +190,54 @@ class PupylImageSearch:
                 ):
                     ranks.append(futures[future])
 
-            embeddings = empty((len(ranks), self.extractor.output_shape))
-
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 try:
                     futures = {
                         executor.submit(
-                            self.extractor.extract,
+                            self.extractor.extract_save,
+                            self.image_database.mount_file_name(
+                                rank, extension='npy'
+                            ),
                             self.image_database.load_image_metadata(
                                 rank, filtered=['internal_path']
                             )['internal_path']
                         ): rank
                         for rank in ranks
                     }
+
+                    _ = [
+                        *self.extractor.progress(
+                            concurrent.futures.as_completed(futures),
+                            precise=False,
+                            message='Extracting features:'
+                        )
+                    ]
+
                 except IndexError as index_error:
                     raise FileIsNotImage('Please, check your input images.') \
                         from index_error
 
-                for future in self.extractor.progress(
-                    concurrent.futures.as_completed(futures),
-                    precise=False,
-                    message='Extracting features:'
-                ):
-                    embeddings[futures[future]] = future.result()
-
-            for embedding in self.extractor.progress(
-                embeddings,
+            for rank in self.extractor.progress(
+                sorted(ranks),
                 precise=True,
                 message='Indexing features:'
             ):
-                self.indexer.append(embedding, check_unique=check_unique)
+                self.indexer.append(
+                    self.extractor.load(
+                        self.image_database.mount_file_name(
+                            rank, extension='npy'
+                        )
+                    ),
+                    check_unique=check_unique
+                )
 
             self.indexer.flush()
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                for rank in ranks:
+                    executor.submit(
+                        self.indexer.remove_feature_cache, rank
+                    )
 
             self._index_configuration(
                 'w', feature_size=self.extractor.output_shape
@@ -246,13 +260,22 @@ class PupylImageSearch:
                     ):
                         self.image_database.insert(rank, uri_from_file)
 
-                        embedding = extractor.extract(
+                        extractor.extract_save(
+                            self.image_database.mount_file_name(
+                                rank, extension='npy'
+                            ),
                             self.image_database.load_image_metadata(
                                 rank, filterd=['internal_path']
                             )['internal_path']
                         )
 
-                        indexer.append(embedding, check_unique=check_unique)
+                        indexer.append(
+                            extractor.load(
+                                self.image_database.mount_file_name(
+                                    rank, extension='npy'
+                                )
+                            ),
+                            check_unique=check_unique)
 
                     self._index_configuration(
                         'w', feature_size=extractor.output_shape

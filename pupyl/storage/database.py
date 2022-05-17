@@ -201,7 +201,7 @@ class ImageDatabase(ImageIO):
         """
         return index // self._bucket_size
 
-    def mount_file_name(self, index, extension):
+    def mount_file_name(self, index, **kwargs):
         """Creates the full name path that the file will be saved inside
         database.
 
@@ -218,12 +218,20 @@ class ImageDatabase(ImageIO):
         str:
             With the full path inside the database.
         """
-        extension = extension[1:] if extension[0] == '.' else extension
+        if kwargs.get('extension'):
+            extension = kwargs['extension'][1:] \
+                if kwargs['extension'][0] == '.' else kwargs['extension']
+
+            return os.path.join(
+                self._data_dir,
+                str(self.what_bucket(index)),
+                f'{index}.{extension}'
+            )
 
         return os.path.join(
             self._data_dir,
             str(self.what_bucket(index)),
-            f'{index}.{extension}'
+            f'{index}'
         )
 
     def load_image_metadata(self, index, **kwargs):
@@ -247,7 +255,7 @@ class ImageDatabase(ImageIO):
         IndexError:
             When ``index`` is not found.
         """
-        result_file_name = self.mount_file_name(index, 'json')
+        result_file_name = self.mount_file_name(index, extension='json')
 
         try:
             with open(result_file_name, encoding='utf-8') as json_file:
@@ -279,7 +287,7 @@ class ImageDatabase(ImageIO):
             Location where the image is stored.
         """
         bytess = self.get(uri)
-        result_file_name = self.mount_file_name(index, 'json')
+        result_file_name = self.mount_file_name(index, extension='json')
 
         os.makedirs(os.path.dirname(result_file_name), exist_ok=True)
 
@@ -288,7 +296,7 @@ class ImageDatabase(ImageIO):
                 metadata = self.get_metadata(uri)
                 metadata['id'] = index
                 metadata['internal_path'] = self.mount_file_name(
-                    index, self.extension(uri)
+                    index, extension=self.extension(uri)
                 )
 
                 json.dump(metadata, json_file)
@@ -305,17 +313,21 @@ class ImageDatabase(ImageIO):
             Where the original file is located.
         """
         if self._import_images:
-            if self.is_animated_gif(uri):
-                image = self.get_image(uri)
-            else:
-                image = self.compress(
-                    self.size(uri, new_size=self._image_size, keep_aspect=True)
-                )
-
-            self.save_image(
-                self.mount_file_name(index, self.extension(uri)),
-                image
+            mounted_file = self.mount_file_name(
+                index, extension=self.extension(uri)
             )
+
+            if not os.path.exists(mounted_file):
+                if self.is_animated_gif(uri):
+                    image = self.get_image(uri)
+                else:
+                    image = self.compress(
+                        self.size(
+                            uri, new_size=self._image_size, keep_aspect=True
+                        )
+                    )
+
+                self.save_image(mounted_file, image)
 
         self.save_image_metadata(index, uri)
 
@@ -355,8 +367,8 @@ class ImageDatabase(ImageIO):
             move(image_old_id, image_new_id)
 
             # Now, the metadata files
-            metadata_old_id = self.mount_file_name(old_id, 'json')
-            metadata_new_id = self.mount_file_name(new_id, 'json')
+            metadata_old_id = self.mount_file_name(old_id, extension='json')
+            metadata_new_id = self.mount_file_name(new_id, extension='json')
 
             copy(metadata_old_id, metadata_new_id)
 
@@ -371,7 +383,7 @@ class ImageDatabase(ImageIO):
                 metadata_file.seek(0)
                 json.dump(metadata, metadata_file)
 
-        os.remove(self.mount_file_name(len(self), 'json'))
+        os.remove(self.mount_file_name(len(self), extension='json'))
 
     def list_images(self, return_ids=False, top=None):
         """Returns images on current database.

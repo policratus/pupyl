@@ -15,4 +15,4 @@ def quiet_tf():
     import tensorflow
 
     tensorflow.get_logger().setLevel(logging.ERROR)
-    tensorflow.autograph.set_verbosity(3)
+    tensorflow.autograph.set_verbosity(0, alsologtostdout=False)

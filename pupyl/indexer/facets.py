@@ -1,8 +1,8 @@
 """Hyperspace indexing and operations."""
 
 import os
-from warnings import warn as warning
 from shutil import move, copy
+from warnings import warn as warning
 
 from annoy import AnnoyIndex
 
@@ -187,6 +187,20 @@ class Index:
             self._is_new_index = False
 
         self.refresh()
+
+    def remove_feature_cache(self, index):
+        """Removes a feature cache used during an indexing process.
+
+        Parameters
+        ----------
+        index: int
+            ``index`` associated to a cache marked for removal.
+        """
+        cache_name = self._image_database.mount_file_name(
+            index, extension='npy'
+        )
+
+        os.remove(cache_name)
 
     def items(self):
         """Returns indexed items.

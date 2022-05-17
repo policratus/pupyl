@@ -33,6 +33,12 @@ jobs:
         make static-check
     - name: Tests
       run: |
+        # Next two lines are a workaround for a faulty keras/tensorflow
+        # integration (regarding keras 2.9.0 and tensorflow 2.9.0).
+        # Hope to remove this in the near future.
+        pip uninstall --yes protobuf
+        pip install protobuf==3.20.1
+        # Everything as usual from now on
         pip install pytest pytest-cov
         make test
     - name: Coverage report
