@@ -19,7 +19,7 @@ setuptools.setup(
     url="https://github.com/policratus/pupyl",
     packages=setuptools.find_packages(),
     install_requires=[
-         # Next line was added to fix an issue related to a
+        # Next line was added to fix an issue related to a
         # faulty integration between keras 2.9.0 and
         # tensorflow 2.9.0, regarding a pinned protobuf version.
         # Hope to remove it as soon as possible.
