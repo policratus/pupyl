@@ -235,7 +235,9 @@ class Extractors(ImageIO):
         numpy.ndarray
             1D tensor with extracted features.
         """
-        return tensorflow.squeeze(self.network.predict(self.preprocessor(uri)))
+        return tensorflow.squeeze(
+            self.network.predict(self.preprocessor(uri), verbose=0)
+        )
 
     def extract_save(self, path, uri):
         """Extracts features from an image, saving to disk after all.
