@@ -5,7 +5,7 @@ Pupyl is a really fast image search library which you
 can index your own (millions of) images and find similar
 images in milliseconds.
 """
-__version__ = 'v0.13.3'
+__version__ = 'v0.13.4'
 
 
 import os

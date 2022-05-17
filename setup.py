@@ -8,7 +8,7 @@ with open('README.md') as readme:
 
 setuptools.setup(
     name="pupyl",
-    version="0.13.3",
+    version="0.13.4",
     author="Nelson Forte",
     author_email="policratus@gmail.com",
     description="🧿 Pupyl is a really fast image search "
@@ -20,8 +20,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         # Next line was added to fix an issue related to a
-        # faulty integration between keras 2.9.0 and
-        # tensorflow 2.9.0, regarding a pinned protobuf version.
+        # faulty integration between keras 2.9.0 and tensorflow 2.9.0
         # Hope to remove it as soon as possible.
         'protobuf==3.20.1',
         'tensorflow==2.9.0',
