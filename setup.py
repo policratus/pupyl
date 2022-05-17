@@ -21,7 +21,7 @@ setuptools.setup(
     install_requires=[
          # Next line was added to fix an issue related to a
         # faulty integration between keras 2.9.0 and
-        # tensorflow 2.8.0, regarding a pinned protobuf version.
+        # tensorflow 2.9.0, regarding a pinned protobuf version.
         # Hope to remove it as soon as possible.
         'protobuf==3.20.1',
         'tensorflow==2.9.0',
