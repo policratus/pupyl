@@ -34,7 +34,7 @@ jobs:
     - name: Tests
       run: |
         # Next two lines are a workaround for a faulty keras/tensorflow
-        # integration (regarding keras 2.9.0 and tensorflow 2.8.0).
+        # integration (regarding keras 2.9.0 and tensorflow 2.9.0).
         # Hope to remove this in the near future.
         pip uninstall --yes protobuf
         pip install protobuf==3.20.1
