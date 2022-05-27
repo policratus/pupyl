@@ -5,7 +5,7 @@ on: [push]
 jobs:
 
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: setup
     steps:
     - uses: actions/checkout@v1
@@ -20,7 +20,7 @@ jobs:
         python setup.py install
 
   pep8:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [setup]
     name: pep-8
     steps:
@@ -28,7 +28,7 @@ jobs:
       run: make flake8
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [setup]
     name: linter
     steps:
@@ -37,7 +37,7 @@ jobs:
 
   static:
     needs: [setup]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: static-check
     steps:
     - name: Static type checking
@@ -45,7 +45,7 @@ jobs:
 
   test:
     needs: [setup]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: tests
     steps:
     - name: Unit tests
@@ -53,7 +53,7 @@ jobs:
 
   coverage:
     needs: [setup, test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: coverage
     steps:
     - name: Coverage report
@@ -61,7 +61,7 @@ jobs:
 
   codecov:
     needs: [coverage]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: codecov-upload
     steps:
     - name: Uploads test coverage results to CodeCov
