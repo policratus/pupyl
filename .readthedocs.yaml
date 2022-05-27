@@ -8,7 +8,7 @@ formats:
    - epub
 
 python:
-   version: 3.8
+   version: 3.10
    install:
    - method: setuptools
      path: .

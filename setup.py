@@ -19,12 +19,7 @@ setuptools.setup(
     url="https://github.com/policratus/pupyl",
     packages=setuptools.find_packages(),
     install_requires=[
-        # Next line was added to fix an issue related to a
-        # faulty integration between keras 2.9.0 and tensorflow 2.9.0
-        # Hope to remove it as soon as possible.
-        'protobuf==3.20.1',
         'tensorflow==2.9.1',
-        'keras==2.9.0',
         'annoy==1.17.0'
     ],
     classifiers=[
@@ -35,9 +30,9 @@ setuptools.setup(
         ),
         'Operating System :: OS Independent',
         'Development Status :: 5 - Production/Stable',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Scientific/Engineering :: Image Recognition'
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.10',
     entry_points={'console_scripts': ['pupyl = pupyl.cli:pupyl']}
 )
