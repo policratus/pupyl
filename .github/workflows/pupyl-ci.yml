@@ -4,60 +4,80 @@ on: [push]
 
 jobs:
 
-  setup:
+  pep8:
     runs-on: ubuntu-22.04
-    name: setup
+    name: pep8
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.9
       uses: actions/setup-python@v1
       with:
         python-version: 3.9
-    - name: Install dependencies
+    - name: Check conformance with PEP-8 using flake8
       run: |
         pip install --upgrade pip
-        pip install flake8 pylint mypy types-termcolor pytest pytest-cov
-        python setup.py install
-
-  pep8:
-    runs-on: ubuntu-22.04
-    needs: [setup]
-    name: pep-8
-    steps:
-    - name: Check conformance with PEP-8 using flake8
-      run: make flake8
+        pip install flake8
+        make flake8
 
   lint:
     runs-on: ubuntu-22.04
-    needs: [setup]
     name: linter
     steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
     - name: Linter with pylint
-      run: make linter
+      run: |
+        pip install --upgrade pip
+        pip install pylint
+        make linter
 
   static:
-    needs: [setup]
     runs-on: ubuntu-22.04
     name: static-check
     steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
     - name: Static type checking
-      run: make static-check
+      run: |
+        pip install --upgrade pip
+        pip install mypy types-termcolor
+        make static-check
 
   test:
-    needs: [setup]
     runs-on: ubuntu-22.04
     name: tests
     steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
     - name: Unit tests
-      run: make test
+      run: |
+        pip install --upgrade pip
+        pip install pytest
+        make test
 
   coverage:
-    needs: [setup, test]
     runs-on: ubuntu-22.04
     name: coverage
     steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
     - name: Coverage report
-      run: make coverage
+      run: |
+        pip install --upgrade pip
+        pip install pytest pytest-cov
+        make coverage
 
   codecov:
     needs: [coverage]
