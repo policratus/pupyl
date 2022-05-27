@@ -109,12 +109,11 @@ Now, let's discuss each way of importing images:
   .. code-block:: shell
       :linenos:
 
-      http://www.norfolkmills.co.uk/images/Hardingham%20turbine%20Aug1965.jpg
       http://farm4.static.flickr.com/3161/2815856063_0ba82bed8a.jpg
       http://farm1.static.flickr.com/179/456107224_81f6430266.jpg
       http://farm4.static.flickr.com/3603/3569845078_ffebb00ec0.jpg
-      http://farm4.static.flickr.com/3.106/2945310084_ac9fdf53fa.jpg
-      http://farm2.static.flickr.com/1361/816405038_030f573.106.jpg
+      http://farm4.static.flickr.com/3286/2945310084_ac9fdf53fa.jpg
+      http://farm2.static.flickr.com/1361/816405038_030f573b86.jpg
       http://cimg2.163.com/catchpic/4/48/4823CF83B0B0D7F52BA1B80A9910D59C.jpg
       http://farm1.static.flickr.com/196/504807098_a11aff3acc.jpg
       ...
@@ -178,7 +177,7 @@ for other similar images). For this example, consider this beautiful image by
 `Unsplash <https://unsplash.com/>`_):
 
 .. image::
-    https://images.unsplash.com/photo-1520763.105298-1b434c919102?w=840&q=80
+    https://images.unsplash.com/photo-1520763185298-1b434c919102?w=840&q=80
     :alt: Copyright @dlanor_s
 
 Hence, to search the image above on the already indexed sample database, just
@@ -186,7 +185,7 @@ use the :meth:`pupyl.search.PupylImageSearch.search` method:
 
 .. code-block:: python
 
-    QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763.105298-1b434c919102'
+    QUERY_IMAGE = 'https://images.unsplash.com/photo-1520763185298-1b434c919102'
     [*PUPYL.search(QUERY_IMAGE)]
 
     # Here's the simplest result
