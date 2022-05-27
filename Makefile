@@ -38,11 +38,11 @@ coverage:
 	py.test --cov-report=xml --cov=.
 
 linter:
-	pylint -j0 --rcfile=~/.pylintrc pupyl
+	pylint -j0 --rcfile=$GITHUB_WORKSPACE/.pylintrc pupyl
 
 coverage-html: clean test_http_server
 	py.test -vv -rxs --cov-report=html --cov=.
-	$(OPEN_EXECUTABLE) htmlcov/index.html
+	$OPEN_EXECUTABLE htmlcov/index.html
 
 docs: clean
 	@pyreverse --ignore=exceptions.py -o png -p pupyl -d docs/source/_static/ pupyl
