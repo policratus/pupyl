@@ -109,6 +109,7 @@ Now, let's discuss each way of importing images:
   .. code-block:: shell
       :linenos:
 
+      http://www.norfolkmills.co.uk/images/Hardingham%20turbine%20Aug1965.jpg
       http://farm4.static.flickr.com/3161/2815856063_0ba82bed8a.jpg
       http://farm1.static.flickr.com/179/456107224_81f6430266.jpg
       http://farm4.static.flickr.com/3603/3569845078_ffebb00ec0.jpg
