@@ -38,7 +38,7 @@ coverage:
 	py.test --cov-report=xml --cov=.
 
 linter:
-	pylint -j0 --rcfile=.pylintrc pupyl
+	pylint -j0 --rcfile=~/.pylintrc pupyl
 
 coverage-html: clean test_http_server
 	py.test -vv -rxs --cov-report=html --cov=.
