@@ -38,7 +38,8 @@ coverage:
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test --cov-report=xml --cov=.
 
 linter:
-	PYTHONPATH=$($PYTHONPATH):$(pwd) pylint --rcfile=.pylintrc pupyl
+	echo $($PYTHONPATH):$(pwd)
+	PYTHONPATH=$($PYTHONPATH):$(pwd) pylint -j0 --rcfile=.pylintrc pupyl
 
 coverage-html: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=html --cov=.
