@@ -22,7 +22,7 @@ setuptools.setup(
         # Next line was added to fix an issue related to a
         # faulty integration between keras 2.9.0 and tensorflow 2.9.0
         # Hope to remove it as soon as possible.
-        'protobuf==3.20.1',
+        'protobuf==4.21.1',
         'tensorflow==2.9.0',
         'keras==2.9.0',
         'annoy==1.17.0'
