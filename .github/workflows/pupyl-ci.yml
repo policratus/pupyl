@@ -9,10 +9,10 @@ jobs:
     name: pep8
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.10
+    - name: Set up Python 3.10.4
       uses: actions/setup-python@v1
       with:
-        python-version: 3.10
+        python-version: 3.10.4
     - name: Check conformance with PEP-8 using flake8
       run: |
         pip install --upgrade pip
@@ -24,10 +24,10 @@ jobs:
     name: lint
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.10
+    - name: Set up Python 3.10.4
       uses: actions/setup-python@v1
       with:
-        python-version: 3.10
+        python-version: 3.10.4
     - name: Linter with pylint
       run: |
         pip install --upgrade pip
@@ -40,10 +40,10 @@ jobs:
     name: static-check
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.10
+    - name: Set up Python 3.10.4
       uses: actions/setup-python@v1
       with:
-        python-version: 3.10
+        python-version: 3.10.4
     - name: Static type checking
       run: |
         pip install --upgrade pip
@@ -55,10 +55,10 @@ jobs:
     name: test
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.10
+    - name: Set up Python 3.10.4
       uses: actions/setup-python@v1
       with:
-        python-version: 3.10
+        python-version: 3.10.4
     - name: Unit tests
       run: |
         pip install --upgrade pip
@@ -71,10 +71,10 @@ jobs:
     name: coverage
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.10
+    - name: Set up Python 3.10.4
       uses: actions/setup-python@v1
       with:
-        python-version: 3.10
+        python-version: 3.10.4
     - name: Coverage report
       run: |
         pip install --upgrade pip
