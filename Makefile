@@ -32,7 +32,7 @@ test_http_server:
 	@python -c "import http.server;import socketserver;import os;os.chdir(os.path.join('tests', 'tar_files'));httpd = socketserver.TCPServer(('', 8888), http.server.SimpleHTTPRequestHandler);httpd.serve_forever()" &
 
 test: clean test_http_server
-	py.test -n auto -vv -rxs
+	py.test -vv -rxs
 
 coverage:
 	py.test --cov-report=xml --cov=.
