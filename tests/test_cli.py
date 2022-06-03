@@ -7,7 +7,7 @@ from pupyl.cli import PupylCommandLineInterface
 CLI = PupylCommandLineInterface()
 
 
-def test_argument_parser_without_parameters(self):
+def test_argument_parser_without_parameters():
     """Unit test for method argument_parser, without params. case."""
 
     cli = CLI.argument_parser()
