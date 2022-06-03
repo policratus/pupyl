@@ -62,7 +62,7 @@ jobs:
     - name: Unit tests
       run: |
         pip install --upgrade pip
-        pip install pytest pytest-xdist
+        pip install pytest
         python setup.py install
         make test
 
