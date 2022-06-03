@@ -1,5 +1,6 @@
 """Unit tests for the command line interface."""
 from argparse import Namespace
+from unittest import TestCase
 
 from pupyl.cli import PupylCommandLineInterface
 
@@ -7,12 +8,15 @@ from pupyl.cli import PupylCommandLineInterface
 CLI = PupylCommandLineInterface()
 
 
-def test_argument_parser_without_parameters():
-    """Unit test for method argument_parser, without params. case."""
+class TestCases(TestCase):
+    """Unit test for special cases."""
 
-    cli = CLI.argument_parser()
+    def test_argument_parser_without_parameters(self):
+        """Unit test for method argument_parser, without params. case."""
 
-    assert cli.data_dir and not cli.options
+        with self.assertRaises(SystemExit):
+
+            _ = CLI.argument_parser()
 
 
 def test_parser_index_case():
