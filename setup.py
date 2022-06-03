@@ -33,6 +33,6 @@ setuptools.setup(
         'Programming Language :: Python :: 3.9',
         'Topic :: Scientific/Engineering :: Image Recognition'
     ],
-    python_requires='>=3.10',
+    python_requires='>=3.9',
     entry_points={'console_scripts': ['pupyl = pupyl.cli:pupyl']}
 )
