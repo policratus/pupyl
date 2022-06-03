@@ -32,16 +32,16 @@ test_http_server:
 	@python -c "import http.server;import socketserver;import os;os.chdir(os.path.join('tests', 'tar_files'));httpd = socketserver.TCPServer(('', 8888), http.server.SimpleHTTPRequestHandler);httpd.serve_forever()" &
 
 test: clean test_http_server
-	py.test -vv -rxs
+	py.test -n auto -vv -rxs
 
 coverage:
-	py.test --cov-report=xml --cov=.
+	py.test -n auto --cov-report=xml --cov=.
 
 linter:
 	pylint -j0 --rcfile=.pylintrc pupyl
 
 coverage-html: clean test_http_server
-	py.test -vv -rxs --cov-report=html --cov=.
+	py.test -n auto -vv -rxs --cov-report=html --cov=.
 	$(OPEN_EXECUTABLE) htmlcov/index.html
 
 docs: clean

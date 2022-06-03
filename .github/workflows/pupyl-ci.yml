@@ -62,7 +62,7 @@ jobs:
     - name: Unit tests
       run: |
         pip install --upgrade pip
-        pip install pytest
+        pip install pytest pytest-xdist
         python setup.py install
         make test
 
@@ -78,7 +78,7 @@ jobs:
     - name: Coverage report
       run: |
         pip install --upgrade pip
-        pip install pytest pytest-cov
+        pip install pytest pytest-xdist pytest-cov
         python setup.py install
         make coverage
 
