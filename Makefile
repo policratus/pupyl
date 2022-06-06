@@ -34,7 +34,7 @@ test_http_server:
 test: clean test_http_server
 	py.test -vv -rxs
 
-coverage:
+coverage: clean test_http_server
 	py.test --cov-report=xml --cov=.
 
 linter:
