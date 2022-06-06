@@ -3,47 +3,85 @@ name: pupyl-ci
 on: [push]
 
 jobs:
-  build:
 
-    name: Build and tests
+  pep8:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'skip-ci')"
-
+    name: pep8
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.8
+    - name: Set up Python 3.9
       uses: actions/setup-python@v1
       with:
-        python-version: 3.8
-    - name: Install dependencies
+        python-version: 3.9
+    - name: Check conformance with PEP-8 using flake8
       run: |
-        python -m pip install --upgrade pip
-        python setup.py install
-    - name: Check code with flake8
-      run: |
+        pip install --upgrade pip
         pip install flake8
         make flake8
+
+  lint:
+    runs-on: ubuntu-latest
+    name: lint
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
     - name: Linter with pylint
       run: |
+        pip install --upgrade pip
         pip install pylint
+        python setup.py install
         make linter
+
+  static:
+    runs-on: ubuntu-latest
+    name: static-check
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
     - name: Static type checking
       run: |
+        pip install --upgrade pip
         pip install mypy types-termcolor
         make static-check
-    - name: Tests
+
+  test:
+    runs-on: ubuntu-latest
+    name: test
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+    - name: Unit tests
       run: |
-        # Next two lines are a workaround for a faulty keras/tensorflow
-        # integration (regarding keras 2.9.0 and tensorflow 2.9.0).
-        # Hope to remove this in the near future.
-        pip uninstall --yes protobuf
-        pip install protobuf==3.20.1
-        # Everything as usual from now on
-        pip install pytest pytest-cov
+        pip install --upgrade pip
+        pip install pytest
+        python setup.py install
         make test
+
+  coverage:
+    runs-on: ubuntu-latest
+    name: coverage
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
     - name: Coverage report
-      run: make coverage
-    - name: CodeCov upload
+      run: |
+        pip install --upgrade pip
+        pip install pytest pytest-cov
+        python setup.py install
+        make coverage
+    - name: Uploads test coverage results to CodeCov
       uses: codecov/codecov-action@v1
       with:
         fail_ci_if_error: true

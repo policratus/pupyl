@@ -7,7 +7,7 @@
 ################
 The installation process for ``pupyl`` is pretty easy. Using your preferred (or
 even not knowing what is a)
-`python virtual environment <https://docs.python.org/3.8/tutorial/venv.html>`_,
+`python virtual environment <https://docs.python.org/3.9/tutorial/venv.html>`_,
 you just need to issue:
 
 *Installing from* `pypi <https://pypi.org/project/pupyl/>`_ *(stable versions)*:

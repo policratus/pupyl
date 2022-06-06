@@ -20,7 +20,7 @@ clean:
 	@find . -name "*.egg-info" | xargs rm -rf
 	@find . -name "*build" | xargs rm -rf
 	@find . -name ".mypy_cache" | xargs rm -rf
-	@-pkill -i 8888 || true
+	@-pkill -fi 8888 || true
 
 flake8: clean
 	@flake8 --show-source --ignore=E402 .
@@ -28,17 +28,17 @@ flake8: clean
 static-check: clean
 	@mypy pupyl/
 
-test_http_server:
+test_http_server: clean
 	@python -c "import http.server;import socketserver;import os;os.chdir(os.path.join('tests', 'tar_files'));httpd = socketserver.TCPServer(('', 8888), http.server.SimpleHTTPRequestHandler);httpd.serve_forever()" &
 
 test: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs
 
-coverage:
+coverage: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test --cov-report=xml --cov=.
 
-linter:
-	PYTHONPATH=$($PYTHONPATH):$(pwd) pylint pupyl
+linter: clean
+	PYTHONPATH=$($PYTHONPATH):$(pwd) pylint -j0 --rcfile=.pylintrc pupyl
 
 coverage-html: clean test_http_server
 	PYTHONPATH=$($PYTHONPATH):$(pwd) py.test -vv -rxs --cov-report=html --cov=.
