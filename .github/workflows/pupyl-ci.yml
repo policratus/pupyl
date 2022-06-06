@@ -81,12 +81,6 @@ jobs:
         pip install pytest pytest-cov
         python setup.py install
         make coverage
-
-  codecov:
-    needs: [coverage]
-    runs-on: ubuntu-latest
-    name: codecov-upload
-    steps:
     - name: Uploads test coverage results to CodeCov
       uses: codecov/codecov-action@v1
       with:
