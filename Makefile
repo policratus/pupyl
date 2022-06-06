@@ -28,7 +28,7 @@ flake8: clean
 static-check: clean
 	@mypy pupyl/
 
-test_http_server:
+test_http_server: clean
 	@python -c "import http.server;import socketserver;import os;os.chdir(os.path.join('tests', 'tar_files'));httpd = socketserver.TCPServer(('', 8888), http.server.SimpleHTTPRequestHandler);httpd.serve_forever()" &
 
 test: clean test_http_server
@@ -37,7 +37,7 @@ test: clean test_http_server
 coverage: clean test_http_server
 	py.test --cov-report=xml --cov=.
 
-linter:
+linter: clean
 	pylint -j0 --rcfile=.pylintrc pupyl
 
 coverage-html: clean test_http_server
