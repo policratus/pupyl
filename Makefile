@@ -20,7 +20,7 @@ clean:
 	@find . -name "*.egg-info" | xargs rm -rf
 	@find . -name "*build" | xargs rm -rf
 	@find . -name ".mypy_cache" | xargs rm -rf
-	@-pkill -i 8888 || true
+	@-pkill -fi 8888 || true
 
 flake8: clean
 	@flake8 --show-source --ignore=E402 .
