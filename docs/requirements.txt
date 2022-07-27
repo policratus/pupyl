@@ -1,2 +1,2 @@
-Sphinx==5.0.1
+Sphinx==5.1.1
 sphinx-press-theme==0.8.0
