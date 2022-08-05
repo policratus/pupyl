@@ -57,12 +57,12 @@ def test_index_creation_chosen_parameters():
         pupyl_test = PupylImageSearch(
             data_dir=temp_dir,
             import_images=True,
-            characteristic=Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
+            characteristic=Characteristics.MINIMUMWEIGHT_FAST_SMALL_PRECISION
         )
 
         assert pupyl_test._import_images and \
             pupyl_test._characteristic == Characteristics.\
-            LIGHTWEIGHT_REGULAR_PRECISION
+            MINIMUMWEIGHT_FAST_SMALL_PRECISION
 
 
 def test_index_config_file():
@@ -90,6 +90,33 @@ def test_index():
     assert os.path.isdir(TEST_DATA_DIR) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, 'pupyl.index')) and \
         os.path.isfile(os.path.join(TEST_DATA_DIR, '0', '0.jpg'))
+
+
+def test_characteristic_by_name():
+    """Unit test for instantiating a characteristic by its name."""
+    test_characteristic = 'MEDIUMWEIGHT_QUICK_GOOD_PRECISION'
+
+    with TemporaryDirectory() as temp_dir:
+        test_pupyl = PupylImageSearch(
+            data_dir=temp_dir,
+            characteristic=test_characteristic
+        )
+
+        assert test_pupyl._characteristic.name == test_characteristic
+
+
+def test_characteristic_by_value():
+    """Unit test for instantiating a characteristic by its value."""
+    # LIGHTWEIGHT_QUICK_SHORT_PRECISION
+    test_characteristic = 4
+
+    with TemporaryDirectory() as temp_dir:
+        test_pupyl = PupylImageSearch(
+            data_dir=temp_dir,
+            characteristic=test_characteristic
+        )
+
+        assert test_pupyl._characteristic.value == test_characteristic
 
 
 def test_index_no_extreme_mode():
@@ -188,13 +215,14 @@ def test_remove_non_extreme():
     with TemporaryDirectory() as temp_dir:
         pupyl_non_extreme = PupylImageSearch(
             data_dir=temp_dir,
-            extreme_mode=False
+            extreme_mode=False,
+            characteristic=Characteristics.HEAVYWEIGHT_SLOW_GOOD_PRECISION
         )
 
         pupyl_non_extreme.index(TEST_SCAN_DIR)
 
         with Extractors(
-            characteristics=Characteristics.HEAVYWEIGHT_HUGE_PRECISION,
+            characteristics=Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION,
             extreme_mode=False
         ) as extractor:
             with Index(extractor.output_shape, data_dir=temp_dir) as indexer:
@@ -206,7 +234,7 @@ def test_remove_non_extreme():
         pupyl_non_extreme.remove(index_to_remove)
 
         with Extractors(
-            characteristics=Characteristics.HEAVYWEIGHT_HUGE_PRECISION,
+            characteristics=Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION,
             extreme_mode=False
         ) as extractor:
             with Index(extractor.output_shape, data_dir=temp_dir) as indexer:

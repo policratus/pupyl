@@ -10,13 +10,14 @@ __version__ = 'v0.13.5'
 
 import os
 import json
+from enum import Enum
 import concurrent.futures
 
+from pupyl.indexer.facets import Index
 from pupyl.duplex.file_io import FileIO
+from pupyl.storage.database import ImageDatabase
 from pupyl.duplex.exceptions import FileIsNotImage
 from pupyl.embeddings.features import Extractors, Characteristics
-from pupyl.storage.database import ImageDatabase
-from pupyl.indexer.facets import Index
 
 
 class PupylImageSearch:
@@ -44,10 +45,91 @@ class PupylImageSearch:
         import_images: bool
             If images should (or was) imported into the database.
 
-        characteristic: Characteristics
+        characteristic: Characteristics or int or str
             The characteristic for feature extraction that must be used. If
             reading from an already created database, retrieves it from the
-            (internal) configuration files.
+            (internal) configuration files. It supports retrieval by the
+            ``Characteristics`` (``enum``), by its ``name`` (``str``) or
+            by its ``value`` (``int``). For more information, see
+            :ref:`features:📊 features module`.
+
+        Notes
+        -----
+        A ``characteristic`` defines a feature extractor, withits own
+        complexity and balance between search precision and indexing speed.
+        Below are the description of every possible
+        ``characteristic``,
+        indexing the dataset
+        `<https://github.com/policratus/pupyl/raw/main/samples/images.tar.xz>`_,
+        with 594 images.
+
+        .. list-table::
+           :header-rows: 1
+
+           * - Name
+             - Value
+             - Network
+             - Speed
+           * - MINIMUMWEIGHT_FAST_SMALL_PRECISION
+             - 1
+             - MobileNet
+             - 19 s
+           * - LIGHTWEIGHT_FAST_SMALL_PRECISION
+             - 2
+             - ResNet50V2
+             - 21.2 s
+           * - LIGHTWEIGHT_FAST_SHORT_PRECISION
+             - 3
+             - ResNet101V2
+             - 20.3 s
+           * - LIGHTWEIGHT_QUICK_SHORT_PRECISION
+             - 4
+             - DenseNet169
+             - 32.7 s
+           * - MEDIUMWEIGHT_QUICK_GOOD_PRECISION
+             - 5
+             - DenseNet201
+             - 31.2 s
+           * - MIDDLEWEIGHT_QUICK_GOOD_PRECISION
+             - 6
+             - InceptionV3
+             - 27 s
+           * - MIDDLEWEIGHT_SLOW_GOOD_PRECISION
+             - 7
+             - Xception
+             - 20.2 s
+           * - HEAVYWEIGHT_SLOW_GOOD_PRECISION
+             - 8
+             - EfficientNetV2M
+             - 39.3 s
+           * - HEAVYWEIGHT_SLOW_HUGE_PRECISION
+             - 9
+             - EfficientNetV2L
+             - 1min 1s
+
+        *All the tests above were under the same circumstances and resources.*
+
+        By default, ``pupyl`` chooses ``MINIMUMWEIGHT_FAST_SMALL_PRECISION``,
+        the fastest but with not so much accuracy than
+        'HEAVYWEIGHT_SLOW_HUGE_PRECISION', for instance.
+
+        Examples
+        --------
+        from pupyl.search import PupylImageSearch
+
+        # Creating a database using the extractor number 3,
+
+        # LIGHTWEIGHT_FAST_SHORT_PRECISION, network ResNet101V2
+
+        pupyl = PupylImageSearch(characteristic=3)
+
+        # Creating a database with extractor 'HEAVYWEIGHT_SLOW_GOOD_PRECISION',
+
+        # based on EfficientNetV2M
+
+        characteristic = 'HEAVYWEIGHT_SLOW_GOOD_PRECISION'
+
+        pupyl = PupylImageSearch(characteristic=characteristic)
         """
         self._extreme_mode = extreme_mode
 
@@ -78,10 +160,19 @@ class PupylImageSearch:
                 self._import_images = True
 
             if characteristic:
-                self._characteristic = characteristic
+                if isinstance(characteristic, Enum):
+                    self._characteristic = characteristic
+                elif isinstance(characteristic, int):
+                    self._characteristic = Characteristics.by_value(
+                        characteristic
+                    )
+                elif isinstance(characteristic, str):
+                    self._characteristic = Characteristics.by_name(
+                        characteristic
+                    )
             else:
                 self._characteristic = Characteristics.\
-                    HEAVYWEIGHT_HUGE_PRECISION
+                    MINIMUMWEIGHT_FAST_SMALL_PRECISION
 
         self.image_database = ImageDatabase(
             import_images=self._import_images,

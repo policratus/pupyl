@@ -4,12 +4,12 @@ import os
 import warnings
 from enum import Enum, auto
 
-import numpy
 import termcolor
 
 from pupyl.verbosity import quiet_tf
 quiet_tf()
 
+import numpy
 import tensorflow
 import keras.backend as backend
 import keras.applications as networks
@@ -25,18 +25,42 @@ class Characteristics(Enum):
     -----
     The currently supported characteristics are:
 
-    ``LIGHTWEIGHT_REGULAR_PRECISION # MobileNetV2``
+    ``MINIMUMWEIGHT_FAST_SMALL_PRECISION # MobileNet``
 
-    ``MEDIUMWEIGHT_GOOD_PRECISION # DenseNet169``
+    ``LIGHTWEIGHT_FAST_SMALL_PRECISION # ResNet50V2``
 
-    ``HEAVYWEIGHT_HUGE_PRECISION # EfficientNetB7``
+    ``LIGHTWEIGHT_FAST_SHORT_PRECISION # ResNet101V2``
+
+    ``LIGHTWEIGHT_QUICK_SHORT_PRECISION # DenseNet169``
+
+    ``MEDIUMWEIGHT_QUICK_GOOD_PRECISION # DenseNet201``
+
+    ``MIDDLEWEIGHT_QUICK_GOOD_PRECISION # InceptionV3``
+
+    ``MIDDLEWEIGHT_SLOW_GOOD_PRECISION # Xception``
+
+    ``HEAVYWEIGHT_SLOW_GOOD_PRECISION # EfficientNetV2M``
+
+    ``HEAVYWEIGHT_SLOW_HUGE_PRECISION # EfficientNetV2L``
     """
-    # MobileNetV2
-    LIGHTWEIGHT_REGULAR_PRECISION = auto()
+    # MobileNet
+    MINIMUMWEIGHT_FAST_SMALL_PRECISION = auto()
+    # ResNet50V2
+    LIGHTWEIGHT_FAST_SMALL_PRECISION = auto()
+    # ResNet101V2
+    LIGHTWEIGHT_FAST_SHORT_PRECISION = auto()
     # DenseNet169
-    MEDIUMWEIGHT_GOOD_PRECISION = auto()
-    # EfficientNetB7
-    HEAVYWEIGHT_HUGE_PRECISION = auto()
+    LIGHTWEIGHT_QUICK_SHORT_PRECISION = auto()
+    # DenseNet201
+    MEDIUMWEIGHT_QUICK_GOOD_PRECISION = auto()
+    # InceptionV3
+    MIDDLEWEIGHT_QUICK_GOOD_PRECISION = auto()
+    # Xception
+    MIDDLEWEIGHT_SLOW_GOOD_PRECISION = auto()
+    # EfficientNetV2M
+    HEAVYWEIGHT_SLOW_GOOD_PRECISION = auto()
+    # EfficientNetV2L
+    HEAVYWEIGHT_SLOW_HUGE_PRECISION = auto()
 
     @staticmethod
     def by_name(name):
@@ -49,7 +73,7 @@ class Characteristics(Enum):
 
         Raises
         ------
-        KeyError:
+        UnknownCharacteristicsName:
             If ``name`` is unknown.
 
         Returns
@@ -57,7 +81,38 @@ class Characteristics(Enum):
         enum:
             The corresponding characteristic.
         """
-        return Characteristics[name]
+        try:
+            return Characteristics[name]
+        except KeyError:
+            raise exceptions.UnknownCharacteristicsName(
+                f'Characteristic with name {name} is unknown.'
+            )
+
+    @staticmethod
+    def by_value(value):
+        """Returns a characteristic by its value.
+
+        Parameters
+        ----------
+        value: int
+            Integer representing a characteristic
+
+        Raises
+        ------
+        UnknownCharacteristicsValue:
+            If ``value`` is unknown.
+
+        Returns
+        -------
+        enum:
+            The corresponding characteristic.
+        """
+        try:
+            return Characteristics(value)
+        except ValueError:
+            raise exceptions.UnknownCharacteristicsValue(
+                f'Characteristic with value {value} is unknown.'
+            )
 
 
 class Extractors(ImageIO):
@@ -157,41 +212,109 @@ class Extractors(ImageIO):
         weights = 'imagenet'
         pooling = 'max'
         include_top = False
+        small_input_shape = (224, 224, 3)
+        middle_input_shape = (299, 299, 3)
+        large_input_shape = (480, 480, 3)
 
         if self._characteristics is \
-                Characteristics.LIGHTWEIGHT_REGULAR_PRECISION:
-            input_shape = (224, 224, 3)
+                Characteristics.MINIMUMWEIGHT_FAST_SMALL_PRECISION:
 
-            return networks.mobilenet_v2.preprocess_input, \
-                networks.mobilenet_v2.MobileNetV2(
+            return networks.mobilenet.preprocess_input, \
+                networks.mobilenet.MobileNet(
                     weights=weights,
                     pooling=pooling,
                     include_top=include_top,
-                    input_shape=input_shape
+                    input_shape=small_input_shape
                 )
 
         if self._characteristics is \
-                Characteristics.MEDIUMWEIGHT_GOOD_PRECISION:
-            input_shape = (224, 224, 3)
+                Characteristics.LIGHTWEIGHT_FAST_SMALL_PRECISION:
+
+            return networks.resnet_v2.preprocess_input, \
+                networks.resnet_v2.ResNet50V2(
+                    weights=weights,
+                    pooling=pooling,
+                    include_top=include_top,
+                    input_shape=small_input_shape
+                )
+
+        if self._characteristics is \
+                Characteristics.LIGHTWEIGHT_FAST_SHORT_PRECISION:
+
+            return networks.resnet_v2.preprocess_input, \
+                networks.resnet_v2.ResNet101V2(
+                    weights=weights,
+                    pooling=pooling,
+                    include_top=include_top,
+                    input_shape=small_input_shape
+                )
+
+        if self._characteristics is \
+                Characteristics.LIGHTWEIGHT_QUICK_SHORT_PRECISION:
 
             return networks.densenet.preprocess_input, \
                 networks.densenet.DenseNet169(
                     weights=weights,
                     pooling=pooling,
                     include_top=include_top,
-                    input_shape=input_shape
+                    input_shape=small_input_shape
                 )
 
         if self._characteristics is \
-                Characteristics.HEAVYWEIGHT_HUGE_PRECISION:
-            input_shape = (600, 600, 3)
+                Characteristics.MEDIUMWEIGHT_QUICK_GOOD_PRECISION:
 
-            return networks.efficientnet.preprocess_input, \
-                networks.efficientnet.EfficientNetB7(
+            return networks.densenet.preprocess_input, \
+                networks.densenet.DenseNet201(
                     weights=weights,
                     pooling=pooling,
                     include_top=include_top,
-                    input_shape=input_shape
+                    input_shape=small_input_shape
+                )
+
+        if self._characteristics is \
+                Characteristics.MIDDLEWEIGHT_QUICK_GOOD_PRECISION:
+
+            return networks.inception_v3.preprocess_input, \
+                networks.inception_v3.InceptionV3(
+                    weights=weights,
+                    pooling=pooling,
+                    include_top=include_top,
+                    input_shape=middle_input_shape
+                )
+
+        if self._characteristics is \
+                Characteristics.MIDDLEWEIGHT_SLOW_GOOD_PRECISION:
+
+            return networks.xception.preprocess_input, \
+                networks.xception.Xception(
+                    weights=weights,
+                    pooling=pooling,
+                    include_top=include_top,
+                    input_shape=middle_input_shape
+                )
+
+        if self._characteristics is \
+                Characteristics.HEAVYWEIGHT_SLOW_GOOD_PRECISION:
+
+            return networks.efficientnet_v2.preprocess_input, \
+                networks.efficientnet_v2.EfficientNetV2M(
+                    weights=weights,
+                    pooling=pooling,
+                    include_top=include_top,
+                    input_shape=large_input_shape,
+                    include_preprocessing=True
+                )
+
+        if self._characteristics is \
+                Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION:
+
+            return networks.efficientnet_v2.preprocess_input, \
+                networks.efficientnet_v2.EfficientNetV2L(
+                    weights=weights,
+                    pooling=pooling,
+                    include_top=include_top,
+                    input_shape=large_input_shape,
+                    include_preprocessing=True
                 )
 
         raise exceptions.UnknownCharacteristics(
@@ -220,7 +343,7 @@ class Extractors(ImageIO):
         else:
             tensor = self.size(uri, self.image_input_shape)
 
-        return numpy.expand_dims(self.converter(tensor), axis=0)
+        return tensorflow.expand_dims(self.converter(tensor), axis=0)
 
     def extract(self, uri):
         """Converts image uri to its embeddings.
@@ -281,4 +404,4 @@ class Extractors(ImageIO):
         numpy.ndarray
             Tensor loaded back again.
         """
-        return numpy.load(path, allow_pickle=False, fix_imports=False)
+        return numpy.load(path, mmap_mode=None, allow_pickle=False)
