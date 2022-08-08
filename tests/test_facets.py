@@ -178,7 +178,9 @@ def test_items_values():
 
 def test_preprocessor_animated_gif():
     """Unit test for method preprocessor, animated GIF case."""
-    with Extractors(Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION) as extractors:
+    with Extractors(
+        Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION
+    ) as extractors:
         assert extractors.preprocessor(TEST_ANIMATED_GIF).shape == \
             (1, 480, 480, 3)
 

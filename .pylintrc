@@ -9,3 +9,4 @@ disable=wrong-import-position,
 [DESIGN]
 max-attributes=16
 max-locals=16
+max-returns=9

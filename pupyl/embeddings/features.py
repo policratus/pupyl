@@ -83,10 +83,10 @@ class Characteristics(Enum):
         """
         try:
             return Characteristics[name]
-        except KeyError:
+        except KeyError as key_error:
             raise exceptions.UnknownCharacteristicsName(
                 f'Characteristic with name {name} is unknown.'
-            )
+            ) from key_error
 
     @staticmethod
     def by_value(value):
@@ -109,10 +109,10 @@ class Characteristics(Enum):
         """
         try:
             return Characteristics(value)
-        except ValueError:
+        except ValueError as value_error:
             raise exceptions.UnknownCharacteristicsValue(
                 f'Characteristic with value {value} is unknown.'
-            )
+            ) from value_error
 
 
 class Extractors(ImageIO):
@@ -218,7 +218,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.MINIMUMWEIGHT_FAST_SMALL_PRECISION:
-
             return networks.mobilenet.preprocess_input, \
                 networks.mobilenet.MobileNet(
                     weights=weights,
@@ -229,7 +228,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.LIGHTWEIGHT_FAST_SMALL_PRECISION:
-
             return networks.resnet_v2.preprocess_input, \
                 networks.resnet_v2.ResNet50V2(
                     weights=weights,
@@ -240,7 +238,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.LIGHTWEIGHT_FAST_SHORT_PRECISION:
-
             return networks.resnet_v2.preprocess_input, \
                 networks.resnet_v2.ResNet101V2(
                     weights=weights,
@@ -251,7 +248,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.LIGHTWEIGHT_QUICK_SHORT_PRECISION:
-
             return networks.densenet.preprocess_input, \
                 networks.densenet.DenseNet169(
                     weights=weights,
@@ -262,7 +258,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.MEDIUMWEIGHT_QUICK_GOOD_PRECISION:
-
             return networks.densenet.preprocess_input, \
                 networks.densenet.DenseNet201(
                     weights=weights,
@@ -273,7 +268,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.MIDDLEWEIGHT_QUICK_GOOD_PRECISION:
-
             return networks.inception_v3.preprocess_input, \
                 networks.inception_v3.InceptionV3(
                     weights=weights,
@@ -284,7 +278,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.MIDDLEWEIGHT_SLOW_GOOD_PRECISION:
-
             return networks.xception.preprocess_input, \
                 networks.xception.Xception(
                     weights=weights,
@@ -295,7 +288,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.HEAVYWEIGHT_SLOW_GOOD_PRECISION:
-
             return networks.efficientnet_v2.preprocess_input, \
                 networks.efficientnet_v2.EfficientNetV2M(
                     weights=weights,
@@ -307,7 +299,6 @@ class Extractors(ImageIO):
 
         if self._characteristics is \
                 Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION:
-
             return networks.efficientnet_v2.preprocess_input, \
                 networks.efficientnet_v2.EfficientNetV2L(
                     weights=weights,

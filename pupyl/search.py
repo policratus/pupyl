@@ -69,7 +69,7 @@ class PupylImageSearch:
            * - Name
              - Value
              - Network
-             - Speed
+             - Speed (GPU)
            * - MINIMUMWEIGHT_FAST_SMALL_PRECISION
              - 1
              - MobileNet
@@ -159,17 +159,16 @@ class PupylImageSearch:
             else:
                 self._import_images = True
 
-            if characteristic:
-                if isinstance(characteristic, Enum):
-                    self._characteristic = characteristic
-                elif isinstance(characteristic, int):
-                    self._characteristic = Characteristics.by_value(
-                        characteristic
-                    )
-                elif isinstance(characteristic, str):
-                    self._characteristic = Characteristics.by_name(
-                        characteristic
-                    )
+            if isinstance(characteristic, Enum):
+                self._characteristic = characteristic
+            elif isinstance(characteristic, int):
+                self._characteristic = Characteristics.by_value(
+                    characteristic
+                )
+            elif isinstance(characteristic, str):
+                self._characteristic = Characteristics.by_name(
+                    characteristic
+                )
             else:
                 self._characteristic = Characteristics.\
                     MINIMUMWEIGHT_FAST_SMALL_PRECISION
