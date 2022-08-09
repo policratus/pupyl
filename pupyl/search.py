@@ -45,7 +45,7 @@ class PupylImageSearch:
         import_images: bool
             If images should (or was) imported into the database.
 
-        characteristic: Characteristics or int or str
+        characteristic: Enum or int or str
             The characteristic for feature extraction that must be used. If
             reading from an already created database, retrieves it from the
             (internal) configuration files. It supports retrieval by the
@@ -55,13 +55,13 @@ class PupylImageSearch:
 
         Notes
         -----
-        A ``characteristic`` defines a feature extractor, withits own
+        A ``characteristic`` defines a feature extractor, with its own
         complexity and balance between search precision and indexing speed.
         Below are the description of every possible
         ``characteristic``,
         indexing the dataset
         `<https://github.com/policratus/pupyl/raw/main/samples/images.tar.xz>`_,
-        with 594 images.
+        containing 594 images.
 
         .. list-table::
            :header-rows: 1
