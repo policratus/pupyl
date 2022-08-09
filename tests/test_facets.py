@@ -98,7 +98,7 @@ class TestCases(TestCase):
 
     def test_export_exclusive_options(self):
         """Unit test for exclusive options."""
-        test_vector_size = 2560
+        test_vector_size = 1024
 
         with self.assertRaises(ExportIdsAndNames):
             with tempfile.TemporaryDirectory() as temp_dir:
@@ -124,7 +124,7 @@ def test_append_check_unique():
         warnings.simplefilter('always')
 
         with Extractors(
-            Characteristics.LIGHTWEIGHT_REGULAR_PRECISION
+            Characteristics.MINIMUMWEIGHT_FAST_SMALL_PRECISION
         ) as extractor, \
                 Index(extractor.output_shape, volatile=True) as index:
             for image in extractor.scan(TEST_CHECK_UNIQUE):
@@ -178,9 +178,11 @@ def test_items_values():
 
 def test_preprocessor_animated_gif():
     """Unit test for method preprocessor, animated GIF case."""
-    with Extractors(Characteristics.HEAVYWEIGHT_HUGE_PRECISION) as extractors:
+    with Extractors(
+        Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION
+    ) as extractors:
         assert extractors.preprocessor(TEST_ANIMATED_GIF).shape == \
-            (1, 600, 600, 3)
+            (1, 480, 480, 3)
 
 
 def test___get_item__():
@@ -398,7 +400,7 @@ def test_group_by_position():
 
 def test_export_group_by():
     """Unit test for method export_group_by method."""
-    test_vector_size = 2560
+    test_vector_size = 1024
 
     with tempfile.TemporaryDirectory() as temp_dir:
         test_search = PupylImageSearch(temp_dir)
@@ -420,7 +422,7 @@ def test_export_group_by():
 
 def test_export_group_by_position():
     """Unit test for method export_group_by method, position case."""
-    test_vector_size = 2560
+    test_vector_size = 1024
 
     with tempfile.TemporaryDirectory() as temp_dir:
         test_search = PupylImageSearch(temp_dir)
@@ -438,7 +440,7 @@ def test_export_group_by_position():
 
 def test_export_results():
     """Unit test for method export_results."""
-    test_vector_size = 2560
+    test_vector_size = 1024
 
     with tempfile.TemporaryDirectory() as temp_dir:
         test_search = PupylImageSearch(temp_dir)

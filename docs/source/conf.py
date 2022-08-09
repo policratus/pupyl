@@ -16,7 +16,11 @@ version = release
 
 # -- General configuration ---------------------------------------------------
 
-extensions = ['sphinx.ext.napoleon', 'sphinx.ext.autodoc']
+extensions = [
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosectionlabel'
+]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -35,3 +39,7 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_preprocess_types = True
 napoleon_attr_annotations = True
+
+# -- Options for autosectionlabel --------------------------------------------
+# Make sure the target is unique
+autosectionlabel_prefix_document = True

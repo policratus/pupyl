@@ -5,8 +5,9 @@ from os.path import abspath
 from enum import Enum, auto
 from unittest import TestCase
 
+from pupyl.embeddings.exceptions import UnknownCharacteristics, \
+    UnknownCharacteristicsValue, UnknownCharacteristicsName
 from pupyl.embeddings.features import Characteristics, Extractors
-from pupyl.embeddings.exceptions import UnknownCharacteristics
 
 
 TEST_LOCAL = abspath('tests/test_image.jpg')
@@ -14,18 +15,20 @@ UNKNOWN_CHARACTERISTICS = 'UNKNOWN'
 
 
 class TestCharacteristics(Enum):
-    """
-    Defines enumerators to test if all characteristics are described
-    """
-    LIGHTWEIGHT_REGULAR_PRECISION = auto()
-    MEDIUMWEIGHT_GOOD_PRECISION = auto()
-    HEAVYWEIGHT_HUGE_PRECISION = auto()
+    """Defines enumerators to test if all characteristics are described."""
+    MINIMUMWEIGHT_FAST_SMALL_PRECISION = auto()
+    LIGHTWEIGHT_FAST_SMALL_PRECISION = auto()
+    LIGHTWEIGHT_FAST_SHORT_PRECISION = auto()
+    LIGHTWEIGHT_QUICK_SHORT_PRECISION = auto()
+    MEDIUMWEIGHT_QUICK_GOOD_PRECISION = auto()
+    MIDDLEWEIGHT_QUICK_GOOD_PRECISION = auto()
+    MIDDLEWEIGHT_SLOW_GOOD_PRECISION = auto()
+    HEAVYWEIGHT_SLOW_GOOD_PRECISION = auto()
+    HEAVYWEIGHT_SLOW_HUGE_PRECISION = auto()
 
 
 class TestCases(TestCase):
-    """
-    Unit tests over special cases
-    """
+    """Unit tests over special cases."""
 
     def test_unknown_network_instance(self):
         """Unit test for an unknown network characteristic."""
@@ -37,28 +40,40 @@ class TestCases(TestCase):
         with self.assertRaises(KeyError):
             _ = Characteristics[UNKNOWN_CHARACTERISTICS]
 
+    def test_unknown_characteristic_name(self):
+        """Unit test for an unknown characteristic name."""
+        with self.assertRaises(UnknownCharacteristicsName):
+            _ = Characteristics.by_name(UNKNOWN_CHARACTERISTICS)
+
+    def test_unknown_characteristic_value(self):
+        """Unit test for an unknown characteristic value."""
+        with self.assertRaises(UnknownCharacteristicsValue):
+            _ = Characteristics.by_value(999)
+
 
 def test_characteristics():
-    """
-    Unit test for characteristics definition
-    """
+    """Unit test for characteristics definition."""
     for characteristic in TestCharacteristics._member_names_:
         assert characteristic in Characteristics._member_names_
 
 
+def test_by_value():
+    """Unit test for characteristic retrieval by value."""
+    for test_characteristic in TestCharacteristics:
+        assert test_characteristic.name == Characteristics.by_value(
+            test_characteristic.value
+        ).name
+
+
 def test_network_instance():
-    """
-    Unit test for network instantiation
-    """
+    """Unit test for network instantiation."""
     for characteristic in Characteristics:
         with Extractors(characteristic) as extractor:
             assert extractor._infer_network()[1].name == extractor.network.name
 
 
 def test_extractors_context_manager():
-    """
-    Unit test for context manager Extractors
-    """
+    """Unit test for context manager Extractors."""
     for characteristic in Characteristics:
         with Extractors(characteristic) as extractors:
             assert isinstance(extractors, Extractors)

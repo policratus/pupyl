@@ -176,7 +176,9 @@ class FileType:
 
                 return hexa.name
 
-        raise exceptions.FileTypeNotSupportedYet
+        raise exceptions.FileTypeNotSupportedYet(
+            'Input file type is not supported yet.'
+        )
 
     @staticmethod
     def tar_compressed_types_resolve(sub_type, mimetype=False):
