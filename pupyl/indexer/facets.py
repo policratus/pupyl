@@ -366,7 +366,9 @@ class Index:
             raise IndexNotBuildYet('Index file not built yet.')
 
         if position > len(self):
-            raise IndexError
+            raise IndexError(
+                f'Position {position} is greater than index length.'
+            )
 
         with Index(self.size, volatile=True, trees=self.trees) as tmp_idx:
             shrink = False
@@ -527,7 +529,7 @@ class Index:
         if self._position < len(all_values):
             return all_values[self._position]
 
-        raise StopIteration
+        raise StopIteration('No more values to iterate.')
 
     def group_by(self, top=10, **kwargs):
         """Returns all (or some position) on the index which is similar

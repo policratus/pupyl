@@ -199,7 +199,7 @@ class ImageIO(FileIO):
         if cls.is_image(image_bytes):
             return b64encode(image_bytes)
 
-        raise FileIsNotImage
+        raise FileIsNotImage('Input image was not recognized as a valid one.')
 
     @staticmethod
     def save_image(path, bytess):
