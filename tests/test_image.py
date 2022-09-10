@@ -150,3 +150,7 @@ def test_get_image_bytes_to_base64():
         test_image_b64 = b64encode(image_bytes)
 
     assert test_image_b64 == ImageIO.get_image_bytes_to_base64(image_bytes)
+
+
+def test_os_supports_compression():
+    isinstance(ImageIO.os_supports_compression(), bool)

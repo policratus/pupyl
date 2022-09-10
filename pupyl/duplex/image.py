@@ -9,6 +9,8 @@ import tensorflow
 from tensorflow import io as io_ops
 from tensorflow import image as image_ops
 
+import platform
+
 from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.exceptions import FileIsNotImage
 
@@ -306,3 +308,19 @@ class ImageIO(FileIO):
             return cls.encoded_to_tensor(compressed)
 
         return compressed
+
+    @staticmethod
+    def os_supports_compression():
+        """Whether the underlying OS supports compression using the JPEG algorithm.
+
+        Returns
+        -------
+        bool:
+            True if the OS supports compression, False otherwise.
+        """
+        compression_supported = True
+
+        if platform.system() == "Windows":
+            compression_supported = False
+
+        return compression_supported
