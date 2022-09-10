@@ -311,7 +311,7 @@ class ImageIO(FileIO):
 
     @staticmethod
     def os_supports_compression():
-        """Whether the underlying OS supports compression using the JPEG algorithm.
+        """Whether the underlying OS supports compression.
 
         Returns
         -------

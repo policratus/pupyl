@@ -320,7 +320,10 @@ class ImageDatabase(ImageIO):
             )
 
             if not os.path.exists(mounted_file):
-                if self.is_animated_gif(uri) or not self.os_supports_compression():
+                compression_not_supported = not self.os_supports_compression()
+                if (
+                    self.is_animated_gif(uri) or compression_not_supported
+                ):
                     warnings.warn(
                         termcolor.colored(
                             f'Indexing uncompressed file {uri}',
