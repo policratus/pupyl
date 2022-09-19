@@ -326,7 +326,8 @@ class ImageDatabase(ImageIO):
                 ):
                     warnings.warn(
                         termcolor.colored(
-                            f'Indexing uncompressed file {uri}',
+                            f'Storing {uri} with original compression due'
+                            'to underlying platform incompatibility.',
                             color='yellow',
                             attrs=['bold']
                         ),
