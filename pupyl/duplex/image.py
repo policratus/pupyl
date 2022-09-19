@@ -1,6 +1,7 @@
 """Performs multiple operations over images, like resizing,loading and so on"""
 
 from base64 import b64encode
+from platform import system
 
 from pupyl.verbosity import quiet_tf
 quiet_tf()
@@ -8,8 +9,6 @@ quiet_tf()
 import tensorflow
 from tensorflow import io as io_ops
 from tensorflow import image as image_ops
-
-import platform
 
 from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.exceptions import FileIsNotImage
@@ -320,7 +319,7 @@ class ImageIO(FileIO):
         """
         compression_supported = True
 
-        if platform.system() == "Windows":
+        if system() == 'Windows':
             compression_supported = False
 
         return compression_supported
