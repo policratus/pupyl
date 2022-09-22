@@ -158,7 +158,7 @@ def test_get_image_bytes_to_base64():
     'os, expected_support',
     [
         ('Windows', False),
-        ("Linux", True),
+        ('Linux', True),
         ("Darwin", True)
     ]
 )
