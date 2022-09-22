@@ -1,6 +1,7 @@
 """Performs multiple operations over images, like resizing,loading and so on"""
 
 from base64 import b64encode
+from platform import system
 
 from pupyl.verbosity import quiet_tf
 quiet_tf()
@@ -306,3 +307,19 @@ class ImageIO(FileIO):
             return cls.encoded_to_tensor(compressed)
 
         return compressed
+
+    @staticmethod
+    def os_supports_compression():
+        """Whether the underlying OS supports compression.
+
+        Returns
+        -------
+        bool:
+            True if the OS supports compression, False otherwise.
+        """
+        compression_supported = True
+
+        if system() == 'Windows':
+            compression_supported = False
+
+        return compression_supported
