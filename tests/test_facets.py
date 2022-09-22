@@ -101,21 +101,27 @@ class TestCases(TestCase):
         test_vector_size = 1024
 
         with self.assertRaises(ExportIdsAndNames):
-            with tempfile.TemporaryDirectory() as temp_dir:
-                test_search = PupylImageSearch(temp_dir)
+            # Windows: bypass clean up errors
+            try:
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    test_search = PupylImageSearch(temp_dir)
 
-                test_search.index(TEST_INDEX_EXPORT)
+                    test_search.index(TEST_INDEX_EXPORT)
 
-                with tempfile.TemporaryDirectory() as new_temp_dir:
-                    with Index(test_vector_size, data_dir=temp_dir) as index:
-                        index.export_results(
-                            new_temp_dir,
-                            test_search.search(
-                                os.path.join(TEST_INDEX_EXPORT, '1.jpg')
-                            ),
-                            keep_ids=True,
-                            keep_names=True
-                        )
+                    with tempfile.TemporaryDirectory() as new_temp_dir:
+                        with Index(
+                            test_vector_size, data_dir=temp_dir
+                        ) as index:
+                            index.export_results(
+                                new_temp_dir,
+                                test_search.search(
+                                    os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                                ),
+                                keep_ids=True,
+                                keep_names=True
+                            )
+            except PermissionError:
+                pass
 
 
 def test_append_check_unique():

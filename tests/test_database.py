@@ -1,7 +1,7 @@
 """Unit tests related to storage.database module."""
 import tempfile
-from os import sep
 from shutil import copy
+from os import sep, abspath
 from unittest import TestCase
 from os.path import join, relpath, exists
 
@@ -95,6 +95,8 @@ def test___get_item__():
 
     test_metadata = resolve_original_path(test_metadata)
 
+    # Converting to underlying filesystem directory separator
+    test_metadata['internal_path'] = abspath(test_metadata['internal_path'])
     assert test_metadata == TEST_METADATA
 
     test_metadata = image_database[1]
@@ -304,6 +306,8 @@ def test_load_image_metadata():
 
     test_metadata = resolve_original_path(test_metadata)
 
+    test_metadata['internal_path'] = abspath(test_metadata['internal_path'])
+
     assert test_metadata == TEST_METADATA
 
     test_metadata = image_database.load_image_metadata(1)
@@ -332,7 +336,7 @@ def test_load_image_metadata_filtered():
 
 def test_list_images():
     """Unit test for method list_images."""
-    expected_result = 'tests/test_database/0/0.jpg'
+    expected_result = abspath('tests/test_database/0/0.jpg')
 
     image_database = ImageDatabase(
         import_images=True,
@@ -346,7 +350,7 @@ def test_list_images():
 
 def test_list_images_return_ids():
     """Unit test for method list_images, return ids case."""
-    expected_path = 'tests/test_database/0/0.jpg'
+    expected_path = abspath('tests/test_database/0/0.jpg')
     expected_index = 0
     expected_result = (expected_index, expected_path)
 
