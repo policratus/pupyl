@@ -159,7 +159,7 @@ def test_get_image_bytes_to_base64():
     [
         ('Windows', False),
         ('Linux', True),
-        ("Darwin", True)
+        ('Darwin', True)
     ]
 )
 @patch('pupyl.duplex.image.system')
