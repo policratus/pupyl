@@ -1,9 +1,9 @@
 """Unit tests related to storage.database module."""
 import tempfile
+from os import sep
 from shutil import copy
-from os import sep, abspath
 from unittest import TestCase
-from os.path import join, relpath, exists
+from os.path import join, relpath, exists, abspath
 
 from pupyl.storage.database import ImageDatabase
 
