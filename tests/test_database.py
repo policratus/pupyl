@@ -3,7 +3,7 @@ import tempfile
 from os import sep
 from shutil import copy
 from unittest import TestCase
-from os.path import join, relpath, exists, abspath
+from os.path import join, relpath, exists
 
 from pupyl.storage.database import ImageDatabase
 
@@ -96,7 +96,7 @@ def test___get_item__():
     test_metadata = resolve_original_path(test_metadata)
 
     # Converting to underlying filesystem directory separator
-    test_metadata['internal_path'] = abspath(test_metadata['internal_path'])
+    test_metadata['internal_path'] = relpath(test_metadata['internal_path'])
     assert test_metadata == TEST_METADATA
 
     test_metadata = image_database[1]
@@ -306,7 +306,7 @@ def test_load_image_metadata():
 
     test_metadata = resolve_original_path(test_metadata)
 
-    test_metadata['internal_path'] = abspath(test_metadata['internal_path'])
+    test_metadata['internal_path'] = relpath(test_metadata['internal_path'])
 
     assert test_metadata == TEST_METADATA
 
@@ -336,7 +336,7 @@ def test_load_image_metadata_filtered():
 
 def test_list_images():
     """Unit test for method list_images."""
-    expected_result = abspath('tests/test_database/0/0.jpg')
+    expected_result = relpath('tests/test_database/0/0.jpg')
 
     image_database = ImageDatabase(
         import_images=True,
@@ -350,7 +350,7 @@ def test_list_images():
 
 def test_list_images_return_ids():
     """Unit test for method list_images, return ids case."""
-    expected_path = abspath('tests/test_database/0/0.jpg')
+    expected_path = relpath('tests/test_database/0/0.jpg')
     expected_index = 0
     expected_result = (expected_index, expected_path)
 

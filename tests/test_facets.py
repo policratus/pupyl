@@ -2,6 +2,7 @@
 import os
 import tempfile
 import warnings
+from platform import system
 from unittest import TestCase
 
 import numpy
@@ -100,28 +101,37 @@ class TestCases(TestCase):
         """Unit test for exclusive options."""
         test_vector_size = 1024
 
+        def export_routines(temp_dir, new_temp_dir):
+            test_search = PupylImageSearch(temp_dir)
+
+            test_search.index(TEST_INDEX_EXPORT)
+
+            with Index(
+                test_vector_size, data_dir=temp_dir
+            ) as index:
+                index.export_results(
+                    new_temp_dir,
+                    test_search.search(
+                        os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                    ),
+                    keep_ids=True,
+                    keep_names=True
+                )
+
         with self.assertRaises(ExportIdsAndNames):
             # Windows: bypass clean up errors
-            try:
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    test_search = PupylImageSearch(temp_dir)
+            if system() == 'Windows':
+                temp_dir = tempfile.TemporaryDirectory()
+                new_temp_dir = tempfile.TemporaryDirectory()
 
-                    test_search.index(TEST_INDEX_EXPORT)
+                export_routines(temp_dir.name, new_temp_dir.name)
 
-                    with tempfile.TemporaryDirectory() as new_temp_dir:
-                        with Index(
-                            test_vector_size, data_dir=temp_dir
-                        ) as index:
-                            index.export_results(
-                                new_temp_dir,
-                                test_search.search(
-                                    os.path.join(TEST_INDEX_EXPORT, '1.jpg')
-                                ),
-                                keep_ids=True,
-                                keep_names=True
-                            )
-            except PermissionError:
-                pass
+                temp_dir.cleanup()
+                new_temp_dir.cleanup()
+            else:
+                with tempfile.TemporaryDirectory() as temp_dir, \
+                        tempfile.TemporaryDirectory() as new_temp_dir:
+                    export_routines(temp_dir.name, new_temp_dir.name)
 
 
 def test_append_check_unique():
@@ -408,66 +418,87 @@ def test_export_group_by():
     """Unit test for method export_group_by method."""
     test_vector_size = 1024
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        test_search = PupylImageSearch(temp_dir)
-        test_search.index(TEST_INDEX_EXPORT)
+    def export_routine(temp_dir, new_temp_dir):
+        with Index(test_vector_size, data_dir=temp_dir) as index:
+            test_search = PupylImageSearch(temp_dir)
+            test_search.index(TEST_INDEX_EXPORT)
 
-        with tempfile.TemporaryDirectory() as new_temp_dir:
-            with Index(test_vector_size, data_dir=temp_dir) as index:
-                index.export_by_group_by(new_temp_dir)
+            index.export_by_group_by(new_temp_dir)
 
-                assert os.path.exists(os.path.join(new_temp_dir, '0', '1.jpg'))
-                assert os.path.exists(
-                    os.path.join(new_temp_dir, '0', 'group.jpg')
-                )
-                assert os.path.exists(os.path.join(new_temp_dir, '1', '1.jpg'))
-                assert os.path.exists(
-                    os.path.join(new_temp_dir, '1', 'group.jpg')
-                )
+            assert os.path.exists(os.path.join(new_temp_dir, '0', '1.jpg'))
+            assert os.path.exists(
+                os.path.join(new_temp_dir, '0', 'group.jpg')
+            )
+            assert os.path.exists(os.path.join(new_temp_dir, '1', '1.jpg'))
+            assert os.path.exists(
+                os.path.join(new_temp_dir, '1', 'group.jpg')
+            )
+
+    # Windows: bypass clean up errors
+    if system() == 'Windows':
+        temp_dir = tempfile.TemporaryDirectory()
+        new_temp_dir = tempfile.TemporaryDirectory()
+
+        export_routines(temp_dir.name, new_temp_dir.name)
+
+        temp_dir.clean_up()
+        new_temp_dir.clean_up()
+    else:
+        with tempfile.TemporaryDirectory() as temp_dir, \
+                tempfile.TemporaryDirectory() as new_temp_dir:
+            export_routines(temp_dir.name, new_temp_dir.name)
 
 
 def test_export_group_by_position():
     """Unit test for method export_group_by method, position case."""
     test_vector_size = 1024
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        test_search = PupylImageSearch(temp_dir)
-        test_search.index(TEST_INDEX_EXPORT)
+    # Windows: bypass clean up errors
+    try:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_search = PupylImageSearch(temp_dir)
+            test_search.index(TEST_INDEX_EXPORT)
 
-        with tempfile.TemporaryDirectory() as new_temp_dir:
-            with Index(test_vector_size, data_dir=temp_dir) as index:
-                index.export_by_group_by(new_temp_dir, position=1)
+            with tempfile.TemporaryDirectory() as new_temp_dir:
+                with Index(test_vector_size, data_dir=temp_dir) as index:
+                    index.export_by_group_by(new_temp_dir, position=1)
 
-                assert os.path.exists(os.path.join(new_temp_dir, '1', '1.jpg'))
-                assert os.path.exists(
-                    os.path.join(new_temp_dir, '1', 'group.jpg')
-                )
+                    assert os.path.exists(os.path.join(new_temp_dir, '1', '1.jpg'))
+                    assert os.path.exists(
+                        os.path.join(new_temp_dir, '1', 'group.jpg')
+                    )
+    except PermissionError:
+        pass
 
 
 def test_export_results():
     """Unit test for method export_results."""
     test_vector_size = 1024
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        test_search = PupylImageSearch(temp_dir)
-        test_search.index(TEST_INDEX_EXPORT)
+    # Windows: bypass clean up errors
+    try:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            test_search = PupylImageSearch(temp_dir)
+            test_search.index(TEST_INDEX_EXPORT)
 
-        with tempfile.TemporaryDirectory() as new_temp_dir:
-            with Index(test_vector_size, data_dir=temp_dir) as index:
-                index.export_results(
-                    new_temp_dir, test_search.search(
-                        os.path.join(TEST_INDEX_EXPORT, '1.jpg')
-                    ),
-                    keep_ids=True
-                )
+            with tempfile.TemporaryDirectory() as new_temp_dir:
+                with Index(test_vector_size, data_dir=temp_dir) as index:
+                    index.export_results(
+                        new_temp_dir, test_search.search(
+                            os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                        ),
+                        keep_ids=True
+                    )
 
-                assert os.path.exists(os.path.join(new_temp_dir, '1.jpg'))
+                    assert os.path.exists(os.path.join(new_temp_dir, '1.jpg'))
 
-                index.export_results(
-                    new_temp_dir, test_search.search(
-                        os.path.join(TEST_INDEX_EXPORT, '1.jpg')
-                    ),
-                    keep_names=True
-                )
+                    index.export_results(
+                        new_temp_dir, test_search.search(
+                            os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                        ),
+                        keep_names=True
+                    )
 
-                assert os.path.exists(os.path.join(new_temp_dir, '1.jpg'))
+                    assert os.path.exists(os.path.join(new_temp_dir, '1.jpg'))
+    except PermissionError:
+        pass
