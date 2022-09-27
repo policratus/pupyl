@@ -2,7 +2,6 @@
 import os
 import tempfile
 import warnings
-from platform import system
 from unittest import TestCase
 
 import numpy
@@ -99,17 +98,25 @@ class TestCases(TestCase):
         test_vector_size = 1024
 
         with self.assertRaises(ExportIdsAndNames):
-            with tempfile.TemporaryDirectory() as temp_dir, \
-                    Index(test_vector_size, data_dir=temp_dir) as index, \
-                    tempfile.TemporaryDirectory() as new_temp_dir:
-                index.export_results(
-                    new_temp_dir,
-                    test_search.search(
-                        os.path.join(TEST_INDEX_EXPORT, '1.jpg')
-                    ),
-                    keep_ids=True,
-                    keep_names=True
-                )
+            with tempfile.TemporaryDirectory(
+                    ignore_cleanup_errors=True
+                ) as temp_dir, \
+                    tempfile.TemporaryDirectory(
+                            ignore_cleanup_errors=True
+                    ) as new_temp_dir:
+
+                test_search = PupylImageSearch(temp_dir)
+                test_search.index(TEST_INDEX_EXPORT)
+
+                with Index(test_vector_size, data_dir=temp_dir) as index:
+                    index.export_results(
+                        new_temp_dir,
+                        test_search.search(
+                            os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                        ),
+                        keep_ids=True,
+                        keep_names=True
+                    )
 
 
 def test_append_check_unique():
