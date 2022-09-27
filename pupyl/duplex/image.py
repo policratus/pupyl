@@ -10,8 +10,6 @@ import tensorflow
 from tensorflow import io as io_ops
 from tensorflow import image as image_ops
 
-import platform
-
 from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.exceptions import FileIsNotImage
 
