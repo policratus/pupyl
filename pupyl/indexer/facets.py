@@ -6,9 +6,9 @@ from warnings import warn as warning
 
 from annoy import AnnoyIndex
 
-from pupyl.duplex.file_io import FileIO
 from pupyl.addendum.operators import intmul
 from pupyl.storage.database import ImageDatabase
+from pupyl.duplex.file_io import FileIO, SafeTemporaryResource
 from pupyl.indexer.exceptions import FileIsNotAnIndex, \
     IndexNotBuildYet, NoDataDirForPermanentIndex, \
     DataDirDefinedForVolatileIndex, NullTensorError, \
@@ -59,15 +59,14 @@ class Index:
                 raise OSError('data_dir parameter is not a directory')
 
             os.makedirs(self._data_dir, exist_ok=True)
-            self._path = os.path.join(self._data_dir, self.index_name)
+            self._path = os.path.join(self._data_dir, self.name)
         elif not self._data_dir and not self._volatile:
             raise NoDataDirForPermanentIndex(
                 'Data directory for permament index was not set.'
             )
         elif not self._data_dir and self._volatile:
-            _temp_file = FileIO.safe_temp_file()
-            self._data_dir = os.path.dirname(_temp_file)
-            self._path = _temp_file
+            self._path = SafeTemporaryResource()
+            self._data_dir = self.directory
         else:
             raise DataDirDefinedForVolatileIndex(
                 'Impossible to set a data directory for a volatile index.'
@@ -116,8 +115,19 @@ class Index:
         return self._path
 
     @property
-    def index_name(self):
-        """Getter for property index_name.
+    def directory(self):
+        """Getter for property directory.
+
+        Returns
+        -------
+        str:
+            With the directory of the current index.
+        """
+        return os.path.dirname(self.path)
+
+    @property
+    def name(self):
+        """Getter for property name.
 
         Returns
         -------
@@ -174,6 +184,8 @@ class Index:
         if not exc_type:
 
             del exc_type, exc_val, exc_tb
+
+            self._path.cleanup()
 
             self.flush()
 
