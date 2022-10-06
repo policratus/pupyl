@@ -6,12 +6,13 @@ from unittest import TestCase
 import numpy
 
 from pupyl.indexer.facets import Index
+from pupyl.search import PupylImageSearch
+from pupyl.duplex.file_io import FileIO
+from pupyl.duplex.temporary import SafeTemporaryResource
+from pupyl.embeddings.features import Extractors, Characteristics
 from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
     NoDataDirForPermanentIndex, DataDirDefinedForVolatileIndex, \
     NullTensorError, TopNegativeOrZero, EmptyIndexError, ExportIdsAndNames
-from pupyl.search import PupylImageSearch
-from pupyl.duplex.file_io import FileIO, SafeTemporaryResource
-from pupyl.embeddings.features import Extractors, Characteristics
 
 
 TEST_INDEX_PATH = os.path.abspath('tests')
