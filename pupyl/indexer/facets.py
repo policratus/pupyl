@@ -65,7 +65,8 @@ class Index:
                 'Data directory for permament index was not set.'
             )
         elif not self._data_dir and self._volatile:
-            self._path = SafeTemporaryResource()
+            self._temp_dir = SafeTemporaryResource()
+            self._path = self._temp_dir.name
             self._data_dir = self.directory
         else:
             raise DataDirDefinedForVolatileIndex(
@@ -123,7 +124,7 @@ class Index:
         str:
             With the directory of the current index.
         """
-        return os.path.dirname(self.path)
+        return os.path.dirname(self._path)
 
     @property
     def name(self):
@@ -185,7 +186,8 @@ class Index:
 
             del exc_type, exc_val, exc_tb
 
-            self._path.cleanup()
+            if self.volatile:
+                self._temp_dir.cleanup()
 
             self.flush()
 

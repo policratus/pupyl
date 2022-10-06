@@ -1,6 +1,5 @@
 """Unit tests related to indexer.facets module."""
 import os
-import tempfile
 import warnings
 from unittest import TestCase
 
@@ -98,19 +97,14 @@ class TestCases(TestCase):
         test_vector_size = 1024
 
         with self.assertRaises(ExportIdsAndNames):
-            with tempfile.TemporaryDirectory(
-                    ignore_cleanup_errors=True
-                ) as temp_dir, \
-                    tempfile.TemporaryDirectory(
-                            ignore_cleanup_errors=True
-                    ) as new_temp_dir:
-
-                test_search = PupylImageSearch(temp_dir)
+            with SafeTemporaryResource() as temp_dir, \
+                    SafeTemporaryResource() as new_temp_dir:
+                test_search = PupylImageSearch(temp_dir.name)
                 test_search.index(TEST_INDEX_EXPORT)
 
-                with Index(test_vector_size, data_dir=temp_dir) as index:
+                with Index(test_vector_size, data_dir=temp_dir.name) as index:
                     index.export_results(
-                        new_temp_dir,
+                        new_temp_dir.name,
                         test_search.search(
                             os.path.join(TEST_INDEX_EXPORT, '1.jpg')
                         ),
@@ -241,7 +235,7 @@ def test_size():
 def test_path_property():
     """Unit test for path property."""
     with Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH) as index:
-        assert index.path == os.path.join(TEST_INDEX_PATH, index.index_name)
+        assert index.path == os.path.join(TEST_INDEX_PATH, index.name)
 
 
 def test_trees_property():
@@ -289,28 +283,28 @@ def test_append_new_file():
 
 
 def test_append_new_created_file():
-    """Unit test for method append, created file case."""
-    new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
-
-    with Index(TEST_VECTOR_SIZE, volatile=True) as index:
-        test_size_before = len(index)
-
-        index.append(new_tensor)
-
-        test_size_after = len(index)
-
-        assert test_size_after == test_size_before + 1
-
-        numpy.testing.assert_array_almost_equal(
-            index[-1], new_tensor, decimal=3
-        )
-
-
+     """Unit test for method append, created file case."""
+     new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
+ 
+     with Index(TEST_VECTOR_SIZE, volatile=True) as index:
+         test_size_before = len(index)
+ 
+         index.append(new_tensor)
+ 
+         test_size_after = len(index)
+ 
+         assert test_size_after == test_size_before + 1
+ 
+         numpy.testing.assert_array_almost_equal(
+             index[-1], new_tensor, decimal=3
+         )
+ 
+ 
 def test_remove():
     """Unit test for method remove."""
     index_to_remove = 8
 
-    with Index.SafeTemporaryResource() as temp_dir:
+    with SafeTemporaryResource() as temp_dir:
         with Index(TEST_VECTOR_SIZE, data_dir=temp_dir.name) as index:
             for _ in range(16):
                 index.append(numpy.random.normal(size=TEST_VECTOR_SIZE))
@@ -330,207 +324,160 @@ def test_remove():
                 test_value,
                 index[index_to_remove]
             )
- 
- 
-# def test_pop():
-#     """Unit test for method pop."""
-#     if system() == 'Windows':
-#         temp_dir = tempfile.TemporaryDirectory()
-# 
-#         pop_routines(temp_dir.name)
-# 
-#         temp_dir.cleanup()
-#     else:
-#         with tempfile.TemporaryDirectory() as temp_dir:
-#             with Index(TEST_VECTOR_SIZE, data_dir=temp_dir.name) as index:
-#                 for _ in range(16):
-#                     index.append(numpy.random.normal(size=TEST_VECTOR_SIZE))
-# 
-#                 test_size_before = len(index)
-# 
-#                 test_value_before = index[-1]
-# 
-#             with Index(TEST_VECTOR_SIZE, data_dir=temp_dir.name) as index:
-#                 test_value_after = index.pop()
-# 
-#                 assert len(index) == test_size_before - 1
-# 
-#                 numpy.testing.assert_array_equal(
-#                     test_value_before,
-#                     test_value_after
-#                 )
-# 
-# 
-# def test_pop_index():
-#     """Unit test for method pop, index case."""
-#     index_to_pop = 4
-# 
-#     temp_file = FileIO.safe_temp_file(file_name='pupyl.index')
-#     temp_dir = os.path.dirname(temp_file)
-# 
-#     with Index(TEST_VECTOR_SIZE, data_dir=temp_dir) as index:
-#         for _ in range(16):
-#             index.append(numpy.random.normal(size=TEST_VECTOR_SIZE))
-# 
-#         test_size_before = len(index)
-# 
-#         test_value_before = index[index_to_pop]
-# 
-#     with Index(TEST_VECTOR_SIZE, data_dir=temp_dir) as index:
-#         test_value_after = index.pop(index_to_pop)
-# 
-#         assert len(index) == test_size_before - 1
-# 
-#         numpy.testing.assert_array_equal(
-#             test_value_before,
-#             test_value_after
-#         )
-# 
-# 
-# def test_index():
-#     """Unit test for method index."""
-#     test_position = 0
-# 
-#     with Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH) as index:
-#         test_value = index[test_position]
-# 
-#         assert index.index(test_value) == 0
-# 
-# 
-# def test_search():
-#     """Unit test for method search."""
-#     query_array = [-0.48870765, -0.57780915, -0.94986234, -1.90035123]
-#     expected_search_result = [25, 78]
-# 
-#     with Index(len(query_array), TEST_INDEX_SEARCH_PATH) as index:
-#         test_result = [*index.search(query_array, results=2)]
-# 
-#     assert expected_search_result == test_result
-# 
-# 
-# def test_group_by():
-#     """Unit test for method group_by."""
-#     expected_result = {0: [25]}
-# 
-#     with Index(4, TEST_INDEX_SEARCH_PATH) as index:
-#         test_result = [*index.group_by(top=1)][0]
-# 
-#     assert expected_result == test_result
-# 
-# 
-# def test_group_by_position():
-#     """Unit test for method group_by."""
-#     expected_result = [25, 89, 88, 44, 38, 64, 10, 101, 78, 67]
-# 
-#     with Index(4, TEST_INDEX_SEARCH_PATH) as index:
-#         test_result = [*index.group_by(position=0)][0]
-# 
-#     assert expected_result == test_result
-# 
-# 
-# def test_export_group_by():
-#     """Unit test for method export_group_by method."""
-#     test_vector_size = 1024
-# 
-#     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as temp_dir:
-#         test_search = PupylImageSearch(temp_dir)
-#         test_search.index(TEST_INDEX_EXPORT)
-# 
-#         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as new_temp_dir:
-#             with Index(test_vector_size, data_dir=temp_dir) as index:
-#                 index.export_by_group_by(new_temp_dir)
-# 
-#             assert os.path.exists(os.path.join(new_temp_dir, '0', '1.jpg'))
-#             assert os.path.exists(
-#                 os.path.join(new_temp_dir, '0', 'group.jpg')
-#             )
-#             assert os.path.exists(os.path.join(new_temp_dir, '1', '1.jpg'))
-#             assert os.path.exists(
-#                 os.path.join(new_temp_dir, '1', 'group.jpg')
-#             )
-# 
-#     # Windows: bypass clean up errors
-#     if system() == 'Windows':
-#         temp_dir = tempfile.TemporaryDirectory()
-#         new_temp_dir = tempfile.TemporaryDirectory()
-# 
-#         export_routines(temp_dir.name, new_temp_dir.name)
-# 
-#         temp_dir.clean_up()
-#         new_temp_dir.clean_up()
-#     else:
-#         with tempfile.TemporaryDirectory() as temp_dir, \
-#                 tempfile.TemporaryDirectory() as new_temp_dir:
-#             export_routines(temp_dir.name, new_temp_dir.name)
-# 
-# 
-# def test_export_group_by_position():
-#     """Unit test for method export_group_by method, position case."""
-#     test_vector_size = 1024
-# 
-#     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as temp_dir:
-#         test_search = PupylImageSearch(temp_dir)
-#         test_search.index(TEST_INDEX_EXPORT)
-# 
-#         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as new_temp_dir:
-#             with Index(test_vector_size, data_dir=temp_dir) as index:
-#                 index.export_by_group_by(new_temp_dir, position=1)
-# 
-#             assert os.path.exists(os.path.join(new_temp_dir, '1', '1.jpg'))
-#             assert os.path.exists(
-#                 os.path.join(new_temp_dir, '1', 'group.jpg')
-#             )
-# 
-#     # Windows: bypass clean up errors
-#     if system() == 'Windows':
-#         temp_dir = tempfile.TemporaryDirectory()
-#         new_temp_dir = tempfile.TemporaryDirectory()
-# 
-#         export_routines(temp_dir.name, new_temp_dir.name)
-# 
-#         temp_dir.cleanup()
-#         new_temp_dir.cleanup()
-#     else:
-#         with tempfile.TemporaryDirectory() as temp_dir, \
-#                 tempfile.TemporaryDirectory() as new_temp_dir:
-#             export_routines(temp_dir.name, new_temp_dir.name)
-# 
-# 
-# def test_export_results():
-#     """Unit test for method export_results."""
-#     test_vector_size = 1024
-# 
-#     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as temp_dir:
-#         test_search = PupylImageSearch(temp_dir)
-#         test_search.index(TEST_INDEX_EXPORT)
-# 
-#         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as new_temp_dir:
-#             with Index(test_vector_size, data_dir=temp_dir) as index:
-#                 index.export_results(
-#                     new_temp_dir, test_search.search(
-#                         os.path.join(TEST_INDEX_EXPORT, '1.jpg')
-#                     ),
-#                     keep_ids=True
-#                 )
-# 
-#             assert os.path.exists(os.path.join(new_temp_dir, '1.jpg'))
-# 
-#             index.export_results(
-#                 new_temp_dir, test_search.search(
-#                     os.path.join(TEST_INDEX_EXPORT, '1.jpg')
-#                 ),
-#                 keep_names=True
-#             )
-# 
-#             assert os.path.exists(os.path.join(new_temp_dir, '1.jpg'))
-# 
-#     # Windows: bypass clean up errors
-#     if system() == 'Windows':
-#         temp_dir = tempfile.TemporaryDirectory()
-#         new_temp_dir = tempfile.TemporaryDirectory()
-# 
-#         export_routines(temp_dir.name, new_temp_dir.name)
-#     else:
-#         with tempfile.TemporaryDirectory() as temp_dir, \
-#                 tempfile.TemporaryDirectory() as new_temp_dir:
-#             export_routines(temp_dir.name, new_temp_dir.name)
+
+
+def test_pop():
+    """Unit test for method pop."""
+    with SafeTemporaryResource() as temp_dir:
+        with Index(TEST_VECTOR_SIZE, data_dir=temp_dir.name) as index:
+            for _ in range(16):
+                index.append(numpy.random.normal(size=TEST_VECTOR_SIZE))
+
+            test_size_before = len(index)
+
+            test_value_before = index[-1]
+
+        with Index(TEST_VECTOR_SIZE, data_dir=temp_dir.name) as index:
+            test_value_after = index.pop()
+
+            assert len(index) == test_size_before - 1
+
+            numpy.testing.assert_array_equal(
+                test_value_before,
+                test_value_after
+            )
+
+
+def test_pop_index():
+    """Unit test for method pop, index case."""
+    index_to_pop = 4
+
+    with SafeTemporaryResource() as temp_dir:
+        with Index(TEST_VECTOR_SIZE, data_dir=temp_dir.name) as index:
+            for _ in range(16):
+                index.append(numpy.random.normal(size=TEST_VECTOR_SIZE))
+
+            test_size_before = len(index)
+
+            test_value_before = index[index_to_pop]
+
+        with Index(TEST_VECTOR_SIZE, data_dir=temp_dir.name) as index:
+            test_value_after = index.pop(index_to_pop)
+
+            assert len(index) == test_size_before - 1
+
+            numpy.testing.assert_array_equal(
+                test_value_before,
+                test_value_after
+            )
+
+
+def test_index():
+    """Unit test for method index."""
+    test_position = 0
+
+    with Index(TEST_VECTOR_SIZE, TEST_INDEX_PATH) as index:
+        test_value = index[test_position]
+
+        assert index.index(test_value) == 0
+
+
+def test_search():
+    """Unit test for method search."""
+    query_array = [-0.48870765, -0.57780915, -0.94986234, -1.90035123]
+    expected_search_result = [25, 78]
+
+    with Index(len(query_array), TEST_INDEX_SEARCH_PATH) as index:
+        test_result = [*index.search(query_array, results=2)]
+
+    assert expected_search_result == test_result
+
+
+def test_group_by():
+    """Unit test for method group_by."""
+    expected_result = {0: [25]}
+
+    with Index(4, TEST_INDEX_SEARCH_PATH) as index:
+        test_result = [*index.group_by(top=1)][0]
+
+    assert expected_result == test_result
+
+
+def test_group_by_position():
+    """Unit test for method group_by."""
+    expected_result = [25, 89, 88, 44, 38, 64, 10, 101, 78, 67]
+
+    with Index(4, TEST_INDEX_SEARCH_PATH) as index:
+        test_result = [*index.group_by(position=0)][0]
+
+    assert expected_result == test_result
+
+
+def test_export_group_by():
+    """Unit test for method export_group_by method."""
+    test_vector_size = 1024
+
+    with SafeTemporaryResource() as temp_dir:
+        test_search = PupylImageSearch(temp_dir.name)
+        test_search.index(TEST_INDEX_EXPORT)
+
+        with SafeTemporaryResource() as new_temp_dir:
+            with Index(test_vector_size, data_dir=temp_dir.name) as index:
+                index.export_by_group_by(new_temp_dir.name)
+
+            assert os.path.exists(os.path.join(new_temp_dir.name, '0', '1.jpg'))
+            assert os.path.exists(
+                os.path.join(new_temp_dir.name, '0', 'group.jpg')
+            )
+            assert os.path.exists(os.path.join(new_temp_dir.name, '1', '1.jpg'))
+            assert os.path.exists(
+                os.path.join(new_temp_dir.name, '1', 'group.jpg')
+            )
+
+
+def test_export_group_by_position():
+    """Unit test for method export_group_by method, position case."""
+    test_vector_size = 1024
+
+    with SafeTemporaryResource() as temp_dir:
+        test_search = PupylImageSearch(temp_dir.name)
+        test_search.index(TEST_INDEX_EXPORT)
+
+        with SafeTemporaryResource() as new_temp_dir:
+            with Index(test_vector_size, data_dir=temp_dir.name) as index:
+                index.export_by_group_by(new_temp_dir.name, position=1)
+
+            assert os.path.exists(os.path.join(new_temp_dir.name, '1', '1.jpg'))
+            assert os.path.exists(
+                os.path.join(new_temp_dir.name, '1', 'group.jpg')
+            )
+
+
+def test_export_results():
+    """Unit test for method export_results."""
+    test_vector_size = 1024
+
+    with SafeTemporaryResource() as temp_dir:
+        test_search = PupylImageSearch(temp_dir.name)
+        test_search.index(TEST_INDEX_EXPORT)
+
+        with SafeTemporaryResource() as new_temp_dir:
+            with Index(test_vector_size, data_dir=temp_dir.name) as index:
+                index.export_results(
+                    new_temp_dir.name, test_search.search(
+                        os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                    ),
+                    keep_ids=True
+                )
+
+            assert os.path.exists(os.path.join(new_temp_dir.name, '1.jpg'))
+
+            index.export_results(
+                new_temp_dir.name, test_search.search(
+                    os.path.join(TEST_INDEX_EXPORT, '1.jpg')
+                ),
+                keep_names=True
+            )
+
+            assert os.path.exists(os.path.join(new_temp_dir.name, '1.jpg'))
+

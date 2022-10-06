@@ -94,12 +94,17 @@ class SafeTemporaryResource:
 
                 os.mkdir(self._temp_path)
             else:
-                self._temp_path = tempfile.TemporaryDirectory()
+                self._temp_dir = tempfile.TemporaryDirectory()
+                self._temp_path = self._temp_dir.name
 
     @property
     def name(self):
         """Getter for property name."""
         return self._temp_path
+
+    def __str__(self):
+        """Returns the string representation."""
+        return self.name
 
     def __enter__(self):
         """Opens the SafeTemporaryResource context."""
@@ -108,9 +113,9 @@ class SafeTemporaryResource:
     def cleanup(self):
         """Clean up temporary resources."""
         try:
-            self._temp_path.close()
+            self._temp_dir.cleanup()
         except AttributeError:
-            rmtree(self._temp_path)
+            rmtree(self._temp_path.name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Opens the SafeTemporaryResource context."""
