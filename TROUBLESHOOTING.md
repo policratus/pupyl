@@ -35,7 +35,7 @@ When installing `pupyl` on Windows, a `C++` compiler must be installed on the sy
 error: Microsoft Visual C++ 14.0 is required. Get it with "Build Tools for Visual Studio": https://visualstudio.microsoft.com/downloads
 ```
 
-Install the `C++` compiler donwloading it from [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+Install the `C++` compiler downloading it from [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
 
 ### 🍏 macOS
 `pupyl` also needs a `C++` compiler on macOS, which `clang` is usually installed by default. If you still face some problems, try to define the compilers' path before:

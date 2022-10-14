@@ -10,7 +10,7 @@
 
 # pupyl - A Python Image Search Library
 
-![pupyl](https://user-images.githubusercontent.com/827563/146164650-bf1b30f7-838f-43b9-9eff-1a2a85a59975.gif)
+![pupyl](https://user-images.githubusercontent.com/827563/183988738-df6451c9-cd62-43a4-8c27-9b910379a898.gif)
 
 # Table of contents
   * [🧿 pupyl what?](#-pupyl-what)
