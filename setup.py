@@ -8,7 +8,7 @@ with open('README.md', encoding='utf-8') as readme:
 
 setuptools.setup(
     name="pupyl",
-    version="0.14.0",
+    version="0.14.1",
     author="Nelson Forte",
     author_email="policratus@gmail.com",
     description="🧿 Pupyl is a really fast image search "
@@ -19,7 +19,7 @@ setuptools.setup(
     url="https://github.com/policratus/pupyl",
     packages=setuptools.find_packages(),
     install_requires=[
-        'tensorflow==2.9.1',
+        'tensorflow==2.10.0',
         'annoy==1.17.1'
     ],
     classifiers=[

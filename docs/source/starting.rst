@@ -27,8 +27,7 @@ you just need to issue:
 .. code-block:: shell
 
     git clone git@github.com:policratus/pupyl.git
-    cd pupyl
-    python setup.py install
+    pip install pupyl/
 
 *If you encounter any installation issues, please go to* `troubleshooting <https://github.com/policratus/pupyl/blob/main/TROUBLESHOOTING.md>`_.
 
