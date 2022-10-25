@@ -7,6 +7,7 @@ import termcolor
 from shutil import copy, move
 
 from pupyl.duplex.image import ImageIO
+from pupyl.duplex.temporary import SafeTemporaryResource
 
 
 class ImageDatabase(ImageIO):
@@ -57,7 +58,7 @@ class ImageDatabase(ImageIO):
         if data_dir:
             self._data_dir = os.path.normpath(data_dir)
         else:
-            self._data_dir = self.safe_temp_file()
+            self._data_dir = SafeTemporaryResource().name
 
         if kwargs.get('bucket_size'):
             self._bucket_size = kwargs['bucket_size']

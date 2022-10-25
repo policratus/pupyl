@@ -1,5 +1,6 @@
 """Operations for volatile resources."""
 
+import os
 import uuid
 import tempfile
 from pathlib import Path
