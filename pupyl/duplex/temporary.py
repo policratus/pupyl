@@ -76,7 +76,7 @@ class SafeTemporaryResource:
         try:
             self._temp_dir.cleanup()
         except AttributeError:
-            rmtree(self._temp_path.name)
+            rmtree(self.name)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Opens the SafeTemporaryResource context."""
