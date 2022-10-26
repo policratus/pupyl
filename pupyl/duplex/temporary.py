@@ -4,7 +4,6 @@ import os
 import uuid
 import tempfile
 from pathlib import Path
-from shutil import rmtree
 from platform import system
 
 
@@ -76,7 +75,7 @@ class SafeTemporaryResource:
         try:
             self._temp_dir.cleanup()
         except AttributeError:
-            rmtree(self.name)
+            os.system(f'rmdir /s /q "{self.name}"')
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Opens the SafeTemporaryResource context."""
