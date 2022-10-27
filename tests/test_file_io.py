@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest import TestCase
 from tarfile import is_tarfile
 from urllib.error import URLError
-from os.path import abspath, exists, join
+from os.path import abspath, exists, join, relpath
 
 from pupyl.duplex.file_io import FileIO, Protocols
 from pupyl.duplex.file_types import TarCompressedTypes
@@ -20,7 +20,7 @@ TEST_DIR = 'tests/'
 TEST_SCAN_DIR = TEST_DIR + 'test_scan/'
 TEST_UNKNOWN = 'unk://path'
 TEST_UNSUPPORTED_FILE_TYPE = abspath(f'{TEST_DIR}not_image.inv')
-TEST_LOCAL = abspath(f'{TEST_DIR}test_image.jpg')
+TEST_LOCAL = relpath(f'{TEST_DIR}test_image.jpg')
 TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/' + \
     'thumb/e/e4/Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
 TEST_URL_NO_DATE = 'http://images.protopage.com/view/572714/' + \
