@@ -102,24 +102,6 @@ class TestCases(TestCase):
             FileIO._get_url(TEST_URL_TIMEOUT)
 
 
-def test_safe_temp_file():
-    """Unit test for method safe_temp_file."""
-    test_temp_file_name = FileIO.safe_temp_file()
-
-    assert not exists(test_temp_file_name)
-
-
-def test_safe_temp_file_exists():
-    """Unit test for method safe_temp_file, file exists case."""
-    test_temp_file_name = 'just_a_temp_file.txt'
-
-    Path(join(tempfile.gettempdir(), test_temp_file_name)).touch()
-
-    _ = FileIO.safe_temp_file(file_name=test_temp_file_name)
-
-    assert not exists(test_temp_file_name)
-
-
 def test__infer_protocol_http():
     """Unit tests for _infer_protocol method, http case."""
     assert FileIO._infer_protocol(TEST_URL) is Protocols.HTTP
