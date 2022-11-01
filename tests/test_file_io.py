@@ -309,7 +309,7 @@ def test_get_metadata_local():
     """Unit test for method get_metadata, local case."""
     test_metadata = {
         'original_file_name': 'test_image.jpg',
-        'original_path': abspath('tests'),
+        'original_path': relpath('tests'),
         'original_file_size': '5K'
     }
 
