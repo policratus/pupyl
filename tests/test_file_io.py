@@ -440,10 +440,14 @@ def test_resolve_path_end():
     test_path_with_sep = '/just/a/test/path/'
     test_path_without_sep = '/just/a/test/path'
 
-    expected_return = '/just/a/test/path'
+    test_path_with_sep_os = test_path_with_sep.replace('/', os.path.sep)
+    test_path_without_sep_os = test_path_without_sep.replace('/', os.path.sep)
 
-    assert FileIO.resolve_path_end(test_path_with_sep) == expected_return
-    assert FileIO.resolve_path_end(test_path_without_sep) == expected_return
+    expected_return = '/just/a/test/path'
+    expected_return_os = expected_return.replace('/', os.path.sep)
+
+    assert FileIO.resolve_path_end(test_path_with_sep_os) == expected_return_os
+    assert FileIO.resolve_path_end(test_path_without_sep_os) == expected_return_os
 
 
 def test_dump():
