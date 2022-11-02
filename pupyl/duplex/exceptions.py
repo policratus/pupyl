@@ -15,3 +15,6 @@ class FileIsNotImage(Error):
 
 class FileScanNotPossible(Error):
     """Raised when the analyzed file is not suitable for scan."""
+
+class JPEGEncodingFailed(Error):
+    """Raised when tensorflow's JPEG encoding fails."""

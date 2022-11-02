@@ -11,7 +11,7 @@ import tensorflow
 from tensorflow import io as io_ops
 
 from pupyl.duplex.image import ImageIO
-from pupyl.duplex.exceptions import FileIsNotImage
+from pupyl.duplex.exceptions import FileIsNotImage, JPEGEncodingFailed
 
 
 TEST_LOCAL = abspath('tests/test_image.jpg')
@@ -37,6 +37,16 @@ class TestCases(TestCase):
         with self.assertRaises(FileIsNotImage):
             with open(TEST_NOT_IMAGE, 'rb') as image_bytes:
                 ImageIO.get_image_bytes_to_base64(image_bytes.read())
+
+    def test_compress_raises_error(self):
+        """Unit test edge case on ImageIO.compress"""
+        test_image_bytes = ImageIO.get_image(TEST_LOCAL)
+        test_tensor = ImageIO.encoded_to_tensor(test_image_bytes)
+        compression_not_supported = not ImageIO.os_supports_compression()
+
+        if compression_not_supported:
+            with self.assertRaises(JPEGEncodingFailed):
+                ImageIO.compress(test_tensor)
 
 
 def test_get_image_as_tensor():
@@ -100,19 +110,19 @@ def test_compress():
             optimize_size=True,
             chroma_downsampling=True
         )
+    if ImageIO.os_supports_compression():
+        test_image_bytes = ImageIO.get_image(TEST_LOCAL)
+        test_tensor = ImageIO.encoded_to_tensor(test_image_bytes)
 
-    test_image_bytes = ImageIO.get_image(TEST_LOCAL)
-    test_tensor = ImageIO.encoded_to_tensor(test_image_bytes)
+        numpy.testing.assert_array_equal(
+            ImageIO.compress(test_tensor),
+            behaviour_compress(test_tensor)
+        )
 
-    numpy.testing.assert_array_equal(
-        ImageIO.compress(test_tensor),
-        behaviour_compress(test_tensor)
-    )
-
-    numpy.testing.assert_array_equal(
-        ImageIO.compress(test_tensor, as_tensor=True),
-        ImageIO.encoded_to_tensor(behaviour_compress(test_tensor))
-    )
+        numpy.testing.assert_array_equal(
+            ImageIO.compress(test_tensor, as_tensor=True),
+            ImageIO.encoded_to_tensor(behaviour_compress(test_tensor))
+        )
 
 
 def test_encoded_to_compressed_tensor():
