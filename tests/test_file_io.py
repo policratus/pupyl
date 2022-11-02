@@ -440,20 +440,19 @@ def test_resolve_path_end():
     test_path_with_sep = '/just/a/test/path/'
     test_path_without_sep = '/just/a/test/path'
 
-    test_path_with_sep_os = test_path_with_sep.replace('/', os.path.sep)
-    test_path_without_sep_os = test_path_without_sep.replace('/', os.path.sep)
+    expected_return = FileIO.compat_path_separator('/just/a/test/path')
 
-    expected_return = '/just/a/test/path'
-    expected_return_os = expected_return.replace('/', os.path.sep)
+    assert FileIO.resolve_path_end(test_path_with_sep) == expected_return
+    assert FileIO.resolve_path_end(test_path_without_sep) == expected_return
 
-    assert FileIO.resolve_path_end(test_path_with_sep_os) == expected_return_os
-    assert FileIO.resolve_path_end(test_path_without_sep_os) == expected_return_os
+
+def test_compat_path_separator():
+    raise NotImplementedError
 
 
 def test_dump():
     """Unit test for method dump."""
     file_io = FileIO()
-
     file_io.dump(TEST_SCAN_DIR, tempfile.gettempdir())
 
     assert is_tarfile(

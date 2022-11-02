@@ -171,8 +171,8 @@ def test_search_non_extreme_mode():
 
 def test_search_returning_metadata():
     """Unit test for method search, returning image metadata case."""
-    with TemporaryDirectory() as temp_dir:
-        test_pupyl = PupylImageSearch(temp_dir)
+    with SafeTemporaryResource() as temp_dir:
+        test_pupyl = PupylImageSearch(temp_dir.name)
         test_pupyl.index(TEST_SCAN_DIR)
 
         test_results = [*test_pupyl.search(

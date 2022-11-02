@@ -352,7 +352,7 @@ class Index:
 
                 _temp_file = tmp_idx.path
 
-            move(_temp_file, self.path)
+            move(_temp_file, FileIO.compat_path_separator(self.path))
 
             self.refresh()
 

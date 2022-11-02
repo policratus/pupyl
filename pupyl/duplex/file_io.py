@@ -707,6 +707,7 @@ class FileIO(FileType):
         str:
             A path without an ending character.
         """
+        path = FileIO.compat_path_separator(path)
         if path[-1] == os.path.sep:
             path = list(path)
             _ = path.pop()
@@ -714,6 +715,22 @@ class FileIO(FileType):
             return ''.join(path)
 
         return path
+
+    @staticmethod
+    def compat_path_separator(path):
+        """Transform path separators according to the underlying OS.
+
+        Parameters
+        ----------
+        path: str
+            Complete path to be transformed.
+
+        Returns
+        -------
+        str:
+            A path with the correct separator character.
+        """
+        return path.replace('/', os.path.sep)
 
     def dump(self, data_dir, output_dir):
         """Reads an entire database tree, compress and export it.
