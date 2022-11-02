@@ -6,6 +6,7 @@ import mimetypes
 from os import walk
 from unittest import TestCase
 from tarfile import is_tarfile
+import unittest
 from urllib.error import URLError
 from os.path import abspath, exists, join, relpath
 
@@ -444,7 +445,7 @@ def test_resolve_path_end():
     assert FileIO.resolve_path_end(test_path_with_sep) == expected_return
     assert FileIO.resolve_path_end(test_path_without_sep) == expected_return
 
-
+@unittest.skip
 def test_compat_path_separator():
     raise NotImplementedError
 
