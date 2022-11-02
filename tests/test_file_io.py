@@ -19,7 +19,7 @@ TEST_DIR = 'tests/'
 TEST_SCAN_DIR = TEST_DIR + 'test_scan/'
 TEST_UNKNOWN = 'unk://path'
 TEST_UNSUPPORTED_FILE_TYPE = abspath(f'{TEST_DIR}not_image.inv')
-TEST_LOCAL = relpath(f'{TEST_DIR}test_image.jpg')
+TEST_LOCAL = abspath(f'{TEST_DIR}test_image.jpg')
 TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/' + \
     'thumb/e/e4/Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
 TEST_URL_NO_DATE = 'http://images.protopage.com/view/572714/' + \
@@ -308,7 +308,7 @@ def test_get_metadata_local():
     """Unit test for method get_metadata, local case."""
     test_metadata = {
         'original_file_name': 'test_image.jpg',
-        'original_path': relpath('tests'),
+        'original_path': abspath('tests'),
         'original_file_size': '5K'
     }
 
