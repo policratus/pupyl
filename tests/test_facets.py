@@ -1,7 +1,9 @@
 """Unit tests related to indexer.facets module."""
 import os
+import platform
+import pytest
 import warnings
-from unittest import TestCase, skip
+from unittest import TestCase
 
 import numpy
 
@@ -303,7 +305,10 @@ def test_append_new_created_file():
              index[-1], new_tensor, decimal=3
          )
  
-@skip("Don't know how to test that on Windows yet.")
+@pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="Don't know how to test that on Windows yet."
+)
 def test_remove():
     """Unit test for method remove."""
     index_to_remove = 8
@@ -329,7 +334,10 @@ def test_remove():
                 index[index_to_remove]
             )
 
-@skip("Don't know how to test that on Windows yet.")
+@pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="Don't know how to test that on Windows yet."
+)
 def test_pop():
     """Unit test for method pop."""
     with SafeTemporaryResource() as temp_dir:
@@ -351,7 +359,10 @@ def test_pop():
                 test_value_after
             )
 
-@skip("Don't know how to test that on Windows yet.")
+@pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="Don't know how to test that on Windows yet."
+)
 def test_pop_index():
     """Unit test for method pop, index case."""
     index_to_pop = 4

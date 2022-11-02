@@ -1,7 +1,9 @@
 """Unit tests for main module pupyl."""
 import os
 import json
-from unittest import TestCase, skip
+import platform
+import pytest
+from unittest import TestCase
 from urllib.error import URLError
 from tempfile import gettempdir, TemporaryDirectory
 
@@ -83,7 +85,10 @@ def test_index_config_file():
     assert configurations['characteristic'] == \
         test_pupyl._characteristic.name
 
-
+@pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="Don't know how to test that on Windows yet."
+)
 def test_index():
     """Unit test for method index."""
     PUPYL.index(TEST_SCAN_DIR)
@@ -119,7 +124,10 @@ def test_characteristic_by_value():
 
         assert test_pupyl._characteristic.value == test_characteristic
 
-
+@pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="Don't know how to test that on Windows yet."
+)
 def test_index_no_extreme_mode():
     """Unit test for method index, non extreme mode case."""
     pupyl_non_extreme = PupylImageSearch(
@@ -185,7 +193,10 @@ def test_search_returning_metadata():
 
         assert isinstance(test_results, dict)
 
-@skip("Don't know how to test that on Windows yet.")
+@pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="Don't know how to test that on Windows yet."
+)
 def test_remove():
     """Unit test for method remove."""
     index_to_remove = 0
@@ -208,7 +219,10 @@ def test_remove():
         assert length_indexer_after == length_indexer_before - 1
         assert length_image_database_after == length_image_database_before - 1
 
-@skip("Don't know how to test on Windows yet.")
+@pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="Don't know how to test that on Windows yet."
+)
 def test_remove_non_extreme():
     """Unit test for method remove, non extrem mode."""
     index_to_remove = 0

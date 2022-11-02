@@ -1,5 +1,6 @@
 """Unit tests related to duplex.image module."""
 import tempfile
+import platform
 from os.path import abspath
 from unittest import TestCase
 from unittest.mock import patch
@@ -135,7 +136,10 @@ def test_encoded_to_compressed_tensor():
     assert test_tensor.ndim == 1 and test_tensor.shape == 6104
     numpy.testing.assert_array_equal(saved_tensor, test_tensor)
 
-
+@pytest.mark.skipif(
+    platform.system() == 'Windows',
+    reason="Don't know how to test that on Windows yet."
+)
 def test_save_image():
     """Unit test for save_image method."""
     test_tensor_bytes = ImageIO.get_image(TEST_LOCAL)

@@ -4,7 +4,6 @@ import csv
 import tempfile
 import mimetypes
 from os import walk
-from pathlib import Path
 from unittest import TestCase
 from tarfile import is_tarfile
 from urllib.error import URLError
