@@ -1,4 +1,4 @@
-# 🧿 Contribuinting to pupyl
+# 🧿 Contributing to pupyl
 
 We are truly glad that you want to contribute. After all, it is a community effort.
 
