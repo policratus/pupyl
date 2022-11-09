@@ -8,9 +8,9 @@ jobs:
     runs-on: ubuntu-latest
     name: pep8
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Set up Python 3.9
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
     - name: Check conformance with PEP-8 using flake8
@@ -23,9 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     name: lint
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Set up Python 3.9
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
     - name: Linter with pylint
@@ -39,9 +39,9 @@ jobs:
     runs-on: ubuntu-latest
     name: static-check
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Set up Python 3.9
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
     - name: Static type checking
@@ -57,9 +57,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: test
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Set up Python 3.9
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
     - name: Unit tests
@@ -73,9 +73,9 @@ jobs:
     runs-on: ubuntu-latest
     name: coverage
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Set up Python 3.9
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
     - name: Coverage report
