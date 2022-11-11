@@ -16,11 +16,11 @@ from pupyl.duplex.exceptions import FileTypeNotSupportedYet, \
     FileScanNotPossible
 
 
-TEST_DIR = 'tests/'
-TEST_SCAN_DIR = TEST_DIR + 'test_scan/'
+TEST_DIR = 'tests'
+TEST_SCAN_DIR = os.path.join(TEST_DIR, 'test_scan')
 TEST_UNKNOWN = 'unk://path'
 TEST_UNSUPPORTED_FILE_TYPE = abspath(f'{TEST_DIR}not_image.inv')
-TEST_LOCAL = abspath(f'{TEST_DIR}test_image.jpg')
+TEST_LOCAL = abspath(os.path.join(TEST_DIR, 'test_image.jpg'))
 TEST_URL = 'https://upload.wikimedia.org/wikipedia/commons/' + \
     'thumb/e/e4/Cheshm-Nazar.JPG/320px-Cheshm-Nazar.JPG'
 TEST_URL_NO_DATE = 'http://images.protopage.com/view/572714/' + \
@@ -28,12 +28,12 @@ TEST_URL_NO_DATE = 'http://images.protopage.com/view/572714/' + \
 TEST_URL_FORBIDDEN = 'https://cutt.ly/hWtd8dN'
 TEST_URL_TIMEOUT = 'http://www.pedigree.com.sg/breeds/images/' + \
     'norwich_terr_02.jpg'
-TEST_CSV = abspath(TEST_SCAN_DIR + 'test_csv.csv')
-TEST_CSV_ZIP = abspath(TEST_SCAN_DIR + 'test_csv.csv.zip')
-TEST_CSV_GZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.gz')
-TEST_CSV_BZ2 = abspath(TEST_SCAN_DIR + 'test_csv.csv.bz2')
-TEST_CSV_XZ = abspath(TEST_SCAN_DIR + 'test_csv.csv.xz')
-TEST_TAR_LOCATION = TEST_DIR + 'tar_files'
+TEST_CSV = abspath(os.path.join(TEST_SCAN_DIR, 'test_csv.csv'))
+TEST_CSV_ZIP = abspath(os.path.join(TEST_SCAN_DIR, 'test_csv.csv.zip'))
+TEST_CSV_GZ = abspath(os.path.join(TEST_SCAN_DIR, 'test_csv.csv.gz'))
+TEST_CSV_BZ2 = abspath(os.path.join(TEST_SCAN_DIR, 'test_csv.csv.bz2'))
+TEST_CSV_XZ = abspath(os.path.join(TEST_SCAN_DIR, 'test_csv.csv.xz'))
+TEST_TAR_LOCATION = os.path.join(TEST_DIR, 'tar_files')
 
 
 def util_test_csv(path):
@@ -190,7 +190,7 @@ def test_scan_directory():
     file_io = FileIO()
 
     test_against_tree = [
-        abspath(f'{TEST_SCAN_DIR}{ffile}')
+        abspath(os.path.join(TEST_SCAN_DIR, ffile))
         for ffile in [*walk(TEST_SCAN_DIR)][0][-1]
     ]
 
@@ -309,7 +309,7 @@ def test_get_metadata_local():
     """Unit test for method get_metadata, local case."""
     test_metadata = {
         'original_file_name': 'test_image.jpg',
-        'original_path': abspath('tests'),
+        'original_path': abspath(os.path.join('tests')),
         'original_file_size': '5K'
     }
 
