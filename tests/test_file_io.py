@@ -8,7 +8,7 @@ from unittest import TestCase
 from tarfile import is_tarfile
 import unittest
 from urllib.error import URLError
-from os.path import abspath, exists, join, relpath
+from os.path import abspath
 
 from pupyl.duplex.file_io import FileIO, Protocols
 from pupyl.duplex.file_types import TarCompressedTypes
@@ -444,6 +444,7 @@ def test_resolve_path_end():
 
     assert FileIO.resolve_path_end(test_path_with_sep) == expected_return
     assert FileIO.resolve_path_end(test_path_without_sep) == expected_return
+
 
 @unittest.skip
 def test_compat_path_separator():

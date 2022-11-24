@@ -85,6 +85,7 @@ def test_index_config_file():
     assert configurations['characteristic'] == \
         test_pupyl._characteristic.name
 
+
 @pytest.mark.skipif(
     platform.system() == 'Windows',
     reason="Don't know how to test that on Windows yet."
@@ -123,6 +124,7 @@ def test_characteristic_by_value():
         )
 
         assert test_pupyl._characteristic.value == test_characteristic
+
 
 @pytest.mark.skipif(
     platform.system() == 'Windows',
@@ -193,6 +195,7 @@ def test_search_returning_metadata():
 
         assert isinstance(test_results, dict)
 
+
 @pytest.mark.skipif(
     platform.system() == 'Windows',
     reason="Don't know how to test that on Windows yet."
@@ -219,6 +222,7 @@ def test_remove():
         assert length_indexer_after == length_indexer_before - 1
         assert length_image_database_after == length_image_database_before - 1
 
+
 @pytest.mark.skipif(
     platform.system() == 'Windows',
     reason="Don't know how to test that on Windows yet."
@@ -240,7 +244,9 @@ def test_remove_non_extreme():
             characteristics=Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION,
             extreme_mode=False
         ) as extractor:
-            with Index(extractor.output_shape, data_dir=temp_dir.name) as indexer:
+            with Index(
+                extractor.output_shape, data_dir=temp_dir.name
+            ) as indexer:
                 length_indexer_before = len(indexer)
                 length_image_database_before = len(
                     pupyl_non_extreme.image_database
@@ -252,7 +258,9 @@ def test_remove_non_extreme():
             characteristics=Characteristics.HEAVYWEIGHT_SLOW_HUGE_PRECISION,
             extreme_mode=False
         ) as extractor:
-            with Index(extractor.output_shape, data_dir=temp_dir.name) as indexer:
+            with Index(
+                extractor.output_shape, data_dir=temp_dir.name
+            ) as indexer:
                 length_indexer_after = len(indexer)
                 length_image_database_after = len(
                     pupyl_non_extreme.image_database

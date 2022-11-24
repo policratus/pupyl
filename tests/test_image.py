@@ -136,6 +136,7 @@ def test_encoded_to_compressed_tensor():
     assert test_tensor.ndim == 1 and test_tensor.shape == 6104
     numpy.testing.assert_array_equal(saved_tensor, test_tensor)
 
+
 @pytest.mark.skipif(
     platform.system() == 'Windows',
     reason="Don't know how to test that on Windows yet."

@@ -9,7 +9,6 @@ import numpy
 
 from pupyl.indexer.facets import Index
 from pupyl.search import PupylImageSearch
-from pupyl.duplex.file_io import FileIO
 from pupyl.duplex.temporary import SafeTemporaryResource
 from pupyl.embeddings.features import Extractors, Characteristics
 from pupyl.indexer.exceptions import FileIsNotAnIndex, IndexNotBuildYet, \
@@ -289,22 +288,23 @@ def test_append_new_file():
 
 
 def test_append_new_created_file():
-     """Unit test for method append, created file case."""
-     new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
- 
-     with Index(TEST_VECTOR_SIZE, volatile=True) as index:
-         test_size_before = len(index)
- 
-         index.append(new_tensor)
- 
-         test_size_after = len(index)
- 
-         assert test_size_after == test_size_before + 1
- 
-         numpy.testing.assert_array_almost_equal(
-             index[-1], new_tensor, decimal=3
-         )
- 
+    """Unit test for method append, created file case."""
+    new_tensor = numpy.random.normal(size=TEST_VECTOR_SIZE)
+
+    with Index(TEST_VECTOR_SIZE, volatile=True) as index:
+        test_size_before = len(index)
+
+        index.append(new_tensor)
+
+        test_size_after = len(index)
+
+        assert test_size_after == test_size_before + 1
+
+        numpy.testing.assert_array_almost_equal(
+            index[-1], new_tensor, decimal=3
+        )
+
+
 @pytest.mark.skipif(
     platform.system() == 'Windows',
     reason="Don't know how to test that on Windows yet."
@@ -334,6 +334,7 @@ def test_remove():
                 index[index_to_remove]
             )
 
+
 @pytest.mark.skipif(
     platform.system() == 'Windows',
     reason="Don't know how to test that on Windows yet."
@@ -358,6 +359,7 @@ def test_pop():
                 test_value_before,
                 test_value_after
             )
+
 
 @pytest.mark.skipif(
     platform.system() == 'Windows',
@@ -440,11 +442,15 @@ def test_export_group_by():
             with Index(test_vector_size, data_dir=temp_dir.name) as index:
                 index.export_by_group_by(new_temp_dir.name)
 
-            assert os.path.exists(os.path.join(new_temp_dir.name, '0', '1.jpg'))
+            assert os.path.exists(
+                os.path.join(new_temp_dir.name, '0', '1.jpg')
+            )
             assert os.path.exists(
                 os.path.join(new_temp_dir.name, '0', 'group.jpg')
             )
-            assert os.path.exists(os.path.join(new_temp_dir.name, '1', '1.jpg'))
+            assert os.path.exists(
+                os.path.join(new_temp_dir.name, '1', '1.jpg')
+            )
             assert os.path.exists(
                 os.path.join(new_temp_dir.name, '1', 'group.jpg')
             )
@@ -462,7 +468,9 @@ def test_export_group_by_position():
             with Index(test_vector_size, data_dir=temp_dir.name) as index:
                 index.export_by_group_by(new_temp_dir.name, position=1)
 
-            assert os.path.exists(os.path.join(new_temp_dir.name, '1', '1.jpg'))
+            assert os.path.exists(
+                os.path.join(new_temp_dir.name, '1', '1.jpg')
+            )
             assert os.path.exists(
                 os.path.join(new_temp_dir.name, '1', 'group.jpg')
             )
@@ -495,4 +503,3 @@ def test_export_results():
             )
 
             assert os.path.exists(os.path.join(new_temp_dir.name, '1.jpg'))
-
