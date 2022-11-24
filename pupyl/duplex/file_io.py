@@ -10,6 +10,7 @@ import zipfile
 import tempfile
 import mimetypes
 from io import BytesIO
+from platform import system
 from itertools import cycle
 from enum import Enum, auto
 from datetime import datetime
@@ -223,6 +224,9 @@ class FileIO(FileType):
         ``FileIO._file_scheme_to_path(file:///home/policratus/1073140.jpg)``
         ``# Returns '/home/policratus/1073140.jpg'``
         """
+        if system() == 'Windows':
+            return uri[len('file:///'):]
+
         return uri[len('file://'):]
 
     @classmethod
