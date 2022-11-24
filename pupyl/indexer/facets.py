@@ -200,7 +200,7 @@ class Index:
 
             self._is_new_index = False
 
-        self.refresh()
+        self._refresh()
 
     def remove_feature_cache(self, index):
         """Removes a feature cache used during an indexing process.
@@ -276,7 +276,7 @@ class Index:
             len(self) - abs(position)
         )
 
-    def refresh(self):
+    def _refresh(self):
         """Updates all information regarding the index file, first unloading
         it, followed by reloading back the index.
         """
@@ -354,7 +354,7 @@ class Index:
 
             move(_temp_file, FileIO.compat_path_separator(self.path))
 
-            self.refresh()
+            self._refresh()
 
     def remove(self, position):
         """Removes the tensor at ``position`` from the database.
@@ -400,7 +400,7 @@ class Index:
 
         move(_temp_file, self.path)
 
-        self.refresh()
+        self._refresh()
 
     def pop(self, position=None):
         """Pops-out the index at position, returning it.

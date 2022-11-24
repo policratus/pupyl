@@ -305,10 +305,12 @@ class ImageIO(FileIO):
 
             if as_tensor:
                 return cls.encoded_to_tensor(compressed)
-            else:
-                return compressed
-        except tensorflow.errors.InternalError:
-            raise JPEGEncodingFailed('Failed to encode tensor using JPEG encoding.')
+
+            return compressed
+        except tensorflow.errors.InternalError as tf_internal_error:
+            raise JPEGEncodingFailed(
+                'Failed to encode tensor using JPEG encoding.'
+            ) from tf_internal_error
 
     @staticmethod
     def os_supports_compression():

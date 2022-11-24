@@ -41,7 +41,7 @@ class SafeTemporaryResource:
                     default_temp_dir, self._directory_name
                 )
 
-                os.mkdirs(self._temp_path, exists_ok=True)
+                os.makedirs(self._temp_path, exist_ok=True)
             elif not self._directory_name and self._file_name:
                 self._temp_path = os.path.join(
                     default_temp_dir, self._file_name
@@ -54,6 +54,10 @@ class SafeTemporaryResource:
 
                 os.mkdir(self._temp_path)
             else:
+                # Not using 'with' context manager because the resource
+                # allocation will be managed by the current class.
+
+                # pylint: disable-next=consider-using-with
                 self._temp_dir = tempfile.TemporaryDirectory()
                 self._temp_path = self._temp_dir.name
 
@@ -80,5 +84,5 @@ class SafeTemporaryResource:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Opens the SafeTemporaryResource context."""
         del exc_type, exc_val, exc_tb
-        
+
         self.cleanup()
