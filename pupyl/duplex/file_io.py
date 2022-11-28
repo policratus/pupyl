@@ -225,7 +225,7 @@ class FileIO(FileType):
         ``# Returns '/home/policratus/1073140.jpg'``
         """
         if system() == 'Windows':
-            return uri[len('file:///'):]
+            return os.path.relpath(urlparse(uri).path)
 
         return uri[len('file://'):]
 
