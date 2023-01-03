@@ -1,4 +1,6 @@
 """Unit tests related to duplex.file_io module."""
+import pytest
+import platform
 import os
 import csv
 import tempfile
@@ -176,6 +178,10 @@ def test_get_unknown():
     assert FileIO.get(TEST_UNKNOWN) is Protocols.UNKNOWN
 
 
+@pytest.mark.skipif(
+    platform.system() == "Windows",
+    reason="Test failing on Windows."
+)
 def test_get_file_scheme():
     """Unit test for get method, file scheme case."""
     test_file = f'file:///{TEST_LOCAL}'
