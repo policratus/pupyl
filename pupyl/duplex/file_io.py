@@ -14,6 +14,7 @@ from platform import system
 from itertools import cycle
 from enum import Enum, auto
 from datetime import datetime
+from pathlib import PureWindowsPath
 from urllib.parse import urlparse
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -224,8 +225,8 @@ class FileIO(FileType):
         ``FileIO._file_scheme_to_path(file:///home/policratus/1073140.jpg)``
         ``# Returns '/home/policratus/1073140.jpg'``
         """
-        if system() == 'Windows':
-            return os.path.relpath(urlparse(uri).path)
+        if system() == "Windows":
+            return os.path.relpath(PureWindowsPath(uri))
 
         return uri[len('file://'):]
 

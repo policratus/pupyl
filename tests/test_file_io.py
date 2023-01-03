@@ -559,8 +559,11 @@ def test_request_http_not_found():
 def test__file_scheme_to_path():
     """Unit test for method _file_scheme_to_path."""
     test_uri = 'file:///path/to/a/test/file'
+    expected_uri = '/path/to/a/test/file'
+    if platform.system() == "Windows":
+        expected_uri = 'file:\\path\\to\\a\\test\\file'
 
-    assert FileIO._file_scheme_to_path(test_uri) == '/path/to/a/test/file'
+    assert FileIO._file_scheme_to_path(test_uri) == expected_uri
 
 
 def test__get_url_forbidden():
