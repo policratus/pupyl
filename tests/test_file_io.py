@@ -152,7 +152,10 @@ def test__get_url_large_file():
     """Unit test for method _get_url, large file case."""
     test_url_big_file = 'http://speed.hetzner.de/10GB.bin'
 
-    assert FileIO._get_url(test_url_big_file) == b''
+    assert FileIO._get_url(
+            test_url_big_file,
+            headers={'User-Agent': 'Mozilla/5.0'}
+        ) == b''
 
 
 def test__get_local_big_file():
