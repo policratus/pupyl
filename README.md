@@ -137,7 +137,7 @@ If you use `pupyl` in your publications or projects, please cite:
 ```BibTeX
 @misc{pupyl,
     author = {Nelson Forte de Souza Junior},
-    title = {pupyl},
+    title = {pupyl - A Python Image Search Library},
     howpublished = {\url{https://github.com/policratus/pupyl}},
     year = {2021}
 }
