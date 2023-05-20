@@ -11,7 +11,7 @@ from tensorflow import io as io_ops
 from tensorflow import image as image_ops
 
 from pupyl.duplex.file_io import FileIO
-from pupyl.duplex.exceptions import FileIsNotImage
+from pupyl.duplex.exceptions import FileIsNotImage, JPEGEncodingFailed
 
 
 class ImageIO(FileIO):
@@ -294,19 +294,23 @@ class ImageIO(FileIO):
                 tensor,
                 tensorflow.uint8
             )
+        try:
+            compressed = image_ops.encode_jpeg(
+                tensor,
+                quality=80,
+                progressive=True,
+                optimize_size=True,
+                chroma_downsampling=True
+            )
 
-        compressed = image_ops.encode_jpeg(
-            tensor,
-            quality=80,
-            progressive=True,
-            optimize_size=True,
-            chroma_downsampling=True
-        )
+            if as_tensor:
+                return cls.encoded_to_tensor(compressed)
 
-        if as_tensor:
-            return cls.encoded_to_tensor(compressed)
-
-        return compressed
+            return compressed
+        except tensorflow.errors.InternalError as tf_internal_error:
+            raise JPEGEncodingFailed(
+                'Failed to encode tensor using JPEG encoding.'
+            ) from tf_internal_error
 
     @staticmethod
     def os_supports_compression():

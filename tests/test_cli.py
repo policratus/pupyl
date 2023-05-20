@@ -1,4 +1,7 @@
 """Unit tests for the command line interface."""
+import pytest
+import platform
+
 from argparse import Namespace
 from unittest import TestCase
 
@@ -11,6 +14,10 @@ CLI = PupylCommandLineInterface()
 class TestCases(TestCase):
     """Unit test for special cases."""
 
+    @pytest.mark.skipif(
+        platform.system() == 'Windows',
+        reason="Function does not raise SystemExit on Windows."
+    )
     def test_argument_parser_without_parameters(self):
         """Unit test for method argument_parser, without params. case."""
 

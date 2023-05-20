@@ -5,25 +5,27 @@ import csv
 import bz2
 import lzma
 import gzip
-import uuid
 import tarfile
 import zipfile
 import tempfile
 import mimetypes
 from io import BytesIO
+from platform import system
 from itertools import cycle
 from enum import Enum, auto
 from datetime import datetime
+from pathlib import PureWindowsPath
 from urllib.parse import urlparse
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 import termcolor
 
+from pupyl.addendum.operators import intmul
 from pupyl.duplex.file_types import FileType
+from pupyl.duplex.temporary import SafeTemporaryResource
 from pupyl.duplex.exceptions import FileTypeNotSupportedYet, \
     FileScanNotPossible
-from pupyl.addendum.operators import intmul
 
 
 class Protocols(Enum):
@@ -223,6 +225,9 @@ class FileIO(FileType):
         ``FileIO._file_scheme_to_path(file:///home/policratus/1073140.jpg)``
         ``# Returns '/home/policratus/1073140.jpg'``
         """
+        if system() == "Windows":
+            return os.path.relpath(PureWindowsPath(uri))
+
         return uri[len('file://'):]
 
     @classmethod
@@ -427,36 +432,6 @@ class FileIO(FileType):
         for row in gzip_file:
             yield row.replace('\n', '')
 
-    @staticmethod
-    def safe_temp_file(**kwargs):
-        """Creates a secure temporary file name, which means a file with an
-        unique name.
-
-        If a file with the same name is found, it's deleted before generating
-        a new unique name.
-
-        Parameters
-        ----------
-        file_name: str
-            Defining a temporary file to assert.
-
-        Returns
-        -------
-        str:
-            With the complete path of the new temporary file created.
-        """
-        temp_dir = tempfile.gettempdir()
-
-        if kwargs.get('file_name'):
-            file_name = os.path.join(temp_dir, kwargs.get('file_name'))
-        else:
-            file_name = os.path.join(temp_dir, str(uuid.uuid4()))
-
-        if os.path.exists(file_name):
-            os.remove(file_name)
-
-        return file_name
-
     @classmethod
     def scan_csv_bzip2(cls, uri):
         """Scanner for CSV text files, compressed with Bzip2 algorithm.
@@ -596,8 +571,7 @@ class FileIO(FileType):
         str:
             Paths of the already untarred files on the temporary directory.
         """
-        # Won't explicitly remove the temporary directory
-        temp_dir = tempfile.mkdtemp()
+        temp_dir = SafeTemporaryResource()
 
         inferred_protocol = cls._infer_protocol(uri)
 
@@ -606,7 +580,7 @@ class FileIO(FileType):
                 uri,
                 file_reader.format(stream_type=':')
             ) as tar_file:
-                tar_file.extractall(temp_dir)
+                tar_file.extractall(temp_dir.name)
 
         elif inferred_protocol is Protocols.HTTP:
 
@@ -615,9 +589,9 @@ class FileIO(FileType):
                 mode=file_reader.format(stream_type='|')
             ) as tar_file:
                 for member in cls.progress(tar_file):
-                    tar_file.extract(member, path=temp_dir)
+                    tar_file.extract(member, path=temp_dir.name)
 
-        for root, _, files in os.walk(temp_dir):
+        for root, _, files in os.walk(temp_dir.name):
             for ffile in files:
                 yield os.path.join(root, ffile)
 
@@ -738,6 +712,7 @@ class FileIO(FileType):
         str:
             A path without an ending character.
         """
+        path = FileIO.compat_path_separator(path)
         if path[-1] == os.path.sep:
             path = list(path)
             _ = path.pop()
@@ -745,6 +720,22 @@ class FileIO(FileType):
             return ''.join(path)
 
         return path
+
+    @staticmethod
+    def compat_path_separator(path):
+        """Transform path separators according to the underlying OS.
+
+        Parameters
+        ----------
+        path: str
+            Complete path to be transformed.
+
+        Returns
+        -------
+        str:
+            A path with the correct separator character.
+        """
+        return path.replace('/', os.path.sep)
 
     def dump(self, data_dir, output_dir):
         """Reads an entire database tree, compress and export it.
