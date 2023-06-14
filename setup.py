@@ -20,7 +20,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'tensorflow==2.12.0',
-        'annoy==1.17.2'
+        'annoy==1.17.3'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
