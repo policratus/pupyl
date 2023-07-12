@@ -151,6 +151,25 @@ def test_search():
     assert len([*test_results]) == expected_length_results
 
 
+def test_search_distances():
+    """Unit test for method search, returning distances case."""
+    expected_result_index = 0
+    expected_result_distance = .1
+
+    test_results = PUPYL.search(
+        TEST_QUERY_IMAGE,
+        top=1,
+        return_distances=True
+    )
+
+    test_results = [*test_results][0]
+    test_results_index = test_results[0]
+    test_results_distance = round(test_results[1], 1)
+
+    assert test_results_index == expected_result_index
+    assert test_results_distance == expected_result_distance
+
+
 def test_search_non_extreme_mode():
     """Unit test for method search, non-extreme mode case."""
     expected_length_results = 1
@@ -166,6 +185,31 @@ def test_search_non_extreme_mode():
     )
 
     assert len([*test_results]) == expected_length_results
+
+
+def test_search_non_extreme_mode_distances():
+    """Unit test for method search, non-extreme mode and distances ase."""
+    expected_result_index = 0
+    expected_result_distance = .1
+
+    pupyl_non_extreme = PupylImageSearch(
+        data_dir=TEST_DATA_DIR,
+        extreme_mode=False
+    )
+
+    test_results = pupyl_non_extreme.search(
+        TEST_QUERY_IMAGE,
+        top=1,
+        return_distances=True,
+        return_metadata=False
+    )
+
+    test_results = [*test_results][0]
+    test_results_index = test_results[0]
+    test_results_distance = round(test_results[1], 1)
+
+    assert test_results_index == expected_result_index
+    assert test_results_distance == expected_result_distance
 
 
 def test_search_returning_metadata():
@@ -209,7 +253,7 @@ def test_remove():
 
 
 def test_remove_non_extreme():
-    """Unit test for method remove, non extrem mode."""
+    """Unit test for method remove, non extreme mode."""
     index_to_remove = 0
 
     with TemporaryDirectory() as temp_dir:
