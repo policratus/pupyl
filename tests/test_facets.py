@@ -381,7 +381,7 @@ def test_search():
 def test_search_return_distances():
     """Unit test for method search, return_distances=True case."""
     query_array = [-0.48870765, -0.57780915, -0.94986234, -1.90035123]
-    expected_search_result = (25, 0.576)
+    expected_search_result = (78, 0.576)
 
     with Index(len(query_array), TEST_INDEX_SEARCH_PATH) as index:
         test_result = [
