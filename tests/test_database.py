@@ -330,6 +330,45 @@ def test_load_image_metadata_filtered():
         assert key in test_filter
 
 
+def test_save_image_metadata():
+    """Unit test for method save_image_metadata."""
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    image_database.save_image_metadata(0, TEST_IMAGE)
+
+    test_metadata = image_database.load_image_metadata(0)
+
+    del test_metadata['original_access_time']
+
+    test_metadata['original_path'] = relpath(test_metadata['original_path'])
+    test_metadata['internal_path'] = relpath(test_metadata['internal_path'])
+
+    assert test_metadata == TEST_METADATA
+
+
+def test_load_image_metadata_distances():
+    """Unit test for method load_image_metadata, returning distances case."""
+    image_database = ImageDatabase(
+        import_images=True,
+        data_dir=TEST_DIRECTORY
+    )
+
+    test_distance = .9999
+    test_metadata = image_database.load_image_metadata(
+        0,
+        distance=test_distance
+    )
+    del test_metadata['original_access_time']
+
+    local_test_metadata = TEST_METADATA
+    local_test_metadata['distance'] = test_distance
+
+    assert test_metadata == local_test_metadata
+
+
 def test_list_images():
     """Unit test for method list_images."""
     expected_result = 'tests/test_database/0/0.jpg'
@@ -390,22 +429,3 @@ def test_list_images_less_than_count():
     actual_result = [*image_database.list_images(top=expected_length)]
 
     assert len(actual_result) == 0
-
-
-def test_save_image_metadata():
-    """Unit test for method save_image_metadata."""
-    image_database = ImageDatabase(
-        import_images=True,
-        data_dir=TEST_DIRECTORY
-    )
-
-    image_database.save_image_metadata(0, TEST_IMAGE)
-
-    test_metadata = image_database.load_image_metadata(0)
-
-    del test_metadata['original_access_time']
-
-    test_metadata['original_path'] = relpath(test_metadata['original_path'])
-    test_metadata['internal_path'] = relpath(test_metadata['internal_path'])
-
-    assert test_metadata == TEST_METADATA

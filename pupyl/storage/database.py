@@ -247,6 +247,10 @@ class ImageDatabase(ImageIO):
         filtered: iterable
             Describing which fields to filter (or select) for return.
 
+        distance: float
+            The distance between the tensor represented by ``index``
+            and the ``query`` image.
+
         Returns
         -------
         dict
@@ -269,6 +273,9 @@ class ImageDatabase(ImageIO):
                         for key, value in metadata.items()
                         if key in kwargs['filtered']
                     }
+
+                if kwargs.get('distance'):
+                    metadata['distance'] = kwargs['distance']
 
                 return metadata
 

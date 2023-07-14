@@ -461,7 +461,7 @@ class Index:
             include_distances=distances
         )
 
-    def search(self, tensor, results=16):
+    def search(self, tensor, results=16, return_distances=False):
         """Searchs for the most similar images compared to the query image (or
         with increasing distances).
 
@@ -470,19 +470,35 @@ class Index:
         tensor: numpy.ndarray or list
             A vector to search for the most similar ones.
 
-        results: int
+        results: int (optional)(default: 16)
             How many results to return. If similar images are less than
             ``results``, it exhausts and will be returned current total
             results.
 
+        return_distances: bool (optional)(default: False)
+            If the distances between tensors should be returned or not.
+
         Yields
         ------
-        int:
-            Representing the index of the most similar, the second one and so
-            on.
+        int or tuple:
+            An ``int`` representing the index of the most similar, the second
+            one and so on or a ``tuple`` (in the case of
+            ``return_distances=True``), where the first element is the ``int``
+            representing the most similar index and a ``float`` with the
+            distance between ``tensor`` and other tensors already indexed.
         """
-        for result in self.tree.get_nns_by_vector(tensor, n=results):
-            yield result
+        search_results = self.tree.get_nns_by_vector(
+            tensor,
+            n=results,
+            include_distances=return_distances
+        )
+
+        if return_distances:
+            for result in zip(search_results[0], search_results[1]):
+                yield result
+        else:
+            for result in search_results:
+                yield result
 
     def __len__(self):
         """Returns how many items are indexed.

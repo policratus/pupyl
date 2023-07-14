@@ -371,7 +371,13 @@ class PupylImageSearch:
                         'w', feature_size=extractor.output_shape
                     )
 
-    def search(self, query, top=4, return_metadata=False):
+    def search(
+        self,
+        query,
+        top=4,
+        return_metadata=False,
+        return_distances=False
+    ):
         """Executes the search for a similar image throughout the database
         based on the ``query`` image.
 
@@ -380,27 +386,39 @@ class PupylImageSearch:
         query: str
             URI of a image to be used as query.
 
-        top: int
+        top: int (optional)(default: 4)
             How many results should be returned from the search process.
 
-        return_metadata: bool
+        return_metadata: bool (optional)(default: False)
             If the image results metadata should also be returned.
+
+        return_distances: bool (optional)(default: False)
+            If the method should return the distances between the ``query``
+            image and other images present in the database.
 
         Yields
         ------
-        int or dict:
+        int, dict or tuple:
             Respectively describing the image index identification that is
-            decresingly (ordered) similar from the query image or a ``dict``
+            decresingly (ordered) similar from the query image, a ``dict``
             with metadata information about this images (case when
-            ``return_metadata=True``).
+            ``return_metadata=True``) or a ``tuple`` when the method
+            was asked to return the distances but not the image metadata
+            (case when ``return_metadata=False`` and ``return_distances=True``.
         """
         if self._extreme_mode:
             for result in self.indexer.search(
                 self.extractor.extract(query),
-                results=top
+                results=top,
+                return_distances=return_distances
             ):
-                yield self.image_database.load_image_metadata(result) \
-                    if return_metadata else result
+                if return_distances:
+                    yield self.image_database.load_image_metadata(
+                        result[0], distance=result[1]
+                    ) if return_metadata else result
+                else:
+                    yield self.image_database.load_image_metadata(result) \
+                        if return_metadata else result
         else:
             with Extractors(
                 characteristics=self._characteristic,
@@ -411,10 +429,17 @@ class PupylImageSearch:
                 ) as indexer:
                     for result in indexer.search(
                         extractor.extract(query),
-                        results=top
+                        results=top,
+                        return_distances=return_distances
                     ):
-                        yield self.image_database.load_image_metadata(result) \
-                            if return_metadata else result
+                        if return_distances:
+                            yield self.image_database.load_image_metadata(
+                                result[0], distance=result[1]
+                            ) if return_metadata else result
+                        else:
+                            yield self.image_database.load_image_metadata(
+                                result
+                            ) if return_metadata else result
 
     def remove(self, index):
         """Removes an indexed image from the storage.

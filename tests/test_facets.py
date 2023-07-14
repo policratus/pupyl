@@ -378,6 +378,23 @@ def test_search():
     assert expected_search_result == test_result
 
 
+def test_search_return_distances():
+    """Unit test for method search, return_distances=True case."""
+    query_array = [-0.48870765, -0.57780915, -0.94986234, -1.90035123]
+    expected_search_result = (78, .603)
+
+    with Index(len(query_array), TEST_INDEX_SEARCH_PATH) as index:
+        test_result = [
+            *index.search(query_array, results=1, return_distances=True)
+        ]
+
+    test_result_index = test_result[0][0]
+    test_result_value = round(test_result[0][1], 3)
+
+    assert expected_search_result[0] == test_result_index
+    assert expected_search_result[1] == test_result_value
+
+
 def test_group_by():
     """Unit test for method group_by."""
     expected_result = {0: [25]}
