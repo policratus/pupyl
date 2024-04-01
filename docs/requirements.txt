@@ -1,2 +1,2 @@
 Sphinx==7.2.6
-sphinx-press-theme==0.8.0
+sphinx-press-theme==0.9.1
