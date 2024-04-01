@@ -10,3 +10,6 @@ disable=wrong-import-position,
 max-attributes=16
 max-locals=16
 max-returns=9
+
+[TYPECHECK]
+ignored-modules=tensorflow,annoy,termcolor,keras
