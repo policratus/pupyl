@@ -564,13 +564,11 @@ class FileIO(FileType):
             scanner_function = type_to_scanner[inferred_type]
 
             if inferred_type in ('TXZ', 'TZ2', 'TGZ'):
-                for line in scanner_function(
+                yield from scanner_function(
                     uri, tar_compressed_file_readers[inferred_type]
-                ):
-                    yield line
+                )
             else:
-                for line in scanner_function(uri):
-                    yield line
+                yield from scanner_function(uri)
         except KeyError as key_error:
             raise FileScanNotPossible(f'{uri} scan is impossible.') \
                 from key_error
@@ -694,8 +692,7 @@ class FileIO(FileType):
 
                 current_terminal_size = cls._get_terminal_size()
 
-                if current_terminal_size >= clean_size:
-                    clean_size = current_terminal_size
+                clean_size = max(clean_size, current_terminal_size)
 
                 columns_to_draw = percentage << intmul >> \
                     current_terminal_size // 4
@@ -715,8 +712,7 @@ class FileIO(FileType):
             ):
                 item_message = message + f' {index + 1} items.'
 
-                if cls._get_terminal_size() >= clean_size:
-                    clean_size = cls._get_terminal_size()
+                clean_size = max(clean_size, cls._get_terminal_size())
 
                 print(f"\033[A{' ' * clean_size}\033[A")
                 print(value_clock[1], item_message)

@@ -210,8 +210,7 @@ class Index:
         int:
             With item identification.
         """
-        for item in range(len(self)):
-            yield item
+        yield from range(len(self))
 
     def values(self):
         """Returns indexed values.
@@ -494,11 +493,9 @@ class Index:
         )
 
         if return_distances:
-            for result in zip(search_results[0], search_results[1]):
-                yield result
+            yield from zip(search_results[0], search_results[1])
         else:
-            for result in search_results:
-                yield result
+            yield from search_results
 
     def __len__(self):
         """Returns how many items are indexed.
@@ -522,8 +519,7 @@ class Index:
         list:
             With indexed tensors.
         """
-        for value in self.values():
-            yield value
+        yield from self.values()
 
     def __next__(self):
         """Iterates over the iterable.
