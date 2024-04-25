@@ -7,8 +7,8 @@ These are the versions supported (or not) by the team, meaning that versions wit
 | Version   | Supported          |
 | -------   | ------------------ |
 | latest    | :white_check_mark: |
-| >= 0.13.2 | :white_check_mark: |
-| < 0.13.2  | :x:                |
+| >= 0.14.5 | :white_check_mark: |
+| < 0.14.5  | :x:                |
 
 ## Reporting a Vulnerability
 
