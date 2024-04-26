@@ -64,7 +64,7 @@ jobs:
         python-version: 3.9
     - name: Unit tests
       run: |
-        pip install --upgrade pip
+        python -m pip install --upgrade pip
         pip install pytest
         pip install .
         make test
@@ -84,7 +84,9 @@ jobs:
         pip install pytest pytest-cov
         pip install .
         make coverage
-    - name: Uploads test coverage results to CodeCov
-      uses: codecov/codecov-action@v3
+    - name: Upload test coverage results to CodeCov
+      uses: codecov/codecov-action@v4
+      env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
         fail_ci_if_error: true
