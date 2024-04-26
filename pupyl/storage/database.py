@@ -2,8 +2,6 @@
 
 import os
 import json
-import warnings
-import termcolor
 from shutil import copy, move
 
 from pupyl.duplex.image import ImageIO
@@ -327,19 +325,7 @@ class ImageDatabase(ImageIO):
             )
 
             if not os.path.exists(mounted_file):
-                compression_not_supported = not self.os_supports_compression()
-                if (
-                    self.is_animated_gif(uri) or compression_not_supported
-                ):
-                    warnings.warn(
-                        termcolor.colored(
-                            f'Storing {uri} with original compression due '
-                            'to underlying platform incompatibility.',
-                            color='yellow',
-                            attrs=['bold']
-                        ),
-                        RuntimeWarning
-                    )
+                if self.is_animated_gif(uri):
                     image = self.get_image(uri)
                 else:
                     image = self.compress(

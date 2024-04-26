@@ -2,10 +2,8 @@
 import tempfile
 from os.path import abspath
 from unittest import TestCase
-from unittest.mock import patch
 from base64 import b64encode
 
-import pytest
 import numpy
 import tensorflow
 from tensorflow import io as io_ops
@@ -152,21 +150,3 @@ def test_get_image_bytes_to_base64():
         test_image_b64 = b64encode(image_bytes)
 
     assert test_image_b64 == ImageIO.get_image_bytes_to_base64(image_bytes)
-
-
-@pytest.mark.parametrize(
-    'os, expected_support',
-    [
-        ('Windows', False),
-        ('Linux', True),
-        ('Darwin', True)
-    ]
-)
-@patch('pupyl.duplex.image.system')
-def test_os_supports_compression(system_mock, os, expected_support):
-    """Unit test for method os_supports_compression."""
-    system_mock.return_value = os
-
-    real_support = ImageIO.os_supports_compression()
-
-    assert real_support == expected_support
