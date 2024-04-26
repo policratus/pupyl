@@ -45,7 +45,7 @@ markupsafe==2.1.5
     # via werkzeug
 mdurl==0.1.2
     # via markdown-it-py
-ml-dtypes==0.3.2
+ml-dtypes==0.4.0
     # via
     #   keras
     #   tensorflow
