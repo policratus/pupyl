@@ -65,7 +65,7 @@ optree==0.11.0
     # via keras
 packaging==24.0
     # via tensorflow
-protobuf==4.25.3
+protobuf==5.26.1
     # via
     #   tensorboard
     #   tensorflow
