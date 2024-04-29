@@ -33,7 +33,7 @@ h5py==3.11.0
     #   tensorflow
 idna==3.7
     # via requests
-keras==3.3.2
+keras==3.3.3
     # via tensorflow
 libclang==18.1.1
     # via tensorflow
