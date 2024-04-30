@@ -23,7 +23,7 @@ gast==0.5.4
     # via tensorflow
 google-pasta==0.2.0
     # via tensorflow
-grpcio==1.62.2
+grpcio==1.63.0
     # via
     #   tensorboard
     #   tensorflow
