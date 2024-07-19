@@ -626,6 +626,8 @@ class Index:
             elif isinstance(element, list):
                 item = kwargs['position']
                 similars = element
+            else:
+                similars = []
 
             save_path = os.path.join(path, str(item))
 

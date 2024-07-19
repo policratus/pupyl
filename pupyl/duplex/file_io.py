@@ -239,6 +239,11 @@ class FileIO(FileType):
         dict:
             Describing several file metadata
         """
+        original_file_name = ''
+        original_path = ''
+        original_file_size = 0
+        original_access_time = 0
+
         if cls._infer_protocol(uri) is Protocols.FILE:
             file_statistics = os.stat(uri)
 
@@ -272,6 +277,11 @@ class FileIO(FileType):
                 original_access_time = file_statistics.get_all('Date')[0]
             except TypeError:
                 original_access_time = datetime.strftime(datetime.now(), '%c')
+
+        if cls._infer_protocol(uri) is not (Protocols.FILE, Protocols.HTTP):
+            raise FileTypeNotSupportedYet(
+                f'{uri} is not a supported protocol.'
+            )
 
         return {
             'original_file_name': original_file_name,
