@@ -239,6 +239,11 @@ class FileIO(FileType):
         dict:
             Describing several file metadata
         """
+        original_file_name = ''
+        original_path = ''
+        original_file_size = 0
+        original_access_time = 0
+
         if cls._infer_protocol(uri) is Protocols.FILE:
             file_statistics = os.stat(uri)
 
