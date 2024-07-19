@@ -278,11 +278,6 @@ class FileIO(FileType):
             except TypeError:
                 original_access_time = datetime.strftime(datetime.now(), '%c')
 
-        if cls._infer_protocol(uri) is not (Protocols.FILE, Protocols.HTTP):
-            raise FileTypeNotSupportedYet(
-                f'{uri} is not a supported protocol.'
-            )
-
         return {
             'original_file_name': original_file_name,
             'original_path': original_path,
