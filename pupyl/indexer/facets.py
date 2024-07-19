@@ -620,6 +620,8 @@ class Index:
                 position=kwargs.get('position')
             )
         ):
+            similars = []
+
             if isinstance(element, dict):
                 item = [*element.keys()][0]
                 similars = element[item]
