@@ -86,7 +86,6 @@ jobs:
         make coverage
     - name: Upload test coverage results to CodeCov
       uses: codecov/codecov-action@v4
-      env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
         fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
